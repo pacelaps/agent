@@ -1,0 +1,40 @@
+{
+  "v": 1,
+  "kind": "self_test_result",
+  "agentId": "agt_7f3k9q2m",
+  "at": "2026-11-07T18:55:02.120Z",
+  "passed": false,
+  "steps": [
+    {
+      "step": 1,
+      "name": "sim",
+      "result": "pass"
+    },
+    {
+      "step": 2,
+      "name": "session",
+      "result": "pass"
+    },
+    {
+      "step": 3,
+      "name": "server",
+      "result": "pass"
+    },
+    {
+      "step": 4,
+      "name": "cars",
+      "result": "pass"
+    },
+    {
+      "step": 5,
+      "name": "typed_channel",
+      "result": "fail",
+      "detail": "the operator is not an admin in this session"
+    }
+  ],
+  "channels": {
+    "macro": "disabled",
+    "typed": "failed",
+    "sdk": "ready"
+  }
+}

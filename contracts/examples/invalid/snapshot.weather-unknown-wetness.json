@@ -1,0 +1,57 @@
+{
+  "v": 1,
+  "agentId": "agt_01",
+  "seq": 1042,
+  "capturedAt": "2026-11-07T19:03:11.250Z",
+  "session": {
+    "leagueId": 12345,
+    "seasonId": 6789,
+    "sessionId": 111,
+    "subSessionId": 222,
+    "num": 2,
+    "type": "Practice",
+    "state": "Racing",
+    "timeSec": 812.4,
+    "flags": [
+      "green"
+    ],
+    "track": {
+      "id": 572,
+      "name": "Autódromo Hermanos Rodríguez",
+      "config": "Grand Prix",
+      "lengthM": 4304.0
+    },
+    "time": {
+      "totalSec": 600,
+      "remainingSec": 534.15
+    },
+    "weather": {
+      "airTempC": 19.97,
+      "trackTempC": 19.44,
+      "wetness": "damp",
+      "precipitationPct": 0.6,
+      "declaredWet": true,
+      "skies": "mostly_cloudy",
+      "windSpeedMs": 1.88,
+      "windDirDeg": 52.3,
+      "humidityPct": 85.9,
+      "fogPct": 0
+    }
+  },
+  "cars": [
+    {
+      "num": "12",
+      "custId": 100200,
+      "classId": 4098,
+      "lap": 14,
+      "lapDistPct": 0.431,
+      "onPitRoad": false,
+      "surface": "OnTrack",
+      "posClass": 3,
+      "posOverall": 7,
+      "isPaceCar": false,
+      "incidents": 4,
+      "connected": true
+    }
+  ]
+}

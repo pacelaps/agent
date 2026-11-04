@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pacelaps.com/schemas/audit-export.schema.json",
+  "title": "Audit log export: one hash chain",
+  "description": "The JSON export of one audit chain (spec: Audit log and incident log > Audit log): a session's chain, a league's chain for entries without a session, or the global chain for entries without a league. Anyone can verify it: each entry's hash is the SHA-256 (lower-case hex) of the canonical JSON of the entry without its hash field, and prevHash is the hash of the entry before it in the chain (64 zeros for seq 1). Canonical JSON (algorithm pacelaps-audit-v1): all fields of the entry object below except hash, null values included; object keys sorted by Unicode code point at every level; no whitespace; strings as UTF-8 without escaping non-ASCII characters or slashes (only the escapes JSON requires); timestamps as in this document. contracts/verify_audit_export.py is a reference checker. The CSV export has the same entry fields as columns, with parameters and affects as canonical JSON text.",
+  "type": "object",
+  "required": ["v", "kind", "algorithm", "exportedAt", "chain", "league", "session", "checkpoint", "entries"],
+  "properties": {
+    "v": { "$ref": "common.schema.json#/$defs/version" },
+    "kind": { "const": "audit_export" },
+    "algorithm": { "const": "pacelaps-audit-v1" },
+    "exportedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "chain": { "$ref": "#/$defs/chainKey" },
+    "league": {
+      "description": "The league of a session or league chain; null for the global chain.",
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["iracingLeagueId", "name"],
+          "properties": {
+            "iracingLeagueId": { "type": "integer", "minimum": 1 },
+            "name": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "session": {
+      "description": "The session of a session chain; null otherwise.",
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["id", "name", "openedAt", "closedAt"],
+          "properties": {
+            "id": { "type": "string" },
+            "name": { "type": "string" },
+            "openedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+            "closedAt": { "oneOf": [{ "type": "null" }, { "$ref": "common.schema.json#/$defs/timestamp" }] }
+          }
+        }
+      ]
+    },
+    "checkpoint": {
+      "description": "The entry that closed the session (session.closed): its hash is the checkpoint shown on the session's audit page. Entries after it arrived late, for example from an agent that was offline. Null while the session is open and for league and global chains.",
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["seq", "hash"],
+          "properties": {
+            "seq": { "type": "integer", "minimum": 1 },
+            "hash": { "$ref": "#/$defs/hash" }
+          }
+        }
+      ]
+    },
+    "entries": {
+      "type": "array",
+      "description": "The whole chain, in seq order from 1.",
+      "items": { "$ref": "#/$defs/entry" }
+    }
+  },
+  "$defs": {
+    "hash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "chainKey": {
+      "type": "string",
+      "pattern": "^(s:[0-9]+|l:[0-9]+|global)$",
+      "description": "s:<session id>, l:<league id> or global."
+    },
+    "entry": {
+      "type": "object",
+      "description": "One audit entry. No names: car numbers, agent ids and pseudonymous steward ids only.",
+      "additionalProperties": false,
+      "required": [
+        "chain", "seq", "prevHash", "hash", "eventTime", "recordedTime", "sessionNum", "sessionTimeSec", "lap",
+        "actorType", "actorId", "action", "parameters", "affects", "executorAgentId", "result", "correlationId", "correctsSeq"
+      ],
+      "properties": {
+        "chain": { "$ref": "#/$defs/chainKey" },
+        "seq": { "type": "integer", "minimum": 1 },
+        "prevHash": { "$ref": "#/$defs/hash" },
+        "hash": { "$ref": "#/$defs/hash" },
+        "eventTime": { "$ref": "common.schema.json#/$defs/timestamp", "description": "When it happened (an agent's own time for late entries)." },
+        "recordedTime": { "$ref": "common.schema.json#/$defs/timestamp", "description": "When the server wrote it." },
+        "sessionNum": { "type": ["integer", "null"], "minimum": 0, "description": "iRacing session number inside the weekend, when known." },
+        "sessionTimeSec": { "type": ["number", "null"], "minimum": 0 },
+        "lap": { "type": ["integer", "null"], "minimum": 0 },
+        "actorType": { "enum": ["steward", "procedure", "system", "agent"] },
+        "actorId": { "type": "string", "description": "With actorType steward the pseudonymous steward id (stw_...); otherwise an agent id, a procedure id or system." },
+        "action": { "type": "string", "pattern": "^[a-z_]+\\.[a-z_]+$" },
+        "parameters": { "type": "object" },
+        "affects": { "oneOf": [{ "type": "null" }, { "type": "object" }] },
+        "executorAgentId": { "type": ["string", "null"] },
+        "result": { "type": ["string", "null"] },
+        "correlationId": { "type": ["string", "null"], "description": "For example the command id." },
+        "correctsSeq": { "type": ["integer", "null"], "minimum": 1, "description": "A correction points to the entry it corrects, in the same chain. Nothing is edited or deleted." }
+      }
+    }
+  }
+}

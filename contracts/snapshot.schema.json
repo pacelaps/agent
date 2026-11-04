@@ -1,0 +1,255 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pacelaps.com/schemas/snapshot.schema.json",
+  "title": "Agent to server: snapshot (1 to 2 Hz)",
+  "type": "object",
+  "required": [
+    "v",
+    "agentId",
+    "seq",
+    "capturedAt",
+    "session",
+    "cars"
+  ],
+  "properties": {
+    "v": {
+      "$ref": "common.schema.json#/$defs/version"
+    },
+    "agentId": {
+      "type": "string"
+    },
+    "seq": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "capturedAt": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    },
+    "session": {
+      "type": "object",
+      "required": [
+        "leagueId",
+        "seasonId",
+        "sessionId",
+        "subSessionId",
+        "num",
+        "type",
+        "state",
+        "timeSec"
+      ],
+      "properties": {
+        "leagueId": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "0 means not a league session."
+        },
+        "seasonId": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sessionId": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "subSessionId": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "num": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Session number inside the weekend."
+        },
+        "type": {
+          "type": "string",
+          "description": "For example Practice, Qualify, Race."
+        },
+        "state": {
+          "type": "string",
+          "description": "iRacing session state, for example Racing."
+        },
+        "timeSec": {
+          "type": "number",
+          "minimum": 0
+        },
+        "track": {
+          "type": "object",
+          "description": "The layout being raced, from the session info's WeekendInfo (agent 0.8 and newer; absent when the agent cannot tell). id is iRacing's TrackID, one per layout, the key for race control's track maps.",
+          "required": ["id", "name", "config"],
+          "additionalProperties": false,
+          "properties": {
+            "id": { "type": "integer", "minimum": 1, "description": "WeekendInfo.TrackID." },
+            "name": { "type": "string", "maxLength": 100, "description": "WeekendInfo.TrackDisplayName, for example Autódromo Hermanos Rodríguez." },
+            "config": { "type": "string", "maxLength": 100, "description": "WeekendInfo.TrackConfigName, for example Grand Prix; empty for a track with one layout." },
+            "lengthM": { "type": "number", "exclusiveMinimum": 0, "description": "WeekendInfo.TrackLength in metres." },
+            "sectorStarts": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 50,
+              "description": "SplitTimeInfo: where the layout's sectors start, as lap distance, in sector order (the first is 0, the line). The sector numbers of sector_crossings events index this list. Optional (agent 0.9 and newer).",
+              "items": { "type": "number", "minimum": 0, "exclusiveMaximum": 1 }
+            }
+          }
+        },
+        "laps": {
+          "type": "object",
+          "description": "A session limited by laps (SessionLapsTotal; left out when unlimited, iRacing's 32767). remaining is SessionLapsRemainEx: the leader's current lap is total - remaining + 1 (session and weather check, 2026-11-03). Optional (agent 0.10 and newer).",
+          "required": ["total", "remaining"],
+          "additionalProperties": false,
+          "properties": {
+            "total": { "type": "integer", "minimum": 1 },
+            "remaining": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "time": {
+          "type": "object",
+          "description": "A session limited by time (SessionTimeTotal below a day; iRacing has no single value for unlimited, a lap race showed 86400). remainingSec is SessionTimeRemain; after the checkered flag it counts the cool-down. Optional (agent 0.10 and newer).",
+          "required": ["totalSec", "remainingSec"],
+          "additionalProperties": false,
+          "properties": {
+            "totalSec": { "type": "number", "exclusiveMinimum": 0, "exclusiveMaximum": 86400 },
+            "remainingSec": { "type": "number", "minimum": 0 }
+          }
+        },
+        "weather": {
+          "type": "object",
+          "description": "The weather now, from telemetry (race control's weather card, spec-feedback 40). Optional (agent 0.10 and newer).",
+          "required": ["airTempC", "trackTempC"],
+          "additionalProperties": false,
+          "properties": {
+            "airTempC": { "type": "number", "description": "AirTemp." },
+            "trackTempC": { "type": "number", "description": "TrackTempCrew." },
+            "wetness": {
+              "enum": ["dry", "mostly_dry", "very_lightly_wet", "lightly_wet", "moderately_wet", "very_wet", "extremely_wet"],
+              "description": "TrackWetness 1 to 7; left out at 0 (unknown, seen for a moment at a session change)."
+            },
+            "precipitationPct": { "type": "number", "minimum": 0, "maximum": 100, "description": "Precipitation (0 to 1) as percent." },
+            "declaredWet": { "type": "boolean", "description": "WeatherDeclaredWet: the session is declared wet (wet tyres allowed)." },
+            "skies": { "enum": ["clear", "partly_cloudy", "mostly_cloudy", "overcast"], "description": "Skies 0 to 3." },
+            "windSpeedMs": { "type": "number", "minimum": 0, "description": "WindVel, metres per second." },
+            "windDirDeg": { "type": "number", "minimum": 0, "exclusiveMaximum": 360, "description": "WindDir as degrees, the direction the wind comes from, 0 north, clockwise." },
+            "humidityPct": { "type": "number", "minimum": 0, "maximum": 100, "description": "RelativeHumidity as percent." },
+            "fogPct": { "type": "number", "minimum": 0, "maximum": 100, "description": "FogLevel as percent." }
+          }
+        },
+        "classes": {
+          "type": "array",
+          "maxItems": 64,
+          "description": "The car classes in the session, one item per class id the cars carry (the pace car's class left out), from the session info's DriverInfo.Drivers (spec-feedback 44). The agent forwards iRacing's values; the server decides the names shown. Optional (agent 0.12 and newer).",
+          "items": {
+            "type": "object",
+            "required": ["id"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "integer", "minimum": 0, "description": "CarClassID, as on the cars." },
+              "name": { "type": "string", "minLength": 1, "maxLength": 60, "description": "CarClassShortName, trimmed; left out when empty (empty in AI sessions, class names check 2026-11-04)." },
+              "colour": { "type": "string", "pattern": "^#[0-9a-f]{6}$", "description": "CarClassColor (0xrrggbb in the session info) as #rrggbb; left out when iRacing gives none." },
+              "models": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 64,
+                "uniqueItems": true,
+                "description": "The class's car models in the session (CarScreenName); left out when iRacing names none.",
+                "items": { "type": "string", "minLength": 1, "maxLength": 100 }
+              }
+            }
+          }
+        },
+        "flags": {
+          "type": "array",
+          "uniqueItems": true,
+          "description": "Session-wide flags, normalised by the agent (see common.schema.json flagName). Per-car flags such as black or blue are not listed here.",
+          "items": {
+            "$ref": "common.schema.json#/$defs/flagName"
+          }
+        }
+      }
+    },
+    "cars": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "num",
+          "classId",
+          "lap",
+          "lapDistPct",
+          "onPitRoad",
+          "posClass",
+          "posOverall",
+          "isPaceCar",
+          "surface",
+          "connected"
+        ],
+        "properties": {
+          "num": {
+            "$ref": "common.schema.json#/$defs/carNumber"
+          },
+          "custId": {
+            "type": "integer"
+          },
+          "classId": {
+            "type": "integer"
+          },
+          "lap": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "lapDistPct": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "onPitRoad": {
+            "type": "boolean"
+          },
+          "surface": {
+            "type": "string",
+            "description": "For example OnTrack, OffTrack, InPitStall, NotInWorld."
+          },
+          "posClass": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "posOverall": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "isPaceCar": {
+            "type": "boolean"
+          },
+          "incidents": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "flags": {
+            "type": "array",
+            "uniqueItems": true,
+            "description": "Per-car flags, normalised by the agent from CarIdxSessionFlags and CarIdxPaceFlags (spike 3): black (a black flag to serve), disqualify, waved_around, end_of_line. Optional; an agent that does not send it says nothing about them. The server marks a black-flag penalty served when black clears without its own !clear.",
+            "items": {
+              "enum": [
+                "black",
+                "disqualify",
+                "waved_around",
+                "end_of_line"
+              ]
+            }
+          },
+          "connected": {
+            "type": "boolean"
+          },
+          "lastLapTime": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "CarIdxLastLapTime in seconds: iRacing's time for the car's last lap. Absent while iRacing has none (-1: before the first lap, an in-lap, a lap under a black flag). It changes up to about a second after the car crosses the line (lap times check, 2026-11-02). Optional (agent 0.9 and newer)."
+          },
+          "bestLapTime": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "CarIdxBestLapTime in seconds: the car's fastest lap in this session as iRacing timed it. Absent without one. Optional (agent 0.9 and newer)."
+          }
+        }
+      }
+    }
+  }
+}

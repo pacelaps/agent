@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "bad-reach",
+  "name": "Unreachable",
+  "version": 1,
+  "state": "draft",
+  "phases": [
+    {
+      "id": "a",
+      "blocks": [
+        {
+          "type": "end"
+        }
+      ],
+      "triggers": [
+        {
+          "on": "button",
+          "label": "Go"
+        }
+      ]
+    },
+    {
+      "id": "b",
+      "blocks": [
+        {
+          "type": "goto",
+          "params": {
+            "phase": "missing"
+          }
+        }
+      ]
+    }
+  ]
+}

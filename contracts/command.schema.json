@@ -1,0 +1,328 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pacelaps.com/schemas/command.schema.json",
+  "title": "Server to agent: command",
+  "description": "Structured commands only. The agent renders the chat text from an allow-listed template; the server never sends raw chat text except in announce.",
+  "type": "object",
+  "required": [
+    "v",
+    "id",
+    "epoch",
+    "type",
+    "params",
+    "idempotent",
+    "issuedAt",
+    "issuedBy"
+  ],
+  "properties": {
+    "v": {
+      "$ref": "common.schema.json#/$defs/version"
+    },
+    "id": {
+      "type": "string"
+    },
+    "epoch": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Executor epoch. The agent rejects commands from an older epoch."
+    },
+    "type": {
+      "enum": [
+        "yellow",
+        "pit_close",
+        "pit_open",
+        "restart_single",
+        "restart_double",
+        "clear_all",
+        "clear",
+        "pace_laps_set",
+        "pace_laps_add",
+        "black_flag",
+        "wave_by",
+        "eol",
+        "dq",
+        "remove",
+        "announce",
+        "replay_jump",
+        "replay_live"
+      ],
+      "description": "replay_jump and replay_live are view commands (race control's incident review, spec-feedback 41): the server sends them to one agent a steward chose, executor or not; an active agent runs them whatever its executor role, without the epoch check. They change only that PC's view: per-car telemetry stays live during a replay (2026-11-03)."
+    },
+    "params": {
+      "type": "object"
+    },
+    "idempotent": {
+      "type": "boolean"
+    },
+    "issuedAt": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    },
+    "executeAt": {
+      "$ref": "common.schema.json#/$defs/timestamp"
+    },
+    "issuedBy": {
+      "type": "string",
+      "description": "For example steward:12 or procedure:code60-failsafe."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "yellow"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "params": {
+            "properties": {
+              "message": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 230,
+                "description": "Optional chat text after the command. The whole chat line stays under the sim's limit of about 254 characters (spike 7): the longest command prefix plus 230 is under 250."
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "enum": [
+              "pit_close",
+              "pit_open",
+              "restart_single",
+              "restart_double",
+              "clear_all"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "params": {
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "clear"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "params": {
+            "required": [
+              "car"
+            ],
+            "properties": {
+              "car": {
+                "$ref": "common.schema.json#/$defs/carNumber"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "enum": [
+              "pace_laps_set",
+              "pace_laps_add"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "params": {
+            "required": [
+              "n"
+            ],
+            "properties": {
+              "n": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 20,
+                "description": "Lap count. The sim's maximum is 20 (spike 9). The sim refuses pace-lap changes until the pace car has completed its first full caution lap."
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "black_flag"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "params": {
+            "required": [
+              "car",
+              "mode"
+            ],
+            "properties": {
+              "car": {
+                "$ref": "common.schema.json#/$defs/carNumber"
+              },
+              "mode": {
+                "enum": [
+                  "stop_and_go",
+                  "drive_through"
+                ]
+              },
+              "seconds": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "laps": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "additionalProperties": false,
+            "not": {
+              "required": [
+                "seconds",
+                "laps"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "enum": [
+              "wave_by",
+              "eol",
+              "dq",
+              "remove"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "params": {
+            "required": [
+              "car"
+            ],
+            "properties": {
+              "car": {
+                "$ref": "common.schema.json#/$defs/carNumber"
+              },
+              "message": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 230,
+                "description": "Optional chat text after the command. The whole chat line stays under the sim's limit of about 254 characters (spike 7): the longest command prefix plus 230 is under 250."
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "announce"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "params": {
+            "required": [
+              "text"
+            ],
+            "properties": {
+              "text": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 250,
+                "description": "Plain chat line. The sim cuts lines at about 254 characters (spike 7). Must not start with ! or / (the agent rejects it: it would be a chat command)."
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "replay_jump"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "params": {
+            "required": [
+              "sessionNum",
+              "sessionTime"
+            ],
+            "properties": {
+              "sessionNum": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "sessionTime": {
+                "type": "number",
+                "minimum": 0
+              },
+              "car": {
+                "$ref": "common.schema.json#/$defs/carNumber",
+                "description": "Optional (2026-11-03): the camera follows this car (iRacing's camera switch by car number)."
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "replay_live"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "params": {
+            "description": "Back to the live session (2026-11-03).",
+            "maxProperties": 0
+          }
+        }
+      }
+    }
+  ]
+}

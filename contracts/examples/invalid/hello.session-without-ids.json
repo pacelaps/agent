@@ -1,0 +1,12 @@
+{
+  "v": 1,
+  "kind": "hello",
+  "agentId": "agt_01",
+  "state": "ready",
+  "agentVersion": "0.1.0",
+  "session": {
+    "leagueId": 1,
+    "num": 0,
+    "type": "Race"
+  }
+}

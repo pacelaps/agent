@@ -1,0 +1,12 @@
+{
+  "v": 1,
+  "id": "cmd_904",
+  "epoch": 7,
+  "idempotent": false,
+  "issuedAt": "2026-11-07T19:03:20.000Z",
+  "issuedBy": "steward:12",
+  "type": "announce",
+  "params": {
+    "text": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  }
+}

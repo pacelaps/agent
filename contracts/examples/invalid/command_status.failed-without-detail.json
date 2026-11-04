@@ -1,0 +1,8 @@
+{
+  "v": 1,
+  "kind": "command_status",
+  "commandId": "cmd_1",
+  "step": "result",
+  "outcome": "failed",
+  "at": "2026-11-07T19:03:12.400Z"
+}

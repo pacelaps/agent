@@ -1,0 +1,6 @@
+{
+  "v": 1,
+  "kind": "pairing_status",
+  "status": "pending",
+  "intervalSec": 5
+}

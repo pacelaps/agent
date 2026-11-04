@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <!-- Not "...Console": a namespace with that name would hide System.Console. -->
+    <RootNamespace>PaceLaps.Agent.ConsoleHost</RootNamespace>
+    <AssemblyName>pacelaps-agent-cli</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PaceLaps.Agent.Core\PaceLaps.Agent.Core.csproj" />
+    <ProjectReference Include="..\PaceLaps.Agent.IRacing\PaceLaps.Agent.IRacing.csproj" />
+    <ProjectReference Include="..\PaceLaps.Agent.Hosting\PaceLaps.Agent.Hosting.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Spikes\*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="PaceLaps.Agent.Tests" />
+  </ItemGroup>
+
+</Project>

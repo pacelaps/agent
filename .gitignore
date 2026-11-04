@@ -1,0 +1,40 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+TestResults/
+publish/
+artifacts/
+
+# Local config and logs
+appsettings.Local.json
+*.log
+logs/
+
+# Editors
+.idea/
+.vscode/*
+!.vscode/settings.json
+
+# Full proof-of-concept run logs (mostly 2 Hz snapshots); a trimmed copy is committed instead.
+docs/poc-logs/*-full.jsonl
+
+# Lap start calibration recordings (calibrate-record): large, local input for the track capture tool.
+docs/recordings/calibration-*.jsonl
+# Lap times recordings (lap-times-record): large, local input for the lap times check.
+docs/recordings/lap-times-*.jsonl
+# Session and weather recordings (session-record): local input for the header and weather check.
+docs/recordings/session-*.jsonl
+# Results recordings (results-record): local input for the results check.
+docs/recordings/results-*.jsonl
+# Class recordings (classes-record): local input for the class names check.
+docs/recordings/classes-*.jsonl
+
+# The logs and recordings of the checks in iRacing stay local; the repository has the results.
+docs/spike-logs/*.jsonl
+docs/spike-logs/*.txt
+docs/poc-logs/
+docs/recordings/*.jsonl
+docs/poc-acceptance-results.txt

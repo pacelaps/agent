@@ -1,0 +1,38 @@
+{
+  "v": 1,
+  "agentId": "agt_01",
+  "seq": 1042,
+  "capturedAt": "2026-11-07T19:03:11.250Z",
+  "session": {
+    "leagueId": 12345,
+    "seasonId": 6789,
+    "sessionId": 111,
+    "subSessionId": 222,
+    "num": 2,
+    "type": "Race",
+    "state": "Racing",
+    "timeSec": 812.4,
+    "flags": [
+      "green"
+    ]
+  },
+  "cars": [
+    {
+      "num": "12",
+      "custId": 100200,
+      "classId": 4098,
+      "lap": 14,
+      "lapDistPct": 0.431,
+      "onPitRoad": false,
+      "surface": "OnTrack",
+      "posClass": 3,
+      "posOverall": 7,
+      "isPaceCar": false,
+      "incidents": 4,
+      "connected": true,
+      "flags": [
+        "meatball"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "bad",
+  "name": "Bad",
+  "version": 1,
+  "state": "draft",
+  "phases": [
+    {
+      "id": "a",
+      "blocks": [
+        {
+          "type": "run_script",
+          "params": {
+            "code": "x"
+          }
+        }
+      ]
+    }
+  ]
+}

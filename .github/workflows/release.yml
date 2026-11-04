@@ -1,0 +1,39 @@
+name: Release
+
+# Push a tag like v0.5.0 on main: the tests run, the package is built with that version and attached to a GitHub
+# release with its SHA-256 checksum. Versions below 1.0 and versions with a suffix (v1.0.0-rc.1) are prereleases.
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Test
+        run: dotnet test --configuration Release
+
+      - name: Package
+        shell: pwsh
+        run: ./scripts/publish.ps1 -Version ($env:GITHUB_REF_NAME.TrimStart('v')) -Server https://racecontrol.pacelaps.com
+
+      - name: Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $version = $env:GITHUB_REF_NAME.TrimStart('v')
+          $flags = @()
+          if ($version.StartsWith('0.') -or $version.Contains('-')) { $flags += '--prerelease' }
+          $assets = Get-ChildItem artifacts -File | Where-Object { $_.Name -like '*.zip' -or $_.Name -like '*.zip.sha256' } | ForEach-Object { $_.FullName }
+          gh release create $env:GITHUB_REF_NAME @assets --title "Agent $version" --notes "Unzip, start pacelaps-agent.exe and follow README.txt. The program is not signed yet: Windows SmartScreen asks once (More info, Run anyway). Check the zip against the .sha256 file." @flags

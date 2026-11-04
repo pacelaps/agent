@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "bad-local",
+  "name": "Bad local failsafe",
+  "version": 1,
+  "state": "draft",
+  "phases": [
+    {
+      "id": "a",
+      "blocks": [
+        {
+          "type": "wait_steward",
+          "params": {
+            "label": "Release"
+          }
+        },
+        {
+          "type": "end"
+        }
+      ],
+      "triggers": [
+        {
+          "on": "timer",
+          "seconds": 30
+        }
+      ]
+    }
+  ]
+}

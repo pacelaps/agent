@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "id": "custom-safety-car",
+  "name": "Custom safety car",
+  "description": "Four phases: Code 60, safety car deployed, sorting, go green. iRacing stays at green and no iRacing commands are sent, so pits stay open.",
+  "version": 1,
+  "state": "published",
+  "phases": [
+    {
+      "id": "code60",
+      "blocks": [
+        {
+          "type": "show_message",
+          "params": {
+            "type": "safety_car",
+            "text": "CODE 60: 60 KM/H, SINGLE FILE, NO OVERTAKING, PITS OPEN",
+            "affects": {
+              "scope": "all"
+            },
+            "sticky": true,
+            "sound": "code60"
+          }
+        },
+        {
+          "type": "wait_steward",
+          "params": {
+            "label": "Safety car deployed"
+          }
+        },
+        {
+          "type": "goto",
+          "params": {
+            "phase": "deployed"
+          }
+        }
+      ],
+      "triggers": [
+        {
+          "on": "button",
+          "label": "Safety car"
+        }
+      ]
+    },
+    {
+      "id": "deployed",
+      "blocks": [
+        {
+          "type": "show_message",
+          "params": {
+            "type": "safety_car",
+            "text": "SAFETY CAR: FOLLOW THE SAFETY CAR",
+            "affects": {
+              "scope": "all"
+            },
+            "sticky": true,
+            "sound": "safety_car"
+          }
+        },
+        {
+          "type": "open_sorting"
+        },
+        {
+          "type": "goto",
+          "params": {
+            "phase": "sorting"
+          }
+        }
+      ]
+    },
+    {
+      "id": "sorting",
+      "blocks": [
+        {
+          "type": "wait_steward",
+          "params": {
+            "label": "Field is correct"
+          }
+        },
+        {
+          "type": "goto",
+          "params": {
+            "phase": "green"
+          }
+        }
+      ]
+    },
+    {
+      "id": "green",
+      "blocks": [
+        {
+          "type": "show_message",
+          "params": {
+            "type": "flag",
+            "text": "GREEN",
+            "affects": {
+              "scope": "all"
+            },
+            "sticky": false,
+            "sound": "green",
+            "clears": true
+          }
+        },
+        {
+          "type": "end"
+        }
+      ]
+    }
+  ]
+}

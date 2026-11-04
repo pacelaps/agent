@@ -1,0 +1,32 @@
+{
+  // Spike 12: which harmless command can verify the typed channel? No second person is available, so this
+  // records what the sender sees and whether the race state changes. Who else sees it stays open.
+  "about": "Send each command and note exactly what appears in chat (text, colour, channel such as @ADMIN or @PRIVATE). Telemetry records any race effect.",
+  "steps": [
+    {
+      "id": "help",
+      "command": "!help",
+      "when": "Any time, preferably under green.",
+      "observe": "What appears, in which channel? Does anything in the race change?",
+      "watchSeconds": 15
+    },
+    {
+      "id": "help_topic",
+      "command": "!help yellow",
+      "when": "Any time.",
+      "observe": "Does help accept a topic and show the syntax of one command?",
+      "watchSeconds": 15
+    },
+    {
+      "id": "rc_message",
+      "command": "/rc spike12 race control test",
+      "when": "Any time.",
+      "observe": "Which lines appear (spike 1 showed @ADMIN and @PRIVATE)?",
+      "watchSeconds": 15
+    }
+  ],
+  "finalQuestions": [
+    "Were flags, penalties and pit state unchanged after all three commands?",
+    "Did !help produce a reply that you could see every time?"
+  ]
+}

@@ -1,0 +1,105 @@
+# PaceLaps Race Control: agent
+
+Windows program that runs on an iRacing session admin's PC. It sleeps until its operator activates it, then reads live iRacing data, forwards structured commands from the web service into iRacing, and reports what it did. It contains no race logic.
+
+Part of PaceLaps Race Control. The shared JSON contracts are copied in `contracts/`.
+
+## Status
+
+Steps 1 and 3 done (proof of concept, spikes, integration with the web service; results in `docs/spike-results.md` and `docs/integration-results.md`). Step 5, the full agent, is under way: sections 5.2 (config file, macros policy, self-test reporting, outage window, typed channel failure) 5.3 (opt-in local failsafe), 5.4 (tray app) and 5.5 (packaging) are built; the sim test script and the pilot follow.
+
+## Stack
+
+- .NET for Windows x64, self-contained
+- IRSDKSharper (pinned version) for telemetry, session info and SDK messages
+- The operator's program: a WinForms tray application (`pacelaps-agent.exe`). The console (`pacelaps-agent-cli.exe`) stays for the spikes, the stub server and development.
+
+## Build and run
+
+Needs the .NET 10 SDK (see `global.json`). Windows x64 only.
+
+```
+dotnet build
+dotnet test
+dotnet run --project src/PaceLaps.Agent.Console -- help
+```
+
+The tray app (manual check: `docs/tray-check.md`):
+
+```
+dotnet run --project src/PaceLaps.Agent.Tray
+```
+
+It starts Sleeping: no connection to the server until Activate, which reads the settings and the credentials, connects and runs the self-test; Sleep or a failed self-test closes the connection. Its menu has Status, Activate, Sleep, Pair, Settings (edits `config.json`, start with Windows), the log folder and Exit. One instance per Windows session; a second start opens the first one's status window. The console's `run --server` runs on the same code (`Hosting/AgentRuntime`).
+
+With the web service from the console (roadmap step 3; steps: `docs/integration-test.md`), pair once, then run:
+
+```
+dotnet run --project src/PaceLaps.Agent.Console -- pair --server http://localhost:8081
+dotnet run --project src/PaceLaps.Agent.Console -- run --server http://localhost:8081 --league 15457
+```
+
+The settings live in `%LOCALAPPDATA%\PaceLaps\Agent\config.json` (server, league for hosted sessions, macro channel and slots, local failsafe and its delay, app.ini path); `run` reads it and its options override it. `config` shows it, `config --init` writes one with every setting:
+
+```
+dotnet run --project src/PaceLaps.Agent.Console -- config --init
+```
+
+Local failsafe (opt-in, `localFailsafe.enabled` in `config.json`): the agent keeps a copy of the procedure the league designates (`local-failsafe.json` next to the settings, so it survives a restart) and, when the server has not answered for the delay (default 30 s) plus 15 s per rank, runs it once per outage if a race (or practice or qualifying, where the league arms them) is under way and no caution is out. It never ends itself: a steward releases it from the race control page. `status` in the console and the tray app's status window show whether it is on, which version it holds and whether it is running; `offline SECONDS` simulates the outage.
+
+The console program is `pacelaps-agent-cli.exe`. `run` without a server (none in the settings file, or `--stub`) is the proof-of-concept agent with an in-process stub server (steps: `docs/poc-acceptance.md`):
+
+```
+dotnet run --project src/PaceLaps.Agent.Console -- run --macros "14=!pitclose;15=!pitopen" --league 1
+```
+
+The Phase 0 spike runners:
+
+```
+dotnet run --project src/PaceLaps.Agent.Console -- probe
+dotnet run --project src/PaceLaps.Agent.Console -- spike1 --slot 7
+dotnet run --project src/PaceLaps.Agent.Console -- spike2 --mode borderless
+dotnet run --project src/PaceLaps.Agent.Console -- spike3 --car 12 --car2 33
+dotnet run --project src/PaceLaps.Agent.Console -- spike9          # and spike4 to spike14, see help
+```
+
+Spikes need Windows with iRacing in a hosted AI session; the manual steps are in `docs/spike-procedures.md`. Spike logs go to `docs/spike-logs/` (JSON Lines). A rolling diagnostic log goes to `%LOCALAPPDATA%\PaceLaps\Agent\logs`. Everything else (typed channel sequence, mapping, spike evaluation) is unit-tested without iRacing.
+
+CI: `.github/workflows/ci.yml` builds and tests on a Windows runner, then builds the package and checks it (the zip is kept as a workflow artifact for 7 days).
+
+## Package and release
+
+The operator's package is one self-contained exe (no .NET needed on the PC; not trimmed, WinForms does not allow it) in a zip with `docs/operator-guide.md` as `README.txt`, plus a SHA-256 checksum file. Build it locally:
+
+```
+./scripts/publish.ps1                  # artifacts/pacelaps-agent-0.1.0-win-x64.zip (development version)
+./scripts/publish.ps1 -Version 0.5.0 -Server https://racecontrol.pacelaps.com   # a release: pairs only with that server
+```
+
+The script runs the packaged exe with `--version` (it prints the version and exits without showing anything) and fails if it does not start. A release: push a tag `vX.Y.Z` on main; `.github/workflows/release.yml` tests, builds the package with that version and the production server built in (its pairing screen and settings show that server; local builds take any) and attaches the zip and checksum to a GitHub release (a prerelease below 1.0 or with a suffix). The exe is not signed yet: SmartScreen asks once, as the operator guide says. Updates are manual (exit, replace the exe); settings and pairing stay in `%LOCALAPPDATA%\PaceLaps\Agent`.
+
+## Layout
+
+```
+src/PaceLaps.Agent.Core/       no iRacing dependency: contracts, states, self-test, command renderer and executor,
+                                      snapshots, events, clock offset, typed chat sender, agent host
+src/PaceLaps.Agent.IRacing/    IRSDKSharper adapter (SimConnection, SimDataAdapter, macro and replay channels), Win32 focus, scancode keyboard
+src/PaceLaps.Agent.Hosting/    shared by the console and the tray app: settings, credentials, logging, AgentRuntime,
+                                      AgentStatus, the tray app's presenters (unit-tested, no WinForms)
+src/PaceLaps.Agent.Tray/       the tray app (WinForms), pacelaps-agent.exe
+src/PaceLaps.Agent.Console/    console (run, pair, config; stub server) and spike runners, pacelaps-agent-cli.exe
+tests/PaceLaps.Agent.Tests/    xunit v3 on Microsoft.Testing.Platform, fakes and a fake clock
+docs/spike-results.md                 results per spike
+docs/spike-procedures.md              what the operator does in iRacing
+docs/poc-acceptance.md                the proof-of-concept acceptance run
+docs/tray-check.md                    manual check of the tray app
+docs/operator-guide.md                the operator's guide (README.txt in the package)
+scripts/publish.ps1                   builds the package (artifacts/, ignored by git)
+contracts/                            copy of webservice/contracts (scripts/sync-contracts.ps1), used by the tests
+Directory.Packages.props              pinned package versions (IRSDKSharper 1.3.0)
+```
+
+## Licence
+
+PaceLaps Agent is free software under the GNU General Public License version 3 (`LICENSE`), the licence of
+IRSDKSharper, which it uses to read iRacing. The libraries it contains and their licences: `THIRD-PARTY-NOTICES.md`.

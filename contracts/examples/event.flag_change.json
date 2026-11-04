@@ -1,0 +1,19 @@
+{
+  "v": 1,
+  "kind": "event",
+  "agentId": "agt_01",
+  "seq": 312,
+  "eventTime": "2026-11-07T19:05:10.300Z",
+  "eventType": "flag_change",
+  "data": {
+    "flags": [
+      "caution",
+      "caution_waving"
+    ],
+    "previous": [
+      "green"
+    ],
+    "sessionNum": 2,
+    "sessionTimeSec": 931.4
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "v": 1,
+  "kind": "self_test_result",
+  "agentId": "agt_7f3k9q2m",
+  "at": "2026-11-07T18:55:02.120Z",
+  "passed": false,
+  "steps": [
+    {
+      "step": 1,
+      "name": "sim",
+      "result": "fail",
+      "detail": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    }
+  ],
+  "channels": {}
+}

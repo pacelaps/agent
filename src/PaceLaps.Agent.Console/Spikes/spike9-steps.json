@@ -1,0 +1,99 @@
+{
+  // Spike 9: how does a caution extend? Two cautions in one race. Steps with sendWhen are armed with Enter
+  // and sent automatically the moment telemetry shows one lap to green, so the timing is exact.
+  "about": "Caution 1: shorten to 2 laps, then at each 'one lap to green' try !pacelaps +2, !yellow and !pacelaps 3, then watch the restart. Caution 2: find the pace lap limit.",
+  "steps": [
+    {
+      "id": "yellow",
+      "command": "!yellow",
+      "when": "Green flag, no other caution.",
+      "observe": "End the watch once the pace car leads the field.",
+      "expect": ["caution", "paceCarAheadOfLeader"],
+      "watchSeconds": 240
+    },
+    {
+      "id": "pace_laps_short",
+      "command": "!pacelaps 2",
+      "when": "Right after the pace car leads the field.",
+      "observe": "Laps to green shows 2. This only shortens the wait for the next steps.",
+      "watchSeconds": 15
+    },
+    {
+      "id": "pace_laps_add_at_one_to_go",
+      "command": "!pacelaps +2",
+      "sendWhen": "oneLapToGreen",
+      "when": "Armed: sent automatically at one lap to green.",
+      "observe": "Does the caution extend (one-to-go goes away, laps to green goes up), or does the field restart?",
+      "expect": ["cautionExtended"],
+      "watchSeconds": 150
+    },
+    {
+      "id": "yellow_at_one_to_go",
+      "command": "!yellow",
+      "sendWhen": "oneLapToGreen",
+      "when": "Armed: sent automatically at the next one lap to green.",
+      "observe": "Does a second !yellow during the caution extend it? Any chat reply?",
+      "expect": ["cautionExtended"],
+      "watchSeconds": 150
+    },
+    {
+      "id": "pace_laps_set_at_one_to_go",
+      "command": "!pacelaps 3",
+      "sendWhen": "oneLapToGreen",
+      "when": "Armed: sent automatically at the next one lap to green.",
+      "observe": "Does an absolute value at one to go extend the caution to 3 more laps?",
+      "expect": ["cautionExtended"],
+      "watchSeconds": 150
+    },
+    {
+      "id": "watch_restart_1",
+      "watchOnly": true,
+      "when": "Start watching right away.",
+      "observe": "Watch to the green flag. Count the caution laps from the yellow to the green.",
+      "expect": ["green"],
+      "endWhen": "green",
+      "watchSeconds": 600
+    },
+    {
+      "id": "yellow_2",
+      "command": "!yellow",
+      "when": "Green flag again, after the restart.",
+      "observe": "End the watch once the pace car leads the field.",
+      "expect": ["caution", "paceCarAheadOfLeader"],
+      "watchSeconds": 240
+    },
+    {
+      "id": "pace_laps_99",
+      "command": "!pacelaps 99",
+      "when": "During caution 2.",
+      "observe": "Accepted, capped or rejected? Note the chat reply and the laps to green shown.",
+      "watchSeconds": 20
+    },
+    {
+      "id": "pace_laps_20",
+      "command": "!pacelaps 20",
+      "when": "During caution 2.",
+      "observe": "Accepted? Note the laps to green shown.",
+      "watchSeconds": 20
+    },
+    {
+      "id": "pace_laps_end",
+      "command": "!pacelaps 1",
+      "when": "During caution 2.",
+      "observe": "Does the caution end after one more lap?",
+      "watchSeconds": 20
+    },
+    {
+      "id": "watch_restart_2",
+      "watchOnly": true,
+      "when": "Start watching right away.",
+      "observe": "Watch to the green flag.",
+      "expect": ["green"],
+      "endWhen": "green",
+      "watchSeconds": 600
+    }
+  ],
+  "finalQuestions": [
+    "Could the caution be held for extra laps with at least one of the three commands sent at one lap to green?"
+  ]
+}

@@ -1,0 +1,185 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pacelaps.com/schemas/device-messages.schema.json",
+  "title": "Devices and server: clock ping, state snapshot, shown report",
+  "description": "PROVISIONAL. Derived from the message catalogue (clock ping, state snapshot) and the synchronized display rules (devices report when they displayed a message). Finalize in step 2.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/clockPing"
+    },
+    {
+      "$ref": "#/$defs/clockPong"
+    },
+    {
+      "$ref": "#/$defs/stateSnapshot"
+    },
+    {
+      "$ref": "#/$defs/shownReport"
+    }
+  ],
+  "$defs": {
+    "clockPing": {
+      "type": "object",
+      "required": [
+        "v",
+        "kind",
+        "clientSentAt"
+      ],
+      "properties": {
+        "v": {
+          "$ref": "common.schema.json#/$defs/version"
+        },
+        "kind": {
+          "const": "clock_ping"
+        },
+        "clientSentAt": {
+          "$ref": "common.schema.json#/$defs/timestamp"
+        }
+      }
+    },
+    "clockPong": {
+      "type": "object",
+      "required": [
+        "v",
+        "kind",
+        "clientSentAt",
+        "serverTime"
+      ],
+      "properties": {
+        "v": {
+          "$ref": "common.schema.json#/$defs/version"
+        },
+        "kind": {
+          "const": "clock_pong"
+        },
+        "clientSentAt": {
+          "$ref": "common.schema.json#/$defs/timestamp"
+        },
+        "serverReceivedAt": {
+          "$ref": "common.schema.json#/$defs/timestamp",
+          "description": "Optional. When the ping reached the server; serverTime is when the pong left it. With both, the device takes the server's processing time out of the round trip (NTP): offset = ((serverReceivedAt - clientSentAt) + (serverTime - clientReceivedAt)) / 2, round trip = (clientReceivedAt - clientSentAt) - (serverTime - serverReceivedAt). Without it, the device assumes serverTime was read half a round trip after sending."
+        },
+        "serverTime": {
+          "$ref": "common.schema.json#/$defs/timestamp",
+          "description": "When the pong left the server."
+        }
+      },
+      "description": "Server to device: the answer to a clock ping. Accepted 2026-10-26 (spec-feedback item 18): serverReceivedAt added."
+    },
+    "stateSnapshot": {
+      "type": "object",
+      "description": "Sent to a device on connect and on resync: current state and phase, banners, recent relevant messages (on resync: the ones after the device's cursor), own target if sorting.",
+      "required": [
+        "v",
+        "kind",
+        "serverTime",
+        "cursor"
+      ],
+      "properties": {
+        "v": {
+          "$ref": "common.schema.json#/$defs/version"
+        },
+        "kind": {
+          "const": "state_snapshot"
+        },
+        "serverTime": {
+          "$ref": "common.schema.json#/$defs/timestamp"
+        },
+        "cursor": {
+          "type": "string",
+          "description": "A reconnecting client sends its cursor and receives only what it missed."
+        },
+        "state": {
+          "type": "object",
+          "properties": {
+            "phase": {
+              "type": "string"
+            },
+            "procedure": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "banners": {
+          "type": "array",
+          "description": "The sticky messages the device shows now, in display order: the first is the main banner. A driver can have a race-wide state and their own penalty at the same time.",
+          "items": {
+            "$ref": "message.schema.json"
+          }
+        },
+        "recentMessages": {
+          "type": "array",
+          "items": {
+            "$ref": "message.schema.json"
+          }
+        },
+        "target": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "properties": {
+                "posClass": {
+                  "type": "integer"
+                },
+                "followCar": {
+                  "$ref": "common.schema.json#/$defs/carNumber"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "shownReport": {
+      "type": "object",
+      "description": "A device reports when it displayed a message. Feeds the lateness statistics.",
+      "required": [
+        "v",
+        "kind",
+        "messageId",
+        "shownAt",
+        "receivedAt",
+        "offsetMs",
+        "rttMs"
+      ],
+      "properties": {
+        "v": {
+          "$ref": "common.schema.json#/$defs/version"
+        },
+        "kind": {
+          "const": "shown"
+        },
+        "messageId": {
+          "type": "string"
+        },
+        "shownAt": {
+          "$ref": "common.schema.json#/$defs/timestamp",
+          "description": "Device time corrected by its measured offset."
+        },
+        "late": {
+          "type": "boolean",
+          "description": "True if the message arrived after its showAt time."
+        },
+        "receivedAt": {
+          "$ref": "common.schema.json#/$defs/timestamp",
+          "description": "When the message arrived on the device, device time corrected by its measured offset."
+        },
+        "offsetMs": {
+          "type": "number",
+          "description": "The device's current offset estimate: server clock minus device clock, in milliseconds."
+        },
+        "rttMs": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Round trip of the ping sample the offset came from. The offset is accurate to about half of it, which bounds how exact shownAt is."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  // Spike 13: can a caution be thrown without the AI pace car? Host the session with the pace car switched off
+  // in the session options (see docs/spike-procedures.md). The header logs the pace car index the SDK reports.
+  "about": "One caution in a session without the AI pace car. Watch what the field does, and whether a normal restart follows.",
+  "steps": [
+    {
+      "id": "yellow",
+      "command": "!yellow",
+      "when": "Green flag.",
+      "observe": "Caution flag shown? Does a pace car appear anyway? Do the cars slow and line up, and behind what?",
+      "expect": ["caution", "paceCarAheadOfLeader"],
+      "watchSeconds": 240
+    },
+    {
+      "id": "pace_laps_short",
+      "command": "!pacelaps 2",
+      "when": "During the caution.",
+      "observe": "Laps to green shows 2?",
+      "watchSeconds": 20
+    },
+    {
+      "id": "watch_restart",
+      "watchOnly": true,
+      "when": "Start watching right away.",
+      "observe": "How does the caution end? Is there a restart procedure and a green flag?",
+      "expect": ["green"],
+      "endWhen": "green",
+      "watchSeconds": 600
+    }
+  ],
+  "finalQuestions": [
+    "Did the caution work without an AI pace car (caution shown, field slowed, ended with a green flag)?"
+  ]
+}

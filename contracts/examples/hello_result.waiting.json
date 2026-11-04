@@ -1,0 +1,9 @@
+{
+  "v": 1,
+  "kind": "hello_result",
+  "state": "ready",
+  "session": null,
+  "epoch": 0,
+  "isExecutor": false,
+  "reason": "The league has no open session. A steward opens one on the league page."
+}

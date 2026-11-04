@@ -1,0 +1,19 @@
+{
+  "v": 1,
+  "kind": "event",
+  "agentId": "agt_01",
+  "seq": 413,
+  "eventTime": "2026-11-07T19:05:13.000Z",
+  "eventType": "sector_crossings",
+  "data": {
+    "sessionNum": 2,
+    "crossings": [
+      {
+        "car": "12",
+        "sector": -1,
+        "lap": 15,
+        "sessionTimeSec": 912.0
+      }
+    ]
+  }
+}

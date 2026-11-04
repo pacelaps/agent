@@ -1,0 +1,14 @@
+{
+  "v": 1,
+  "id": "cmd_r41",
+  "epoch": 7,
+  "type": "replay_jump",
+  "params": {
+    "sessionNum": 2,
+    "sessionTime": 1834.5,
+    "car": "1234"
+  },
+  "idempotent": true,
+  "issuedAt": "2026-11-07T19:41:02.000Z",
+  "issuedBy": "steward:stw_ab12cd34ef56"
+}

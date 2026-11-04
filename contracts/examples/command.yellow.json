@@ -1,0 +1,10 @@
+{
+  "v": 1,
+  "id": "cmd_8f3",
+  "epoch": 7,
+  "type": "yellow",
+  "params": {},
+  "idempotent": true,
+  "issuedAt": "2026-11-07T19:03:20.000Z",
+  "issuedBy": "procedure:custom-safety-car"
+}

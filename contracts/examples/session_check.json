@@ -1,0 +1,13 @@
+{
+  "v": 1,
+  "kind": "session_check",
+  "agentId": "agt_7f3k9q2m4x8w",
+  "session": {
+    "leagueId": 12345,
+    "seasonId": 6789,
+    "sessionId": 0,
+    "subSessionId": 0,
+    "num": 2,
+    "type": "Practice"
+  }
+}

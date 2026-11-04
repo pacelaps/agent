@@ -1,0 +1,283 @@
+{
+  "v": 1,
+  "kind": "audit_export",
+  "algorithm": "pacelaps-audit-v1",
+  "exportedAt": "2026-10-26T15:10:00.000Z",
+  "chain": "s:3",
+  "league": {
+    "iracingLeagueId": 15457,
+    "name": "SCT | Slipstream Challenge Trophy"
+  },
+  "session": {
+    "id": "3",
+    "name": "Lime Rock Park",
+    "openedAt": "2026-10-26T14:51:44.650Z",
+    "closedAt": "2026-10-26T15:07:30.000Z"
+  },
+  "checkpoint": {
+    "seq": 10,
+    "hash": "f07ac5252f9d4f3f2b3e4abef88658265a869f789a1abee96fbeea208fa60182"
+  },
+  "entries": [
+    {
+      "chain": "s:3",
+      "seq": 1,
+      "prevHash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "eventTime": "2026-10-26T14:51:44.650Z",
+      "recordedTime": "2026-10-26T14:51:44.650Z",
+      "sessionNum": null,
+      "sessionTimeSec": null,
+      "lap": null,
+      "actorType": "steward",
+      "actorId": "stw_hev9ckirg6nw",
+      "action": "session.opened",
+      "parameters": {
+        "source": "manual"
+      },
+      "affects": null,
+      "executorAgentId": null,
+      "result": null,
+      "correlationId": null,
+      "correctsSeq": null,
+      "hash": "bec13ae3f344bf9dc3efd42e3002c9eb9963d1bf0ae6cf174605a52e3e929ef5"
+    },
+    {
+      "chain": "s:3",
+      "seq": 2,
+      "prevHash": "bec13ae3f344bf9dc3efd42e3002c9eb9963d1bf0ae6cf174605a52e3e929ef5",
+      "eventTime": "2026-10-26T14:53:05.475Z",
+      "recordedTime": "2026-10-26T14:53:05.475Z",
+      "sessionNum": null,
+      "sessionTimeSec": null,
+      "lap": null,
+      "actorType": "agent",
+      "actorId": "agt_pbc7ejf9hztp",
+      "action": "agent.activated",
+      "parameters": {},
+      "affects": null,
+      "executorAgentId": null,
+      "result": null,
+      "correlationId": null,
+      "correctsSeq": null,
+      "hash": "09891a15060cf67edb237ec2f5c9436b33481ac0261f589cb9a64d809eacea2e"
+    },
+    {
+      "chain": "s:3",
+      "seq": 3,
+      "prevHash": "09891a15060cf67edb237ec2f5c9436b33481ac0261f589cb9a64d809eacea2e",
+      "eventTime": "2026-10-26T14:54:08.737Z",
+      "recordedTime": "2026-10-26T14:54:08.737Z",
+      "sessionNum": null,
+      "sessionTimeSec": null,
+      "lap": null,
+      "actorType": "steward",
+      "actorId": "stw_hev9ckirg6nw",
+      "action": "executor.chosen",
+      "parameters": {
+        "agent": "agt_pbc7ejf9hztp",
+        "epoch": 1,
+        "previous": null
+      },
+      "affects": null,
+      "executorAgentId": null,
+      "result": null,
+      "correlationId": null,
+      "correctsSeq": null,
+      "hash": "c61c9af90526b5cfa19d5c1afe700652a8fa2e1ae3d96b295a4dd10ad74e3da4"
+    },
+    {
+      "chain": "s:3",
+      "seq": 4,
+      "prevHash": "c61c9af90526b5cfa19d5c1afe700652a8fa2e1ae3d96b295a4dd10ad74e3da4",
+      "eventTime": "2026-10-26T14:54:48.440Z",
+      "recordedTime": "2026-10-26T14:54:48.440Z",
+      "sessionNum": 0,
+      "sessionTimeSec": 645.3,
+      "lap": 9,
+      "actorType": "steward",
+      "actorId": "stw_hev9ckirg6nw",
+      "action": "command.issued",
+      "parameters": {
+        "type": "yellow",
+        "params": {
+          "message": "Débris turn 3"
+        }
+      },
+      "affects": null,
+      "executorAgentId": "agt_pbc7ejf9hztp",
+      "result": null,
+      "correlationId": "cmd_01m5wb9y3v2dtf3dftb0ad3x8r",
+      "correctsSeq": null,
+      "hash": "7a631314d0dad6236a7cd9bbcfd961dfcf8214fd6c5903aec28cff2d91dac64a"
+    },
+    {
+      "chain": "s:3",
+      "seq": 5,
+      "prevHash": "7a631314d0dad6236a7cd9bbcfd961dfcf8214fd6c5903aec28cff2d91dac64a",
+      "eventTime": "2026-10-26T14:54:49.193Z",
+      "recordedTime": "2026-10-26T14:54:49.301Z",
+      "sessionNum": 0,
+      "sessionTimeSec": 645.7,
+      "lap": 9,
+      "actorType": "agent",
+      "actorId": "agt_pbc7ejf9hztp",
+      "action": "command.result",
+      "parameters": {
+        "type": "yellow",
+        "detail": "via typed; caution flag"
+      },
+      "affects": null,
+      "executorAgentId": "agt_pbc7ejf9hztp",
+      "result": "failed",
+      "correlationId": "cmd_01m5wb9y3v2dtf3dftb0ad3x8r",
+      "correctsSeq": null,
+      "hash": "0a68c947bc995412d58610d8aa143d1663f2465f71e93eca39e9423b44e5d45b"
+    },
+    {
+      "chain": "s:3",
+      "seq": 6,
+      "prevHash": "0a68c947bc995412d58610d8aa143d1663f2465f71e93eca39e9423b44e5d45b",
+      "eventTime": "2026-10-26T15:01:43.002Z",
+      "recordedTime": "2026-10-26T15:01:43.002Z",
+      "sessionNum": null,
+      "sessionTimeSec": null,
+      "lap": null,
+      "actorType": "system",
+      "actorId": "system",
+      "action": "agent.lost",
+      "parameters": {
+        "agent": "agt_pbc7ejf9hztp",
+        "lastHeartbeatAt": "2026-10-26T15:01:39.366Z"
+      },
+      "affects": null,
+      "executorAgentId": null,
+      "result": null,
+      "correlationId": null,
+      "correctsSeq": null,
+      "hash": "036389adeca6a8d7b152c5474e01b6b9bea51479f36f156faf806f74471b9f29"
+    },
+    {
+      "chain": "s:3",
+      "seq": 7,
+      "prevHash": "036389adeca6a8d7b152c5474e01b6b9bea51479f36f156faf806f74471b9f29",
+      "eventTime": "2026-10-26T15:02:20.730Z",
+      "recordedTime": "2026-10-26T15:02:20.730Z",
+      "sessionNum": null,
+      "sessionTimeSec": null,
+      "lap": null,
+      "actorType": "agent",
+      "actorId": "agt_pbc7ejf9hztp",
+      "action": "agent.reconnected",
+      "parameters": {
+        "lostAt": "2026-10-26T15:01:42.997Z",
+        "lostForMs": 37729
+      },
+      "affects": null,
+      "executorAgentId": null,
+      "result": null,
+      "correlationId": null,
+      "correctsSeq": null,
+      "hash": "95394d13c99ecbc4c2a18b00144db9120c3e63a3021f4016338cb279e947e250"
+    },
+    {
+      "chain": "s:3",
+      "seq": 8,
+      "prevHash": "95394d13c99ecbc4c2a18b00144db9120c3e63a3021f4016338cb279e947e250",
+      "eventTime": "2026-10-26T15:03:00.000Z",
+      "recordedTime": "2026-10-26T15:03:00.000Z",
+      "sessionNum": 0,
+      "sessionTimeSec": 1100.0,
+      "lap": 12,
+      "actorType": "steward",
+      "actorId": "stw_nwmdtwxzjkhx",
+      "action": "incident.added",
+      "parameters": {
+        "car": "6",
+        "delta": 2,
+        "note": "Contact turn 1"
+      },
+      "affects": {
+        "scope": "car",
+        "cars": [
+          "6"
+        ]
+      },
+      "executorAgentId": null,
+      "result": null,
+      "correlationId": null,
+      "correctsSeq": null,
+      "hash": "fcb321c3803fd8f6426f3a8032e16b1c62d35d908dd5280725b75ad8de4c9ec7"
+    },
+    {
+      "chain": "s:3",
+      "seq": 9,
+      "prevHash": "fcb321c3803fd8f6426f3a8032e16b1c62d35d908dd5280725b75ad8de4c9ec7",
+      "eventTime": "2026-10-26T15:03:30.000Z",
+      "recordedTime": "2026-10-26T15:03:30.000Z",
+      "sessionNum": null,
+      "sessionTimeSec": null,
+      "lap": null,
+      "actorType": "steward",
+      "actorId": "stw_nwmdtwxzjkhx",
+      "action": "incident.corrected",
+      "parameters": {
+        "car": "6",
+        "delta": 4,
+        "reason": "It was a 4x"
+      },
+      "affects": {
+        "scope": "car",
+        "cars": [
+          "6"
+        ]
+      },
+      "executorAgentId": null,
+      "result": null,
+      "correlationId": null,
+      "correctsSeq": 8,
+      "hash": "8b85946be7eac9cfa55d31cf733ca5714708771608904473f73b5c29d8c84c8c"
+    },
+    {
+      "chain": "s:3",
+      "seq": 10,
+      "prevHash": "8b85946be7eac9cfa55d31cf733ca5714708771608904473f73b5c29d8c84c8c",
+      "eventTime": "2026-10-26T15:07:30.000Z",
+      "recordedTime": "2026-10-26T15:07:30.000Z",
+      "sessionNum": null,
+      "sessionTimeSec": null,
+      "lap": null,
+      "actorType": "steward",
+      "actorId": "stw_hev9ckirg6nw",
+      "action": "session.closed",
+      "parameters": {},
+      "affects": null,
+      "executorAgentId": null,
+      "result": null,
+      "correlationId": null,
+      "correctsSeq": null,
+      "hash": "f07ac5252f9d4f3f2b3e4abef88658265a869f789a1abee96fbeea208fa60182"
+    },
+    {
+      "chain": "s:3",
+      "seq": 11,
+      "prevHash": "f07ac5252f9d4f3f2b3e4abef88658265a869f789a1abee96fbeea208fa60182",
+      "eventTime": "2026-10-26T15:07:21.000Z",
+      "recordedTime": "2026-10-26T15:08:02.000Z",
+      "sessionNum": null,
+      "sessionTimeSec": null,
+      "lap": null,
+      "actorType": "agent",
+      "actorId": "agt_pbc7ejf9hztp",
+      "action": "agent.released",
+      "parameters": {
+        "reason": "session_closed"
+      },
+      "affects": null,
+      "executorAgentId": null,
+      "result": null,
+      "correlationId": null,
+      "correctsSeq": null,
+      "hash": "f91781cfd87d1063f362b9b3383302e249b7c2d585df03146dd4232d03931a4c"
+    }
+  ]
+}

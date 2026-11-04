@@ -1,0 +1,11 @@
+{
+  "v": 1,
+  "kind": "heartbeat_result",
+  "state": "active",
+  "session": {
+    "id": "s_12",
+    "name": "Race 1"
+  },
+  "epoch": 3,
+  "isExecutor": true
+}

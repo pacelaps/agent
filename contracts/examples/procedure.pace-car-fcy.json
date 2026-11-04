@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "id": "pace-car-fcy",
+  "name": "iRacing pace car full course yellow",
+  "description": "The steward calls it. Sets the restart type, then throws iRacing's native caution. iRacing freezes the order, the AI pace car picks up the leader and iRacing runs the restart. Stewards can add pace laps while the caution is out. It runs until the green flag, which withdraws its banner.",
+  "version": 1,
+  "state": "published",
+  "phases": [
+    {
+      "id": "caution",
+      "blocks": [
+        {
+          "type": "iracing_command",
+          "params": {
+            "command": "restart_single"
+          }
+        },
+        {
+          "type": "iracing_command",
+          "params": {
+            "command": "yellow",
+            "args": {
+              "message": "Full course yellow, single file behind pace car"
+            }
+          }
+        },
+        {
+          "type": "show_message",
+          "params": {
+            "type": "flag",
+            "text": "FULL COURSE YELLOW",
+            "affects": {
+              "scope": "all"
+            },
+            "sticky": true,
+            "sound": "caution"
+          }
+        },
+        {
+          "type": "wait_until",
+          "params": {
+            "condition": {
+              "flag_is": "caution"
+            }
+          }
+        },
+        {
+          "type": "wait_until",
+          "params": {
+            "condition": {
+              "flag_is": "green"
+            }
+          }
+        },
+        {
+          "type": "show_message",
+          "params": {
+            "type": "flag",
+            "text": "GREEN FLAG",
+            "affects": {
+              "scope": "all"
+            },
+            "sticky": false,
+            "sound": "green",
+            "clears": true
+          }
+        },
+        {
+          "type": "end"
+        }
+      ],
+      "triggers": [
+        {
+          "on": "button",
+          "label": "Caution"
+        }
+      ]
+    }
+  ]
+}

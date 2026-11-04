@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- No iRacing or Win32 dependency here. Everything in Core is unit-tested with fakes. -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="PaceLaps.Agent.Tests" />
+  </ItemGroup>
+
+</Project>

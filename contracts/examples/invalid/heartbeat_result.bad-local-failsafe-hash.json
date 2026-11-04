@@ -1,0 +1,18 @@
+{
+  "v": 1,
+  "kind": "heartbeat_result",
+  "state": "active",
+  "session": {
+    "id": "17",
+    "name": "Race 1"
+  },
+  "epoch": 2,
+  "isExecutor": true,
+  "localFailsafe": {
+    "procedure": "local-failsafe-default",
+    "version": 1,
+    "hash": "abc",
+    "armPractice": false,
+    "armQualify": false
+  }
+}

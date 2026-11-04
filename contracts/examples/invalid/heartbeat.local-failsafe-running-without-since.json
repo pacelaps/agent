@@ -1,0 +1,12 @@
+{
+  "v": 1,
+  "kind": "heartbeat",
+  "agentId": "agt_7f3k9q2m",
+  "epoch": 2,
+  "state": "active",
+  "localFailsafe": {
+    "enabled": true,
+    "version": 1,
+    "running": true
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "v": 1,
+  "kind": "heartbeat_result",
+  "state": "ready",
+  "session": null,
+  "epoch": 0,
+  "isExecutor": false,
+  "macros": "allowed",
+  "localFailsafe": null,
+  "localFailsafeRank": null
+}

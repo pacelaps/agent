@@ -1,0 +1,45 @@
+{
+  "v": 1,
+  "kind": "self_test_result",
+  "agentId": "agt_7f3k9q2m",
+  "at": "2026-11-07T18:55:02.120Z",
+  "passed": true,
+  "steps": [
+    {
+      "step": 1,
+      "name": "sim",
+      "result": "pass"
+    },
+    {
+      "step": 2,
+      "name": "session",
+      "result": "pass"
+    },
+    {
+      "step": 3,
+      "name": "server",
+      "result": "pass"
+    },
+    {
+      "step": 4,
+      "name": "cars",
+      "result": "pass"
+    },
+    {
+      "step": 5,
+      "name": "typed_channel",
+      "result": "pass"
+    },
+    {
+      "step": 6,
+      "name": "macro_channel",
+      "result": "skipped",
+      "detail": "macro channel off"
+    }
+  ],
+  "channels": {
+    "macro": "disabled",
+    "typed": "ready",
+    "sdk": "ready"
+  }
+}

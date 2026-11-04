@@ -1,0 +1,16 @@
+{
+  "v": 1,
+  "kind": "event",
+  "agentId": "agt_01",
+  "seq": 300,
+  "eventTime": "2026-11-07T18:58:00.000Z",
+  "eventType": "session_change",
+  "data": {
+    "leagueId": 12345,
+    "seasonId": 6789,
+    "sessionId": 111,
+    "subSessionId": 222,
+    "num": 2,
+    "type": "Race"
+  }
+}

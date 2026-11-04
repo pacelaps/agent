@@ -1,0 +1,1 @@
+{ "v": 1, "id": "msg_1", "cursor": "c_1", "type": "flag", "showAt": "2026-11-07T19:03:13.500Z", "sticky": true, "text": "BLACK FLAG", "affects": { "scope": "car", "cars": ["12a"] }, "visibleTo": { "scope": "car", "cars": ["12a"] } }

@@ -1,0 +1,364 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pacelaps.com/schemas/agent-server.schema.json",
+  "title": "Server to agent: answers and pushes",
+  "description": "The server's answers to the Agent API calls (agent-messages.schema.json) and what it pushes on the agent's channel agent.{id}: commands (command.schema.json) and executor assignments. Roadmap step 3 (2026-10-26). Step 5 (2026-10-27): the league's macros policy, the local failsafe the agent should hold (fetched with GET local-failsafe), its rank in the stagger and the steward's release.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/sessionCheckResult"
+    },
+    {
+      "$ref": "#/$defs/helloResult"
+    },
+    {
+      "$ref": "#/$defs/heartbeatResult"
+    },
+    {
+      "$ref": "#/$defs/executorAssignment"
+    },
+    {
+      "$ref": "#/$defs/eventsAck"
+    },
+    {
+      "$ref": "#/$defs/commandList"
+    },
+    {
+      "$ref": "#/$defs/localFailsafeDocument"
+    }
+  ],
+  "$defs": {
+    "sessionCheckResult": {
+      "type": "object",
+      "required": [
+        "v",
+        "kind",
+        "leagueRegistered",
+        "operatorIsSteward"
+      ],
+      "properties": {
+        "v": {
+          "$ref": "common.schema.json#/$defs/version"
+        },
+        "kind": {
+          "const": "session_check_result"
+        },
+        "leagueRegistered": {
+          "type": "boolean"
+        },
+        "operatorIsSteward": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string",
+          "description": "Why the check failed, for the operator."
+        }
+      }
+    },
+    "helloResult": {
+      "type": "object",
+      "description": "Answer to hello. active with a session when the agent was bound to one: by league and sub-session id, or, with sub-session id 0, to the league's open session. ready with a reason otherwise.",
+      "required": [
+        "v",
+        "kind",
+        "state",
+        "session",
+        "epoch",
+        "isExecutor"
+      ],
+      "properties": {
+        "v": {
+          "$ref": "common.schema.json#/$defs/version"
+        },
+        "kind": {
+          "const": "hello_result"
+        },
+        "state": {
+          "enum": [
+            "ready",
+            "active"
+          ],
+          "description": "ready: not part of a session (yet); active: part of a session, publishing data, executing if executor."
+        },
+        "session": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "required": [
+                "id",
+                "name"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "The server's session id."
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "epoch": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Executor epoch. Commands carry it; the agent rejects older ones."
+        },
+        "isExecutor": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string",
+          "description": "Why the agent is not active, for the operator."
+        },
+        "macros": {
+          "enum": [
+            "allowed",
+            "off"
+          ],
+          "description": "The league's macros policy: off means the agent switches its macro channel off and types every command."
+        },
+        "localFailsafe": {
+          "$ref": "#/$defs/localFailsafeTarget"
+        }
+      }
+    },
+    "heartbeatResult": {
+      "type": "object",
+      "description": "Answer to every heartbeat: the server's view, so the agent catches an executor change or a release even if it missed the push.",
+      "required": [
+        "v",
+        "kind",
+        "state",
+        "session",
+        "epoch",
+        "isExecutor"
+      ],
+      "properties": {
+        "v": {
+          "$ref": "common.schema.json#/$defs/version"
+        },
+        "kind": {
+          "const": "heartbeat_result"
+        },
+        "state": {
+          "enum": [
+            "ready",
+            "active"
+          ],
+          "description": "ready: not part of a session (yet); active: part of a session, publishing data, executing if executor."
+        },
+        "session": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "required": [
+                "id",
+                "name"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "The server's session id."
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "epoch": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Executor epoch. Commands carry it; the agent rejects older ones."
+        },
+        "isExecutor": {
+          "type": "boolean"
+        },
+        "macros": {
+          "enum": [
+            "allowed",
+            "off"
+          ],
+          "description": "The league's macros policy: off means the agent switches its macro channel off and types every command."
+        },
+        "localFailsafe": {
+          "$ref": "#/$defs/localFailsafeTarget"
+        },
+        "localFailsafeRank": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            }
+          ],
+          "description": "The agent's place among the session's active agents (the executor is 0): its local failsafe waits its delay plus 15 s per rank, so agents act one after another. null when not active."
+        },
+        "releaseLocalFailsafe": {
+          "type": "boolean",
+          "description": "A steward released the local failsafe this agent runs: it stops. Sent until the agent reports it is not running."
+        }
+      }
+    },
+    "executorAssignment": {
+      "type": "object",
+      "description": "Pushed on agent.{id} when stewards choose the executor (and to the previous executor, with isExecutor false).",
+      "required": [
+        "v",
+        "kind",
+        "sessionId",
+        "epoch",
+        "isExecutor"
+      ],
+      "properties": {
+        "v": {
+          "$ref": "common.schema.json#/$defs/version"
+        },
+        "kind": {
+          "const": "executor_assignment"
+        },
+        "sessionId": {
+          "type": "string"
+        },
+        "epoch": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Executor epoch. Commands carry it; the agent rejects older ones."
+        },
+        "isExecutor": {
+          "type": "boolean"
+        }
+      }
+    },
+    "eventsAck": {
+      "type": "object",
+      "description": "Answer to an event or a resync: the agent may drop buffered events up to this sequence number.",
+      "required": [
+        "v",
+        "kind",
+        "lastAckedSeq"
+      ],
+      "properties": {
+        "v": {
+          "$ref": "common.schema.json#/$defs/version"
+        },
+        "kind": {
+          "const": "events_ack"
+        },
+        "lastAckedSeq": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "commandList": {
+      "type": "object",
+      "description": "Long-poll fallback while the websocket is down: commands sent to this agent that it has not acknowledged yet.",
+      "required": [
+        "v",
+        "kind",
+        "commands"
+      ],
+      "properties": {
+        "v": {
+          "$ref": "common.schema.json#/$defs/version"
+        },
+        "kind": {
+          "const": "commands"
+        },
+        "commands": {
+          "type": "array",
+          "items": {
+            "$ref": "command.schema.json"
+          }
+        }
+      }
+    },
+    "localFailsafeTarget": {
+      "description": "The local failsafe procedure the agent should hold (spec: Local failsafe): the version its session uses, or the latest published one when it is in no session; null when the league has designated none (the agent deletes its copy). The agent fetches the document when its own version or hash differs.",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "required": [
+            "procedure",
+            "version",
+            "hash",
+            "armPractice",
+            "armQualify"
+          ],
+          "properties": {
+            "procedure": {
+              "type": "string",
+              "description": "The procedure's id (procedure.schema.json id)."
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "hash": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$",
+              "description": "Identifies the version's content; the agent compares it, it does not recompute it."
+            },
+            "armPractice": {
+              "type": "boolean",
+              "description": "The league arms the failsafe in practice as well (Arming and session lifecycle)."
+            },
+            "armQualify": {
+              "type": "boolean",
+              "description": "The league arms the failsafe in qualifying as well."
+            }
+          }
+        }
+      ]
+    },
+    "localFailsafeDocument": {
+      "type": "object",
+      "description": "Answer to GET /api/v1/agent/local-failsafe: the procedure the agent should hold, with its version and hash as in localFailsafeTarget. 404 when the league has designated none.",
+      "required": [
+        "v",
+        "kind",
+        "procedure",
+        "version",
+        "hash",
+        "document"
+      ],
+      "properties": {
+        "v": {
+          "$ref": "common.schema.json#/$defs/version"
+        },
+        "kind": {
+          "const": "local_failsafe"
+        },
+        "procedure": {
+          "type": "string"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "document": {
+          "$ref": "procedure.schema.json",
+          "description": "The published version; only offline blocks (the server checked it when it was designated)."
+        }
+      }
+    }
+  }
+}

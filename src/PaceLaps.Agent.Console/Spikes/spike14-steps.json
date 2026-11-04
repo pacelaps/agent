@@ -1,0 +1,68 @@
+{
+  // Spike 14: do Spotter and Crew Chief react to iRacing's flags? Crew Chief announces flags for the car you
+  // drive, so you drive and --car is your own car number. Note what Crew Chief and iRacing's own spotter say.
+  "about": "Drive your own car with Crew Chief running. Note every announcement and roughly how long after the command it came.",
+  "steps": [
+    {
+      "id": "yellow",
+      "command": "!yellow",
+      "when": "Green flag, you on track.",
+      "observe": "What does Crew Chief say, and when? Anything from iRacing's spotter?",
+      "expect": ["caution"],
+      "watchSeconds": 90
+    },
+    {
+      "id": "pace_laps_short",
+      "command": "!pacelaps 2",
+      "when": "During the caution.",
+      "observe": "Any announcement about laps to go?",
+      "watchSeconds": 20
+    },
+    {
+      "id": "watch_restart",
+      "watchOnly": true,
+      "when": "Start watching right away.",
+      "observe": "Crew Chief calls for one to go and for the green flag?",
+      "expect": ["green"],
+      "endWhen": "green",
+      "watchSeconds": 600
+    },
+    {
+      "id": "black_drive_through",
+      "command": "!black #{car} D",
+      "when": "Green flag, you on track. This is your own car.",
+      "observe": "What does Crew Chief say about the black flag (drive-through)?",
+      "expect": ["carBlack"],
+      "watchSeconds": 40
+    },
+    {
+      "id": "clear",
+      "command": "!clear #{car}",
+      "when": "Right after, before you serve the penalty.",
+      "observe": "Does Crew Chief announce that the flag is cleared?",
+      "expect": ["carBlackCleared"],
+      "watchSeconds": 30
+    },
+    {
+      "id": "black_stop_and_go",
+      "command": "!black #{car} 10",
+      "when": "Green flag.",
+      "observe": "What does Crew Chief say about a stop and go? Clear it in the next step.",
+      "expect": ["carBlack"],
+      "watchSeconds": 40
+    },
+    {
+      "id": "clear_2",
+      "command": "!clear #{car}",
+      "when": "Right after.",
+      "observe": "Flag cleared.",
+      "expect": ["carBlackCleared"],
+      "watchSeconds": 20
+    }
+  ],
+  "finalQuestions": [
+    "Did Crew Chief announce the caution?",
+    "Did Crew Chief announce the green flag at the restart?",
+    "Did Crew Chief announce the black flags?"
+  ]
+}

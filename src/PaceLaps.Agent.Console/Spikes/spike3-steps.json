@@ -1,0 +1,131 @@
+{
+  // Spike 3 steps. The command syntax below is NOT confirmed: it follows the spec's command names and
+  // iRacing's documented admin commands as far as we know them. Fix a command here (or with 'e' at the
+  // prompt during the run) and the corrected text is logged. {car} = --car, {car2} = --car2 (asked if missing).
+  // expect: telemetry checks, see Expectations.cs. Known: caution, green, carBlack, carBlackCleared,
+  // carWavedAround, carEndOfLine, paceModeSingle, paceModeDouble, pitsClosed, pitsOpen, paceCarAheadOfLeader.
+  "about": "Order: green-flag commands first, then one caution that covers pace laps, wave-by, end of line and the restart type.",
+  "finalQuestions": ["Did the AI pace car pick up the leader after !yellow?"],
+  "steps": [
+    {
+      "id": "help",
+      "command": "!help",
+      "when": "Any time. Read the command list iRacing prints and compare it with the commands below.",
+      "observe": "Which commands and argument formats does iRacing list? Write differences in the note.",
+      "watchSeconds": 15,
+      "optional": true
+    },
+    {
+      "id": "pit_close",
+      "command": "!pitclose",
+      "when": "Green flag, race running.",
+      "observe": "Chat or on-screen notice that pits are closed. Do AI cars stay out?",
+      "expect": ["pitsClosed"],
+      "watchSeconds": 20
+    },
+    {
+      "id": "pit_open",
+      "command": "!pitopen",
+      "when": "Right after pit_close.",
+      "observe": "Notice that pits are open.",
+      "expect": ["pitsOpen"],
+      "watchSeconds": 20
+    },
+    {
+      "id": "black_drive_through",
+      "command": "!black #{car} D",
+      "when": "Green flag.",
+      "observe": "Black flag shown for the car, drive-through. Does the AI serve it, and does the flag clear when served? End the watch once it has served (or after a lap).",
+      "expect": ["carBlack"],
+      "watchSeconds": 180
+    },
+    {
+      "id": "black_stop_and_go",
+      "command": "!black #{car} 10",
+      "when": "Green flag, after the drive-through is served.",
+      "observe": "Black flag with a 10 second stop and go. Do not wait for it to be served: the next step clears it.",
+      "expect": ["carBlack"],
+      "watchSeconds": 20
+    },
+    {
+      "id": "clear",
+      "command": "!clear #{car}",
+      "when": "While the stop-and-go black flag is still pending.",
+      "observe": "The black flag disappears for the car.",
+      "expect": ["carBlackCleared"],
+      "watchSeconds": 20
+    },
+    {
+      "id": "yellow",
+      "command": "!yellow",
+      "when": "Green flag, no other caution.",
+      "observe": "Full course yellow. The pace car leaves the pits and picks up the leader. End the watch once the pace car leads the field.",
+      "expect": ["caution", "paceCarAheadOfLeader"],
+      "watchSeconds": 240
+    },
+    {
+      "id": "pace_laps_set",
+      "command": "!pacelaps 4",
+      "when": "During the caution.",
+      "observe": "Laps-to-green changes to 4 (check the black box or the lap counter).",
+      "watchSeconds": 20
+    },
+    {
+      "id": "pace_laps_add",
+      "command": "!pacelaps +2",
+      "when": "During the caution, after pace_laps_set.",
+      "observe": "Laps-to-green increases by 2 (to 6 if nothing else changed), or the command is rejected.",
+      "watchSeconds": 20
+    },
+    {
+      "id": "wave_by",
+      "command": "!waveby #{car2}",
+      "target": "car2",
+      "when": "During the caution. Use a car that is a lap down if there is one.",
+      "observe": "The car is waved around and may pass the pace car to regain its lap.",
+      "expect": ["carWavedAround"],
+      "watchSeconds": 60
+    },
+    {
+      "id": "eol",
+      "command": "!eol #{car}",
+      "when": "During the caution, before the restart.",
+      "observe": "The car is sent to the end of the line.",
+      "expect": ["carEndOfLine"],
+      "watchSeconds": 60
+    },
+    {
+      "id": "restart_double",
+      "command": "!restart double",
+      "when": "Early in the caution: once the field is behind the pace car, well before one lap to green (spike 3 run 1: sent at one to go, too late).",
+      "observe": "Restart set to double file; cars line up two by two. PaceMode in telemetry changed minutes later in run 1, so watch long.",
+      "expect": ["paceModeDouble"],
+      "watchSeconds": 180
+    },
+    {
+      "id": "restart_single",
+      "command": "!restart single",
+      "when": "Right after restart_double has shown its effect, and still before one lap to green.",
+      "observe": "Restart set to single file. Then watch the restart: how many laps did the caution last, does it restart single file, and does green come?",
+      "expect": ["paceModeSingle", "green"],
+      "watchSeconds": 420
+    },
+    {
+      "id": "yellow_with_message",
+      "command": "!yellow Spike three test caution",
+      "when": "Green flag again, after the restart.",
+      "observe": "Caution thrown and the message shown (where, to whom?).",
+      "expect": ["caution"],
+      "watchSeconds": 30,
+      "optional": true
+    },
+    {
+      "id": "clear_all",
+      "command": "!clearall",
+      "when": "Any time.",
+      "observe": "What does it clear (penalties, black flags)? Any message?",
+      "watchSeconds": 15,
+      "optional": true
+    }
+  ]
+}

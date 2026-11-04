@@ -1,0 +1,5 @@
+{
+  "v": 1,
+  "kind": "events_ack",
+  "lastAckedSeq": 311
+}

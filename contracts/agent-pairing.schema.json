@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pacelaps.com/schemas/agent-pairing.schema.json",
+  "title": "Agent and server: device-code pairing",
+  "description": "Pairing an agent with an operator (spec: Identity and access > Agents), modelled on the OAuth device authorization grant (RFC 8628), over versioned HTTPS. POST /api/v1/agent/pairing takes pairing_request and answers pairing_code. POST /api/v1/agent/pairing/token takes pairing_poll and answers pairing_status or, once, pairing_token. The token then goes into Authorization: Bearer on every request and websocket subscription. Accepted 2026-10-26 (spec-feedback item 16).",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/pairingRequest"
+    },
+    {
+      "$ref": "#/$defs/pairingCode"
+    },
+    {
+      "$ref": "#/$defs/pairingPoll"
+    },
+    {
+      "$ref": "#/$defs/pairingStatus"
+    },
+    {
+      "$ref": "#/$defs/pairingToken"
+    }
+  ],
+  "$defs": {
+    "pairingId": {
+      "type": "string",
+      "minLength": 32,
+      "maxLength": 128,
+      "description": "Secret that identifies the pairing between agent and server. Never shown to the operator."
+    },
+    "pairingRequest": {
+      "type": "object",
+      "description": "Agent to server: start pairing.",
+      "required": [
+        "v",
+        "kind",
+        "agentVersion"
+      ],
+      "properties": {
+        "v": {
+          "$ref": "common.schema.json#/$defs/version"
+        },
+        "kind": {
+          "const": "pairing_request"
+        },
+        "agentVersion": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 40
+        }
+      }
+    },
+    "pairingCode": {
+      "type": "object",
+      "description": "Server to agent: the code the agent shows to its operator.",
+      "required": [
+        "v",
+        "kind",
+        "pairingId",
+        "userCode",
+        "verificationUrl",
+        "expiresAt",
+        "intervalSec"
+      ],
+      "properties": {
+        "v": {
+          "$ref": "common.schema.json#/$defs/version"
+        },
+        "kind": {
+          "const": "pairing_code"
+        },
+        "pairingId": {
+          "$ref": "#/$defs/pairingId"
+        },
+        "userCode": {
+          "type": "string",
+          "pattern": "^[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$",
+          "description": "Shown by the agent; the operator types it in on the verification page. No 0, O, 1 or I."
+        },
+        "verificationUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "The page where the signed-in operator enters the code, for example https://<host>/pair."
+        },
+        "expiresAt": {
+          "$ref": "common.schema.json#/$defs/timestamp",
+          "description": "After this the code no longer works (10 minutes)."
+        },
+        "intervalSec": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Minimum seconds between two polls."
+        }
+      }
+    },
+    "pairingPoll": {
+      "type": "object",
+      "description": "Agent to server: has the operator approved?",
+      "required": [
+        "v",
+        "kind",
+        "pairingId"
+      ],
+      "properties": {
+        "v": {
+          "$ref": "common.schema.json#/$defs/version"
+        },
+        "kind": {
+          "const": "pairing_poll"
+        },
+        "pairingId": {
+          "$ref": "#/$defs/pairingId"
+        }
+      }
+    },
+    "pairingStatus": {
+      "type": "object",
+      "description": "Server to agent: not (yet) approved. pending: poll again after intervalSec. slow_down: polled too early, wait intervalSec. denied and expired are final: start again. An unknown pairingId is answered with expired.",
+      "required": [
+        "v",
+        "kind",
+        "status"
+      ],
+      "properties": {
+        "v": {
+          "$ref": "common.schema.json#/$defs/version"
+        },
+        "kind": {
+          "const": "pairing_status"
+        },
+        "status": {
+          "enum": [
+            "pending",
+            "slow_down",
+            "denied",
+            "expired"
+          ]
+        },
+        "intervalSec": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "pairingToken": {
+      "type": "object",
+      "description": "Server to agent, once, after approval. The server stores only a hash of the token; the operator can revoke it. The agent uses this agentId in all its messages.",
+      "required": [
+        "v",
+        "kind",
+        "agentId",
+        "token"
+      ],
+      "properties": {
+        "v": {
+          "$ref": "common.schema.json#/$defs/version"
+        },
+        "kind": {
+          "const": "pairing_token"
+        },
+        "agentId": {
+          "type": "string",
+          "pattern": "^agt_[a-z0-9]{8,32}$",
+          "description": "Assigned by the server."
+        },
+        "token": {
+          "type": "string",
+          "minLength": 32,
+          "maxLength": 128
+        }
+      }
+    }
+  }
+}

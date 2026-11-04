@@ -1,0 +1,16 @@
+{
+  "v": 1,
+  "id": "msg_92",
+  "cursor": "c_5611",
+  "type": "system",
+  "text": "Safety car #99 is not in the session",
+  "affects": {
+    "scope": "stewards"
+  },
+  "visibleTo": {
+    "scope": "stewards"
+  },
+  "showAt": "2026-11-07T19:10:03.000Z",
+  "sticky": false,
+  "createdBy": "system"
+}

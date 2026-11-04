@@ -1,0 +1,24 @@
+{
+  "v": 1,
+  "id": "msg_77",
+  "cursor": "c_5521",
+  "type": "wave_around",
+  "text": "WAVE AROUND: GT4 CLASS",
+  "affects": {
+    "scope": "class",
+    "classes": [
+      4098
+    ]
+  },
+  "visibleTo": {
+    "scope": "all"
+  },
+  "showAt": "2026-11-07T19:03:13.500Z",
+  "sticky": false,
+  "sound": "wave",
+  "createdBy": "steward:12",
+  "session": {
+    "num": 2,
+    "timeSec": 812.9
+  }
+}

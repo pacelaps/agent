@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The operator's program (spec: Packaging, "a tray application"). The logic is in Hosting; this is the WinForms shell. -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>PaceLaps.Agent.Tray</RootNamespace>
+    <AssemblyName>pacelaps-agent</AssemblyName>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+  </PropertyGroup>
+
+  <!-- A release build belongs to one server: scripts/publish.ps1 -Server (the release workflow) builds it in. -->
+  <ItemGroup Condition="'$(ReleaseServer)' != ''">
+    <AssemblyMetadata Include="ReleaseServer" Value="$(ReleaseServer)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PaceLaps.Agent.Core\PaceLaps.Agent.Core.csproj" />
+    <ProjectReference Include="..\PaceLaps.Agent.IRacing\PaceLaps.Agent.IRacing.csproj" />
+    <ProjectReference Include="..\PaceLaps.Agent.Hosting\PaceLaps.Agent.Hosting.csproj" />
+  </ItemGroup>
+
+</Project>

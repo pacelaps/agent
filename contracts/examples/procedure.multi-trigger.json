@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "id": "multi-trigger",
+  "name": "Multiple triggers",
+  "version": 1,
+  "state": "draft",
+  "phases": [
+    {
+      "id": "start",
+      "triggers": [
+        {
+          "on": "button",
+          "label": "Start"
+        },
+        {
+          "on": "telemetry",
+          "condition": {
+            "all": [
+              {
+                "flag_is": "caution"
+              },
+              {
+                "pace_car_on_track": true
+              }
+            ]
+          }
+        }
+      ],
+      "blocks": [
+        {
+          "type": "show_message",
+          "params": {
+            "type": "flag",
+            "text": "CAUTION",
+            "affects": {
+              "scope": "all"
+            },
+            "sticky": true,
+            "sound": "caution"
+          }
+        },
+        {
+          "type": "wait",
+          "params": {
+            "seconds": 5
+          }
+        },
+        {
+          "type": "end"
+        }
+      ]
+    },
+    {
+      "id": "abort",
+      "triggers": [
+        {
+          "on": "button",
+          "label": "Abort"
+        },
+        {
+          "on": "timer",
+          "seconds": 600
+        }
+      ],
+      "blocks": [
+        {
+          "type": "show_message",
+          "params": {
+            "type": "info",
+            "text": "ABORTED",
+            "affects": {
+              "scope": "all"
+            },
+            "sticky": false
+          }
+        },
+        {
+          "type": "end"
+        }
+      ]
+    }
+  ]
+}

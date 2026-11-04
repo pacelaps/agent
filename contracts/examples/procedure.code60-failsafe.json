@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "id": "code60-failsafe",
+  "name": "Code 60 failsafe",
+  "version": 3,
+  "state": "published",
+  "phases": [
+    {
+      "id": "countdown",
+      "blocks": [
+        {
+          "type": "countdown",
+          "params": {
+            "seconds": 20,
+            "cancelBy": "steward",
+            "autoCancelWhen": {
+              "agents_active": 1
+            },
+            "onCancel": "end"
+          }
+        },
+        {
+          "type": "goto",
+          "params": {
+            "phase": "code60"
+          }
+        }
+      ],
+      "triggers": [
+        {
+          "on": "failure",
+          "signal": "no_active_agent"
+        }
+      ]
+    },
+    {
+      "id": "code60",
+      "blocks": [
+        {
+          "type": "show_message",
+          "params": {
+            "type": "safety_car",
+            "text": "CODE 60: 60 KM/H, SINGLE FILE, NO OVERTAKING, PITS OPEN",
+            "affects": {
+              "scope": "all"
+            },
+            "sticky": true,
+            "sound": "code60"
+          }
+        },
+        {
+          "type": "wait_steward",
+          "params": {
+            "label": "Release"
+          }
+        },
+        {
+          "type": "show_message",
+          "params": {
+            "type": "info",
+            "text": "CODE 60 RELEASED: RACE CONTROL IS BACK",
+            "affects": {
+              "scope": "all"
+            },
+            "sticky": false,
+            "sound": "info",
+            "clears": true
+          }
+        },
+        {
+          "type": "end"
+        }
+      ]
+    }
+  ]
+}

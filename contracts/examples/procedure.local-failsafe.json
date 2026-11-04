@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "id": "local-failsafe-default",
+  "name": "Local failsafe (default template)",
+  "description": "Runs on the agent when it has lost the server for the delay its operator set; the agent starts the first phase itself. Offline blocks only. After the caution it keeps the caution going: at one lap to green it adds a pace lap with !pacelaps +1 while the caution flag is out.",
+  "version": 1,
+  "state": "published",
+  "phases": [
+    {
+      "id": "lost",
+      "blocks": [
+        {
+          "type": "iracing_command",
+          "params": {
+            "command": "restart_single"
+          }
+        },
+        {
+          "type": "iracing_command",
+          "params": {
+            "command": "yellow",
+            "args": {
+              "message": "Full course yellow, single file behind pace car, race control lost connection"
+            }
+          }
+        },
+        {
+          "type": "goto",
+          "params": {
+            "phase": "keepalive"
+          }
+        }
+      ]
+    },
+    {
+      "id": "keepalive",
+      "blocks": [
+        {
+          "type": "wait_until",
+          "params": {
+            "condition": {
+              "any": [
+                {
+                  "flag_is": "one_lap_to_green"
+                },
+                {
+                  "not": {
+                    "flag_is": "caution"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "branch",
+          "params": {
+            "condition": {
+              "flag_is": "caution"
+            },
+            "then": "extend",
+            "else": "done"
+          }
+        }
+      ]
+    },
+    {
+      "id": "extend",
+      "blocks": [
+        {
+          "type": "iracing_command",
+          "params": {
+            "command": "pace_laps_add",
+            "args": {
+              "n": 1
+            }
+          }
+        },
+        {
+          "type": "wait_until",
+          "params": {
+            "condition": {
+              "not": {
+                "flag_is": "one_lap_to_green"
+              }
+            }
+          }
+        },
+        {
+          "type": "goto",
+          "params": {
+            "phase": "keepalive"
+          }
+        }
+      ]
+    },
+    {
+      "id": "done",
+      "blocks": [
+        {
+          "type": "end"
+        }
+      ]
+    }
+  ]
+}

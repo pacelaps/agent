@@ -1,0 +1,28 @@
+{
+  "description": "Which schema each file in examples/ and examples/invalid/ is checked against, by file name prefix; the first matching prefix wins. Read by validate.py and by the web service's contract test, so both check the same pairs. Add a prefix here when you add a message type.",
+  "prefixes": {
+    "self_test_result": "agent-messages.schema.json",
+    "local_failsafe": "agent-server.schema.json",
+    "audit_export": "audit-export.schema.json",
+    "resync": "agent-messages.schema.json",
+    "session_check_result": "agent-server.schema.json",
+    "session_check": "agent-messages.schema.json",
+    "hello_result": "agent-server.schema.json",
+    "heartbeat_result": "agent-server.schema.json",
+    "executor_assignment": "agent-server.schema.json",
+    "events_ack": "agent-server.schema.json",
+    "commands.": "agent-server.schema.json",
+    "snapshot": "snapshot.schema.json",
+    "command.": "command.schema.json",
+    "message": "message.schema.json",
+    "procedure": "procedure.schema.json",
+    "event": "agent-messages.schema.json",
+    "clock_": "device-messages.schema.json",
+    "state_snapshot": "device-messages.schema.json",
+    "shown": "device-messages.schema.json",
+    "hello": "agent-messages.schema.json",
+    "heartbeat": "agent-messages.schema.json",
+    "command_status": "agent-messages.schema.json",
+    "pairing_": "agent-pairing.schema.json"
+  }
+}

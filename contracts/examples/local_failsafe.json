@@ -1,0 +1,113 @@
+{
+  "v": 1,
+  "kind": "local_failsafe",
+  "procedure": "local-failsafe-default",
+  "version": 1,
+  "hash": "3f6a1c2e9b0d4f7a8c5e2b1d0f9a7c6e5b4d3a2f1e0c9b8a7d6e5f4a3b2c1d0e",
+  "document": {
+    "schemaVersion": 1,
+    "id": "local-failsafe-default",
+    "name": "Local failsafe (default template)",
+    "description": "Runs on the agent when the server connection has been lost for the agent's configured delay. Offline-capable blocks only. The delay is an agent setting, not a trigger: the agent starts the first phase. After the caution it keeps the caution alive: at one lap to green it adds a pace lap with !pacelaps +1 while the caution flag is active (spike 9: !pacelaps +n at one to go extends the caution). Whether repeated extensions of one caution are capped is checked in the sim (step 5).",
+    "version": 1,
+    "state": "published",
+    "phases": [
+      {
+        "id": "lost",
+        "blocks": [
+          {
+            "type": "iracing_command",
+            "params": {
+              "command": "restart_single"
+            }
+          },
+          {
+            "type": "iracing_command",
+            "params": {
+              "command": "yellow",
+              "args": {
+                "message": "Full course yellow, single file behind pace car, race control lost connection"
+              }
+            }
+          },
+          {
+            "type": "goto",
+            "params": {
+              "phase": "keepalive"
+            }
+          }
+        ]
+      },
+      {
+        "id": "keepalive",
+        "blocks": [
+          {
+            "type": "wait_until",
+            "params": {
+              "condition": {
+                "any": [
+                  {
+                    "flag_is": "one_lap_to_green"
+                  },
+                  {
+                    "not": {
+                      "flag_is": "caution"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "type": "branch",
+            "params": {
+              "condition": {
+                "flag_is": "caution"
+              },
+              "then": "extend",
+              "else": "done"
+            }
+          }
+        ]
+      },
+      {
+        "id": "extend",
+        "blocks": [
+          {
+            "type": "iracing_command",
+            "params": {
+              "command": "pace_laps_add",
+              "args": {
+                "n": 1
+              }
+            }
+          },
+          {
+            "type": "wait_until",
+            "params": {
+              "condition": {
+                "not": {
+                  "flag_is": "one_lap_to_green"
+                }
+              }
+            }
+          },
+          {
+            "type": "goto",
+            "params": {
+              "phase": "keepalive"
+            }
+          }
+        ]
+      },
+      {
+        "id": "done",
+        "blocks": [
+          {
+            "type": "end"
+          }
+        ]
+      }
+    ]
+  }
+}

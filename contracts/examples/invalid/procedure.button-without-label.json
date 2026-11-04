@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "bad-trigger2",
+  "name": "Bad trigger",
+  "version": 1,
+  "state": "draft",
+  "phases": [
+    {
+      "id": "a",
+      "triggers": [
+        {
+          "on": "button"
+        }
+      ],
+      "blocks": [
+        {
+          "type": "end"
+        }
+      ]
+    }
+  ]
+}

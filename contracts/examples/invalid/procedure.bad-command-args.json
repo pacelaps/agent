@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "bad-args",
+  "name": "Bad args",
+  "version": 1,
+  "state": "draft",
+  "phases": [
+    {
+      "id": "a",
+      "blocks": [
+        {
+          "type": "iracing_command",
+          "params": {
+            "command": "black_flag",
+            "args": {
+              "mode": "drive_through"
+            }
+          }
+        },
+        {
+          "type": "end"
+        }
+      ],
+      "triggers": [
+        {
+          "on": "button",
+          "label": "Go"
+        }
+      ]
+    }
+  ]
+}

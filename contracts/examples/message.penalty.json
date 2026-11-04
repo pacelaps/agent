@@ -1,0 +1,28 @@
+{
+  "v": 1,
+  "id": "msg_88",
+  "cursor": "c_5601",
+  "type": "penalty",
+  "text": "DT #12: Unsafe rejoin",
+  "detail": "Drive-through penalty: serve it within 3 laps by driving through the pit lane at the speed limit.",
+  "affects": {
+    "scope": "car",
+    "cars": [
+      "12"
+    ]
+  },
+  "visibleTo": {
+    "scope": "car",
+    "cars": [
+      "12"
+    ]
+  },
+  "showAt": "2026-11-07T19:08:30.000Z",
+  "sticky": true,
+  "sound": "penalty",
+  "createdBy": "steward:stw_hev9ckirg6nw",
+  "session": {
+    "num": 2,
+    "timeSec": 1110.2
+  }
+}

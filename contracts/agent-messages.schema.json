@@ -1,0 +1,961 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pacelaps.com/schemas/agent-messages.schema.json",
+  "title": "Agent to server: hello, session check, event, heartbeat, command status, resync",
+  "description": "Messages the agent sends over the versioned HTTPS Agent API (/api/v1/agent/...), authenticated with the token from pairing (agent-pairing.schema.json). The server's answers and pushes are in agent-server.schema.json. Snapshots are in snapshot.schema.json. Finalized in roadmap step 3 (2026-10-26).",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/hello"
+    },
+    {
+      "$ref": "#/$defs/sessionCheck"
+    },
+    {
+      "$ref": "#/$defs/event"
+    },
+    {
+      "$ref": "#/$defs/heartbeat"
+    },
+    {
+      "$ref": "#/$defs/commandStatus"
+    },
+    {
+      "$ref": "#/$defs/resync"
+    },
+    {
+      "$ref": "#/$defs/selfTestResult"
+    }
+  ],
+  "$defs": {
+    "channels": {
+      "type": "object",
+      "description": "Per-channel readiness. A channel that is not verified is not offered to the server as ready.",
+      "properties": {
+        "macro": {
+          "enum": [
+            "disabled",
+            "unverified",
+            "ready",
+            "failed"
+          ]
+        },
+        "typed": {
+          "enum": [
+            "disabled",
+            "unverified",
+            "ready",
+            "failed"
+          ]
+        },
+        "sdk": {
+          "enum": [
+            "disabled",
+            "unverified",
+            "ready",
+            "failed"
+          ]
+        }
+      }
+    },
+    "hello": {
+      "type": "object",
+      "required": [
+        "v",
+        "kind",
+        "agentId",
+        "state",
+        "agentVersion"
+      ],
+      "properties": {
+        "v": {
+          "$ref": "common.schema.json#/$defs/version"
+        },
+        "kind": {
+          "const": "hello"
+        },
+        "agentId": {
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "sleeping",
+            "self_test",
+            "ready",
+            "active"
+          ]
+        },
+        "agentVersion": {
+          "type": "string"
+        },
+        "session": {
+          "$ref": "#/$defs/sessionIdentity",
+          "description": "The session the agent is in; absent when the sim is in no session."
+        },
+        "operator": {
+          "type": "object",
+          "properties": {
+            "custId": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "channels": {
+          "$ref": "#/$defs/channels"
+        }
+      },
+      "description": "Sent when the agent becomes ready and whenever its session identity changes. The answer (hello_result) says whether it is now active in a session, the epoch and whether it is the executor."
+    },
+    "event": {
+      "type": "object",
+      "required": [
+        "v",
+        "kind",
+        "agentId",
+        "seq",
+        "eventTime",
+        "eventType"
+      ],
+      "properties": {
+        "v": {
+          "$ref": "common.schema.json#/$defs/version"
+        },
+        "kind": {
+          "const": "event"
+        },
+        "agentId": {
+          "type": "string"
+        },
+        "seq": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Strictly increasing per agent, also across restarts of the agent (it starts at its start time in Unix milliseconds). The server stores each agent and seq once, so a resent event is harmless."
+        },
+        "eventTime": {
+          "$ref": "common.schema.json#/$defs/timestamp",
+          "description": "When it happened. On the server's clock: the agent's clock plus the offset it measured with clock pings (spec feedback 31), like the resync's outage window."
+        },
+        "eventType": {
+          "enum": [
+            "flag_change",
+            "session_change",
+            "incident",
+            "local_failsafe",
+            "sector_crossings",
+            "session_results"
+          ]
+        },
+        "data": {
+          "type": "object"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "eventType": {
+                "const": "incident"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "data": {
+                "required": [
+                  "car",
+                  "delta",
+                  "total",
+                  "sessionNum",
+                  "sessionTimeSec",
+                  "lap",
+                  "lapDistPct"
+                ],
+                "properties": {
+                  "car": {
+                    "$ref": "common.schema.json#/$defs/carNumber"
+                  },
+                  "delta": {
+                    "type": "integer"
+                  },
+                  "total": {
+                    "type": "integer"
+                  },
+                  "sessionNum": {
+                    "type": "integer"
+                  },
+                  "sessionTimeSec": {
+                    "type": "number"
+                  },
+                  "lap": {
+                    "type": "integer"
+                  },
+                  "lapDistPct": {
+                    "type": "number"
+                  }
+                }
+              }
+            },
+            "required": [
+              "data"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "eventType": {
+                "const": "sector_crossings"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "data"
+            ],
+            "properties": {
+              "data": {
+                "description": "The moments cars crossed a sector start since the agent's last sector_crossings event (race control's lap times card, spec-feedback 39), bundled about once a second. Measured at the sim's full rate and interpolated between the two frames around the crossing; the server works out sector times, lap times and bests. A car that jumped (tow, reset, more lap distance between two frames than a sector) gives no crossing for the jump, and its next crossing says so.",
+                "required": [
+                  "sessionNum",
+                  "crossings"
+                ],
+                "properties": {
+                  "sessionNum": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "crossings": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 1000,
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "car",
+                        "sector",
+                        "lap",
+                        "sessionTimeSec"
+                      ],
+                      "properties": {
+                        "car": {
+                          "$ref": "common.schema.json#/$defs/carNumber"
+                        },
+                        "sector": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "The sector the car entered: an index of session.track.sectorStarts (0: it crossed the line)."
+                        },
+                        "lap": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "The car's laps completed (CarIdxLapCompleted) after the crossing."
+                        },
+                        "sessionTimeSec": {
+                          "type": "number",
+                          "minimum": 0,
+                          "description": "Session time of the crossing, interpolated between two frames (about 8 ms either way)."
+                        },
+                        "pit": {
+                          "type": "boolean",
+                          "description": "The car was on pit road at some time since its previous crossing."
+                        },
+                        "off": {
+                          "type": "boolean",
+                          "description": "The car was off track at some time since its previous crossing."
+                        },
+                        "jump": {
+                          "type": "boolean",
+                          "description": "The car jumped since its previous crossing (tow, reset, a gap in the data): the time since that crossing is not a sector time."
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "eventType": {
+                "const": "flag_change"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "data"
+            ],
+            "properties": {
+              "data": {
+                "description": "The session flags after and before the change (agent-normalised names), with when it happened.",
+                "required": [
+                  "flags",
+                  "previous",
+                  "sessionNum",
+                  "sessionTimeSec"
+                ],
+                "properties": {
+                  "flags": {
+                    "type": "array",
+                    "uniqueItems": true,
+                    "items": {
+                      "$ref": "common.schema.json#/$defs/flagName"
+                    }
+                  },
+                  "previous": {
+                    "type": "array",
+                    "uniqueItems": true,
+                    "items": {
+                      "$ref": "common.schema.json#/$defs/flagName"
+                    }
+                  },
+                  "sessionNum": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "sessionTimeSec": {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "eventType": {
+                "const": "session_change"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "data"
+            ],
+            "properties": {
+              "data": {
+                "$ref": "#/$defs/sessionIdentity",
+                "description": "The new session identity."
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "eventType": {
+                "const": "local_failsafe"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "data"
+            ],
+            "properties": {
+              "data": {
+                "description": "The local failsafe's run, buffered through the outage like every event: started (after the delay without the server), a command sent, ended (its procedure reached an end), released (by a steward through the server).",
+                "required": [
+                  "action",
+                  "procedure",
+                  "version"
+                ],
+                "properties": {
+                  "action": {
+                    "enum": [
+                      "started",
+                      "command",
+                      "ended",
+                      "released"
+                    ]
+                  },
+                  "procedure": {
+                    "type": "string"
+                  },
+                  "version": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "command": {
+                    "type": "string",
+                    "description": "action command: the command type (command.schema.json)."
+                  },
+                  "result": {
+                    "enum": [
+                      "sent",
+                      "verified",
+                      "failed"
+                    ],
+                    "description": "action command: its result."
+                  },
+                  "detail": {
+                    "type": "string",
+                    "maxLength": 200
+                  }
+                },
+                "allOf": [
+                  {
+                    "if": {
+                      "properties": {
+                        "action": {
+                          "const": "command"
+                        }
+                      }
+                    },
+                    "then": {
+                      "required": [
+                        "command",
+                        "result"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "eventType": {
+                "const": "session_results"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "data"
+            ],
+            "properties": {
+              "data": {
+                "description": "A session's results as iRacing's session info carries them (ResultsPositions), sent whenever they change (spec-feedback 42): about 2 s after cars cross the line, and once more when they become official in the cool-down. All cars each time; placeholder rows before the first lap are not sent. The agent forwards iRacing's values; the server keeps the latest per race session and session number and works out the classification.",
+                "required": [
+                  "sessionNum",
+                  "official",
+                  "lapsComplete",
+                  "fastestLap",
+                  "cars"
+                ],
+                "properties": {
+                  "sessionNum": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "official": {
+                    "type": "boolean",
+                    "description": "ResultsOfficial: iRacing's results are final (in a hosted AI session about 20 s after the checkered flag). Incidents fill in only then."
+                  },
+                  "lapsComplete": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "ResultsLapsComplete: laps the leader completed."
+                  },
+                  "fastestLap": {
+                    "type": [
+                      "object",
+                      "null"
+                    ],
+                    "description": "ResultsFastestLap: the session's fastest lap, or null while there is none.",
+                    "required": [
+                      "car",
+                      "lap",
+                      "time"
+                    ],
+                    "properties": {
+                      "car": {
+                        "$ref": "common.schema.json#/$defs/carNumber"
+                      },
+                      "lap": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "time": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "cars": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 64,
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "car",
+                        "position",
+                        "classPosition",
+                        "laps",
+                        "lapsBehind",
+                        "gap",
+                        "lastLap",
+                        "bestLap",
+                        "bestLapNum",
+                        "lapsLed",
+                        "incidents",
+                        "out"
+                      ],
+                      "properties": {
+                        "car": {
+                          "$ref": "common.schema.json#/$defs/carNumber"
+                        },
+                        "position": {
+                          "type": "integer",
+                          "minimum": 1
+                        },
+                        "classPosition": {
+                          "type": "integer",
+                          "minimum": 1,
+                          "description": "From 1 (iRacing counts ClassPosition from 0; the agent adds 1)."
+                        },
+                        "laps": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "LapsComplete."
+                        },
+                        "lapsBehind": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Lap: laps behind the leader (0 on the lead lap)."
+                        },
+                        "gap": {
+                          "type": "number",
+                          "minimum": 0,
+                          "description": "Time: seconds behind the leader (the leader 0). Not the race time."
+                        },
+                        "lastLap": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "minimum": 0
+                        },
+                        "bestLap": {
+                          "type": [
+                            "number",
+                            "null"
+                          ],
+                          "minimum": 0
+                        },
+                        "bestLapNum": {
+                          "type": [
+                            "integer",
+                            "null"
+                          ],
+                          "minimum": 0
+                        },
+                        "lapsLed": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "incidents": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Meaningful once official (0 before)."
+                        },
+                        "out": {
+                          "type": [
+                            "object",
+                            "null"
+                          ],
+                          "description": "Why the car is out (ReasonOutId and ReasonOutStr), or null while running. A towed car on pit road stays running.",
+                          "required": [
+                            "id",
+                            "text"
+                          ],
+                          "properties": {
+                            "id": {
+                              "type": "integer",
+                              "minimum": 1
+                            },
+                            "text": {
+                              "type": "string",
+                              "maxLength": 100
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "heartbeat": {
+      "type": "object",
+      "required": [
+        "v",
+        "kind",
+        "agentId",
+        "epoch",
+        "state"
+      ],
+      "properties": {
+        "v": {
+          "$ref": "common.schema.json#/$defs/version"
+        },
+        "kind": {
+          "const": "heartbeat"
+        },
+        "agentId": {
+          "type": "string"
+        },
+        "epoch": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "state": {
+          "enum": [
+            "sleeping",
+            "self_test",
+            "ready",
+            "active"
+          ]
+        },
+        "inSession": {
+          "type": "boolean"
+        },
+        "channels": {
+          "$ref": "#/$defs/channels"
+        },
+        "lastCommandLatencyMs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "localFailsafe": {
+          "type": "object",
+          "description": "The agent's local failsafe (spec: Local failsafe, opt-in): whether its operator turned it on, which version it holds (null: none), and whether it is running and since when.",
+          "required": [
+            "enabled",
+            "version",
+            "running"
+          ],
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "version": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              ]
+            },
+            "hash": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              ]
+            },
+            "running": {
+              "type": "boolean"
+            },
+            "since": {
+              "$ref": "common.schema.json#/$defs/timestamp"
+            }
+          },
+          "if": {
+            "properties": {
+              "running": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "since"
+            ]
+          }
+        }
+      }
+    },
+    "commandStatus": {
+      "type": "object",
+      "required": [
+        "v",
+        "kind",
+        "commandId",
+        "step",
+        "at"
+      ],
+      "properties": {
+        "v": {
+          "$ref": "common.schema.json#/$defs/version"
+        },
+        "kind": {
+          "const": "command_status"
+        },
+        "commandId": {
+          "type": "string"
+        },
+        "step": {
+          "enum": [
+            "sent_to_server",
+            "received_by_server",
+            "sent_to_executor",
+            "received_by_executor",
+            "executing",
+            "result"
+          ],
+          "description": "The agent reports received_by_executor, executing and result. The other steps are written by the browser and the server."
+        },
+        "outcome": {
+          "enum": [
+            "sent",
+            "verified",
+            "failed"
+          ],
+          "description": "Only with step result. verified means telemetry shows the effect (for example a caution flag after !yellow)."
+        },
+        "at": {
+          "$ref": "common.schema.json#/$defs/timestamp",
+          "description": "On the server's clock: the agent's clock plus the offset it measured with clock pings (spec feedback 31), like the resync's outage window."
+        },
+        "detail": {
+          "type": "string",
+          "description": "Failure reason. Required when outcome is failed."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "step": {
+                "const": "result"
+              }
+            },
+            "required": [
+              "step"
+            ]
+          },
+          "then": {
+            "required": [
+              "outcome"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "outcome": {
+                "const": "failed"
+              }
+            },
+            "required": [
+              "outcome"
+            ]
+          },
+          "then": {
+            "required": [
+              "detail"
+            ]
+          }
+        }
+      ]
+    },
+    "resync": {
+      "type": "object",
+      "required": [
+        "v",
+        "kind",
+        "lastAckedSeq"
+      ],
+      "properties": {
+        "v": {
+          "$ref": "common.schema.json#/$defs/version"
+        },
+        "kind": {
+          "const": "resync"
+        },
+        "lastAckedSeq": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "outage": {
+          "type": "object",
+          "description": "From the first request that failed to the first one answered again, on the agent's clock (server-adjusted). Optional: absent when the agent noticed no outage.",
+          "required": [
+            "from",
+            "to"
+          ],
+          "properties": {
+            "from": {
+              "$ref": "common.schema.json#/$defs/timestamp"
+            },
+            "to": {
+              "$ref": "common.schema.json#/$defs/timestamp"
+            }
+          }
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "description": "After a reconnect: the agent's last acknowledged event sequence number and the events after it. outage is the agent's own view of the gap, which the server writes into its outage audit entry (spec: Audit log, outage entries from the agents' reports)."
+    },
+    "sessionIdentity": {
+      "type": "object",
+      "description": "The session the agent's sim is in, from the session info. leagueId 0 means not a league session; the operator can name the league (agent option). sessionId and subSessionId are 0 in hosted AI sessions: the server then binds the agent to the league's open session (spec-feedback item 13).",
+      "required": [
+        "leagueId",
+        "seasonId",
+        "sessionId",
+        "subSessionId",
+        "num",
+        "type"
+      ],
+      "properties": {
+        "leagueId": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "seasonId": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sessionId": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "subSessionId": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "num": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Session number inside the weekend."
+        },
+        "type": {
+          "type": "string",
+          "description": "For example Practice, Qualify, Race."
+        }
+      }
+    },
+    "sessionCheck": {
+      "type": "object",
+      "description": "Self-test step 2: is this league registered and is the agent's operator a steward of it? Answered with session_check_result. The operator is identified by the agent's token.",
+      "required": [
+        "v",
+        "kind",
+        "agentId",
+        "session"
+      ],
+      "properties": {
+        "v": {
+          "$ref": "common.schema.json#/$defs/version"
+        },
+        "kind": {
+          "const": "session_check"
+        },
+        "agentId": {
+          "type": "string"
+        },
+        "session": {
+          "$ref": "#/$defs/sessionIdentity"
+        }
+      }
+    },
+    "selfTestResult": {
+      "type": "object",
+      "description": "POST /api/v1/agent/self-test after every self-test that reached the server (step 3 on), passed or failed (spec: Self-test; audit: self-test results). The details never carry names.",
+      "required": [
+        "v",
+        "kind",
+        "agentId",
+        "at",
+        "passed",
+        "steps",
+        "channels"
+      ],
+      "properties": {
+        "v": {
+          "$ref": "common.schema.json#/$defs/version"
+        },
+        "kind": {
+          "const": "self_test_result"
+        },
+        "agentId": {
+          "type": "string"
+        },
+        "at": {
+          "$ref": "common.schema.json#/$defs/timestamp",
+          "description": "On the server's clock: the agent's clock plus the offset it measured with clock pings (spec feedback 31), like the resync's outage window."
+        },
+        "passed": {
+          "type": "boolean"
+        },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "items": {
+            "type": "object",
+            "required": [
+              "step",
+              "name",
+              "result"
+            ],
+            "properties": {
+              "step": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 6
+              },
+              "name": {
+                "enum": [
+                  "sim",
+                  "session",
+                  "server",
+                  "cars",
+                  "typed_channel",
+                  "macro_channel"
+                ]
+              },
+              "result": {
+                "enum": [
+                  "pass",
+                  "fail",
+                  "skipped",
+                  "unverified"
+                ]
+              },
+              "detail": {
+                "type": "string",
+                "maxLength": 200,
+                "description": "What failed, for stewards; no names."
+              }
+            }
+          }
+        },
+        "channels": {
+          "$ref": "#/$defs/channels"
+        }
+      }
+    }
+  }
+}

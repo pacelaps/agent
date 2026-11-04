@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pacelaps.com/schemas/message.schema.json",
+  "title": "Server to devices: message",
+  "description": "Messages are filtered by audience on the server. A device never receives a message it should not see.",
+  "type": "object",
+  "required": [
+    "v",
+    "id",
+    "cursor",
+    "type",
+    "text",
+    "affects",
+    "visibleTo",
+    "showAt",
+    "sticky"
+  ],
+  "properties": {
+    "v": {
+      "$ref": "common.schema.json#/$defs/version"
+    },
+    "id": {
+      "type": "string"
+    },
+    "cursor": {
+      "type": "string",
+      "description": "Position in the session's message stream, opaque to devices. A reconnecting device sends the last cursor it saw and receives only what it missed."
+    },
+    "type": {
+      "enum": [
+        "flag",
+        "safety_car",
+        "penalty",
+        "wave_around",
+        "info",
+        "system"
+      ]
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120,
+      "description": "Banner text: a few words. At most 120 characters."
+    },
+    "detail": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 300,
+      "description": "Optional second line under the banner: for a penalty, the catalog's explanation (what it means and how to respond). Views without room may leave it out."
+    },
+    "affects": {
+      "$ref": "common.schema.json#/$defs/audience",
+      "description": "Who the message is about."
+    },
+    "visibleTo": {
+      "$ref": "common.schema.json#/$defs/audience",
+      "description": "Who receives it."
+    },
+    "showAt": {
+      "$ref": "common.schema.json#/$defs/timestamp",
+      "description": "Server clock time at which every device shows the message."
+    },
+    "sticky": {
+      "type": "boolean",
+      "description": "State messages (true) stay as a banner until superseded. One-off messages (false) show briefly and stay in the history."
+    },
+    "sound": {
+      "type": "string"
+    },
+    "createdBy": {
+      "type": "string",
+      "description": "A steward (steward:<pseudonymous id>), a procedure (procedure:<id>) or the system."
+    },
+    "session": {
+      "type": "object",
+      "description": "iRacing session number and time, to match entries with the replay.",
+      "properties": {
+        "num": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "timeSec": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "supersedes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      },
+      "description": "Ids of earlier messages this one replaces: a device removes them from its banners. Used when a state ends (green after a caution) or a penalty is revoked."
+    }
+  }
+}

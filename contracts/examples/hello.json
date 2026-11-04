@@ -1,0 +1,24 @@
+{
+  "v": 1,
+  "kind": "hello",
+  "agentId": "agt_01",
+  "state": "ready",
+  "agentVersion": "0.1.0",
+  "operator": {
+    "custId": 100200,
+    "name": "Example Operator"
+  },
+  "channels": {
+    "macro": "ready",
+    "typed": "ready",
+    "sdk": "ready"
+  },
+  "session": {
+    "leagueId": 12345,
+    "seasonId": 6789,
+    "sessionId": 111,
+    "subSessionId": 222,
+    "num": 2,
+    "type": "Race"
+  }
+}

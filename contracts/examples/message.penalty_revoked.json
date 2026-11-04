@@ -1,0 +1,30 @@
+{
+  "v": 1,
+  "id": "msg_91",
+  "cursor": "c_5610",
+  "type": "penalty",
+  "text": "PENALTY REVOKED: #12",
+  "affects": {
+    "scope": "car",
+    "cars": [
+      "12"
+    ]
+  },
+  "visibleTo": {
+    "scope": "car",
+    "cars": [
+      "12"
+    ]
+  },
+  "showAt": "2026-11-07T19:10:02.000Z",
+  "sticky": false,
+  "supersedes": [
+    "msg_88"
+  ],
+  "sound": "info",
+  "createdBy": "steward:12",
+  "session": {
+    "num": 2,
+    "timeSec": 1201.4
+  }
+}

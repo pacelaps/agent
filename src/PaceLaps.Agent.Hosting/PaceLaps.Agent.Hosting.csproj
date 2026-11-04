@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- What the console and the tray app share: settings, credentials, logging, the agent's wiring, status and the
+       tray app's presenters (no WinForms here, so they are unit-tested). -->
+
+  <ItemGroup>
+    <PackageReference Include="Serilog" />
+    <PackageReference Include="Serilog.Extensions.Logging" />
+    <PackageReference Include="Serilog.Sinks.File" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PaceLaps.Agent.Core\PaceLaps.Agent.Core.csproj" />
+    <ProjectReference Include="..\PaceLaps.Agent.IRacing\PaceLaps.Agent.IRacing.csproj" />
+  </ItemGroup>
+
+</Project>

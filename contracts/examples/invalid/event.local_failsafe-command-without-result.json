@@ -1,0 +1,14 @@
+{
+  "v": 1,
+  "kind": "event",
+  "agentId": "agt_7f3k9q2m",
+  "seq": 1793130000124,
+  "eventTime": "2026-11-07T19:42:10.250Z",
+  "eventType": "local_failsafe",
+  "data": {
+    "action": "command",
+    "procedure": "local-failsafe-default",
+    "version": 1,
+    "command": "yellow"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "v": 1,
+  "kind": "heartbeat",
+  "agentId": "agt_01",
+  "epoch": 7,
+  "state": "active",
+  "inSession": true,
+  "channels": { "macro": "ready", "typed": "ready", "sdk": "ready" },
+  "lastCommandLatencyMs": 310
+}

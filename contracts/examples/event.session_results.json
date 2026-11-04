@@ -1,0 +1,121 @@
+{
+  "v": 1,
+  "kind": "event",
+  "agentId": "agt_01",
+  "seq": 913,
+  "eventTime": "2026-11-03T15:26:28.000Z",
+  "eventType": "session_results",
+  "data": {
+    "sessionNum": 0,
+    "official": true,
+    "lapsComplete": 3,
+    "fastestLap": {
+      "car": "28",
+      "lap": 2,
+      "time": 59.2233
+    },
+    "cars": [
+      {
+        "car": "33",
+        "position": 1,
+        "classPosition": 1,
+        "laps": 3,
+        "lapsBehind": 0,
+        "gap": 0,
+        "lastLap": 60.3541,
+        "bestLap": 59.8462,
+        "bestLapNum": 2,
+        "lapsLed": 1,
+        "incidents": 0,
+        "out": null
+      },
+      {
+        "car": "2",
+        "position": 2,
+        "classPosition": 2,
+        "laps": 3,
+        "lapsBehind": 0,
+        "gap": 0.1265,
+        "lastLap": 60.554,
+        "bestLap": 60.2604,
+        "bestLapNum": 2,
+        "lapsLed": 1,
+        "incidents": 0,
+        "out": null
+      },
+      {
+        "car": "46",
+        "position": 3,
+        "classPosition": 3,
+        "laps": 3,
+        "lapsBehind": 0,
+        "gap": 0.6753,
+        "lastLap": 60.2194,
+        "bestLap": 59.3955,
+        "bestLapNum": 2,
+        "lapsLed": 0,
+        "incidents": 0,
+        "out": null
+      },
+      {
+        "car": "28",
+        "position": 4,
+        "classPosition": 4,
+        "laps": 3,
+        "lapsBehind": 0,
+        "gap": 0.825,
+        "lastLap": 60.2572,
+        "bestLap": 59.2233,
+        "bestLapNum": 2,
+        "lapsLed": 0,
+        "incidents": 0,
+        "out": null
+      },
+      {
+        "car": "3",
+        "position": 5,
+        "classPosition": 5,
+        "laps": 3,
+        "lapsBehind": 0,
+        "gap": 1.09,
+        "lastLap": 59.4885,
+        "bestLap": 59.4885,
+        "bestLapNum": 3,
+        "lapsLed": 0,
+        "incidents": 0,
+        "out": null
+      },
+      {
+        "car": "218",
+        "position": 6,
+        "classPosition": 6,
+        "laps": 2,
+        "lapsBehind": 1,
+        "gap": 62.682,
+        "lastLap": null,
+        "bestLap": null,
+        "bestLapNum": null,
+        "lapsLed": 1,
+        "incidents": 4,
+        "out": null
+      },
+      {
+        "car": "1",
+        "position": 7,
+        "classPosition": 7,
+        "laps": 2,
+        "lapsBehind": 1,
+        "gap": 72.3147,
+        "lastLap": null,
+        "bestLap": null,
+        "bestLapNum": null,
+        "lapsLed": 0,
+        "incidents": 2,
+        "out": {
+          "id": 2,
+          "text": "Disconnected"
+        }
+      }
+    ]
+  }
+}

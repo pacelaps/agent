@@ -1,0 +1,12 @@
+{
+  "v": 1,
+  "id": "cmd_902",
+  "epoch": 7,
+  "idempotent": true,
+  "issuedAt": "2026-11-07T19:03:20.000Z",
+  "issuedBy": "steward:12",
+  "type": "pace_laps_set",
+  "params": {
+    "n": 21
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "v": 1,
+  "kind": "heartbeat",
+  "agentId": "agt_7f3k9q2m",
+  "epoch": 2,
+  "state": "active",
+  "inSession": true,
+  "channels": {
+    "macro": "disabled",
+    "typed": "ready",
+    "sdk": "ready"
+  },
+  "localFailsafe": {
+    "enabled": true,
+    "version": 1,
+    "hash": "3f6a1c2e9b0d4f7a8c5e2b1d0f9a7c6e5b4d3a2f1e0c9b8a7d6e5f4a3b2c1d0e",
+    "running": true,
+    "since": "2026-11-07T19:42:10.250Z"
+  }
+}

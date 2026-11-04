@@ -1,0 +1,10 @@
+{
+  "v": 1,
+  "kind": "hello_result",
+  "state": "active",
+  "session": {
+    "id": "s_12",
+    "name": "Race 1"
+  },
+  "isExecutor": true
+}

@@ -1,0 +1,38 @@
+{
+  // Re-check for spike 3 run 1, where !restart single was sent after one lap to green and did not apply.
+  // On !yellow the sim sets PaceMode to single file restart by default, so set double first, then single.
+  "about": "One caution: yellow, restart double early, then restart single, then watch the restart.",
+  "steps": [
+    {
+      "id": "yellow",
+      "command": "!yellow",
+      "when": "Green flag, no other caution.",
+      "observe": "Wait until the pace car leads the field, then end the watch.",
+      "expect": ["caution", "paceCarAheadOfLeader"],
+      "watchSeconds": 240
+    },
+    {
+      "id": "pace_laps_set",
+      "command": "!pacelaps 5",
+      "when": "During the caution. Gives enough laps for the two restart commands.",
+      "observe": "Laps to green shows 5.",
+      "watchSeconds": 15
+    },
+    {
+      "id": "restart_double",
+      "command": "!restart double",
+      "when": "Right away, well before one lap to green.",
+      "observe": "Chat confirms double file. Note when PaceMode changes (printed live).",
+      "expect": ["paceModeDouble"],
+      "watchSeconds": 180
+    },
+    {
+      "id": "restart_single",
+      "command": "!restart single",
+      "when": "After restart_double, still at least two laps before green.",
+      "observe": "Chat confirms single file. Does the field restart single file? Let the watch run through the green flag.",
+      "expect": ["paceModeSingle", "green"],
+      "watchSeconds": 480
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+{ "v": 1, "id": "cmd_2", "epoch": 1, "type": "black_flag", "params": { "mode": "drive_through" }, "idempotent": false,
+  "issuedAt": "2026-11-07T19:03:12.000Z", "issuedBy": "steward:1" }

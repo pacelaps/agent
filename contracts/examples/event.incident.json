@@ -1,0 +1,9 @@
+{
+  "v": 1,
+  "kind": "event",
+  "agentId": "agt_01",
+  "seq": 311,
+  "eventTime": "2026-11-07T19:04:02.100Z",
+  "eventType": "incident",
+  "data": { "car": "12", "delta": 2, "total": 6, "sessionNum": 2, "sessionTimeSec": 863.2, "lap": 15, "lapDistPct": 0.62 }
+}

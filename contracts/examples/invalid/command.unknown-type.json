@@ -1,0 +1,2 @@
+{ "v": 1, "id": "cmd_1", "epoch": 1, "type": "format_disk", "params": {}, "idempotent": false,
+  "issuedAt": "2026-11-07T19:03:12.000Z", "issuedBy": "steward:1" }

@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="JsonSchema.Net" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\PaceLaps.Agent.Core\PaceLaps.Agent.Core.csproj" />
+    <ProjectReference Include="..\..\src\PaceLaps.Agent.IRacing\PaceLaps.Agent.IRacing.csproj" />
+    <ProjectReference Include="..\..\src\PaceLaps.Agent.Hosting\PaceLaps.Agent.Hosting.csproj" />
+    <ProjectReference Include="..\..\src\PaceLaps.Agent.Console\PaceLaps.Agent.Console.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\contracts\**\*" LinkBase="contracts" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

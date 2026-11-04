@@ -1,0 +1,11 @@
+{
+  "v": 1,
+  "id": "cmd_8f2",
+  "epoch": 7,
+  "type": "black_flag",
+  "params": { "car": "12", "mode": "drive_through" },
+  "idempotent": false,
+  "issuedAt": "2026-11-07T19:03:12.000Z",
+  "executeAt": "2026-11-07T19:03:13.500Z",
+  "issuedBy": "steward:12"
+}
