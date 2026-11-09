@@ -16,12 +16,12 @@ internal sealed record TrayActions(Action Open, Action Activate, Func<Task> Slee
 internal sealed class TrayMenu
 {
     private readonly TextBlock _title = new() { FontSize = 20, LineHeight = 20 };
-    private readonly TextBlock _line = new() { FontSize = 12, Margin = new Thickness(0, 2, 0, 0), TextTrimming = TextTrimming.CharacterEllipsis, MaxWidth = 210 };
+    private readonly TextBlock _line = new() { FontSize = 12, Margin = new Thickness(0, 2, 0, 0), TextTrimming = TextTrimming.CharacterEllipsis, MaxWidth = 230 };
     private readonly Ellipse _dot = new() { Width = 10, Height = 10, VerticalAlignment = VerticalAlignment.Center };
     private readonly MenuItem _activate;
     private readonly MenuItem _sleep;
     private readonly MenuItem _update;
-    private readonly Separator _updateSeparator = new() { Visibility = Visibility.Collapsed };
+    private readonly Separator _updateSeparator = Line();
 
     public TrayMenu(TrayActions actions)
     {
@@ -34,20 +34,22 @@ internal sealed class TrayMenu
         _update = Item("", actions.Update);
         _update.Visibility = Visibility.Collapsed;
 
-        var head = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(10, 8, 10, 10) };
+        var head = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(-2, 8, 0, 8) };
         head.Children.Add(_dot);
         var text = new StackPanel { Margin = new Thickness(10, 0, 0, 0) };
         text.Children.Add(_title);
         text.Children.Add(_line);
         head.Children.Add(text);
 
+        _updateSeparator.Visibility = Visibility.Collapsed;
+        var state = new MenuItem { Header = head, IsEnabled = false };
         var open = Item("Open PaceLaps Agent", actions.Open);
         open.FontWeight = FontWeights.SemiBold;
         Menu = new ContextMenu { Style = (Style)Application.Current.Resources["TrayMenu"] };
         foreach (var element in new FrameworkElement[]
                  {
-                     head, new Separator(), open, _activate, _sleep, _updateSeparator, _update, new Separator(), Item("Settings", actions.Settings),
-                     Item("Open the log folder", actions.OpenLogFolder), new Separator(), Item("Exit", () => _ = actions.Exit()),
+                     state, Line(), open, _activate, _sleep, _updateSeparator, _update, Line(), Item("Settings", actions.Settings),
+                     Item("Open the log folder", actions.OpenLogFolder), Line(), Item("Exit", () => _ = actions.Exit()),
                  })
         {
             Menu.Items.Add(element);
@@ -74,6 +76,8 @@ internal sealed class TrayMenu
         _update.Header = update ?? "";
         _update.Visibility = _updateSeparator.Visibility = update is null ? Visibility.Collapsed : Visibility.Visible;
     }
+
+    private static Separator Line() => new() { Style = (Style)Application.Current.Resources["MenuLine"] };
 
     private static MenuItem Item(string header, Action click)
     {

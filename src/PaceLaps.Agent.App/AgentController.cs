@@ -32,6 +32,7 @@ public sealed class AgentController : IDisposable
     private readonly TrayMenu _menu;
     private readonly TaskbarIcon _tray;
     private readonly ShellModel _shell;
+    private readonly Toasts _toasts;
     private MainWindow? _window;
     private AgentStatus? _last;
     private string? _updateShown;
@@ -62,6 +63,7 @@ public sealed class AgentController : IDisposable
             NoLeftClickDelay = true,
             LeftClickCommand = new CommunityToolkit.Mvvm.Input.RelayCommand(OpenWindow),
         };
+        _toasts = new Toasts(() => _focus.FindSimWindow() is { IsNone: false } sim ? sim.Value : IntPtr.Zero, OpenWindow);
         _timer.Tick += (_, _) => Refresh();
     }
 
@@ -149,7 +151,7 @@ public sealed class AgentController : IDisposable
         catch (Exception e)
         {
             _logger.LogError(e, "Activate failed");
-            _tray.ShowNotification("Couldn't activate", "Something went wrong. Open the app and the log folder for details.", NotificationIcon.Error);
+            _toasts.Show("Couldn't activate", "Something went wrong. Open the app and the log folder for details.", ToastTone.Trouble);
         }
 
         Refresh();
@@ -161,7 +163,7 @@ public sealed class AgentController : IDisposable
     {
         _shell.Screen = Screen.Status;
         Refresh();
-        _tray.ShowNotification("Paired", "Next: join your session in iRacing as an admin, then Activate.", NotificationIcon.Info);
+        _toasts.Show("Paired", "Next: join your session in iRacing as an admin, then Activate.", ToastTone.Good);
     }
 
     /// <summary>
@@ -202,12 +204,12 @@ public sealed class AgentController : IDisposable
         _menu.Show(view, _shell.Status.View!, TrayPresenter.UpdateMenuText(_updates.Offer)?.TrimEnd('.'));
         foreach (var notice in TrayPresenter.Notices(_last, status))
         {
-            _tray.ShowNotification(notice.Title, notice.Text, notice.Warning ? NotificationIcon.Warning : NotificationIcon.Info);
+            _toasts.Show(notice.Title, notice.Text, notice.Warning ? ToastTone.Trouble : ToastTone.Good);
         }
 
         if (TrayPresenter.UpdateNotice(_updates.Offer, _updateShown, status) is { } update)
         {
-            _tray.ShowNotification(update.Title, update.Text, NotificationIcon.Info);
+            _toasts.Show(update.Title, update.Text, ToastTone.Info);
             _updateShown = _updates.Offer!.Version;
         }
 

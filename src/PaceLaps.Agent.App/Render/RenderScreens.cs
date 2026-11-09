@@ -24,6 +24,19 @@ public static class RenderScreens
 
     public static int Run(string dir)
     {
+        try
+        {
+            return RunAll(dir);
+        }
+        catch (Exception e)
+        {
+            File.WriteAllText(Path.Combine(dir, "render-error.txt"), e.ToString());
+            return 1;
+        }
+    }
+
+    private static int RunAll(string dir)
+    {
         Directory.CreateDirectory(dir);
         var app = new App();
         app.InitializeComponent();
@@ -70,6 +83,28 @@ public static class RenderScreens
                 Save(new ShellView { DataContext = model }, 1000, 660, scale, Path.Combine(dir, $"{name}{(scale == 1 ? "" : "@150")}.png"));
             }
         }
+
+        var toasts = new System.Windows.Controls.StackPanel { Width = 340 };
+        foreach (var (title, text, tone) in new[]
+                 {
+                     ("You send the commands", "This agent types race control's commands for Round 4 Race.", PaceLaps.Agent.App.Tray.ToastTone.Good),
+                     ("Can't reach Race Control", "What happens in the race is sent once it's back.", PaceLaps.Agent.App.Tray.ToastTone.Trouble),
+                     ("Update available", "PaceLaps Agent 0.14.0 is available. Open the menu to see what's new.", PaceLaps.Agent.App.Tray.ToastTone.Info),
+                 })
+        {
+            var card = PaceLaps.Agent.App.Tray.ToastWindow.Card(title, text, tone);
+            card.Margin = new Thickness(0, 0, 0, 8);
+            toasts.Children.Add(card);
+        }
+
+        toasts.Measure(new Size(340, double.PositiveInfinity));
+        Save(toasts, 340, toasts.DesiredSize.Height, 1.5, Path.Combine(dir, "notifications@150.png"), new SolidColorBrush(Color.FromRgb(0x1C, 0x24, 0x33)));
+
+        var menu = new PaceLaps.Agent.App.Tray.TrayMenu(new PaceLaps.Agent.App.Tray.TrayActions(() => { }, () => { }, () => Task.CompletedTask, () => { }, () => { }, () => { }, () => Task.CompletedTask));
+        var executor = Samples().First().Status;
+        menu.Show(TrayPresenter.Present(executor), StatusView.From(executor), null);
+        menu.Menu.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+        Save(menu.Menu, menu.Menu.DesiredSize.Width, menu.Menu.DesiredSize.Height, 1.5, Path.Combine(dir, "tray-menu@150.png"));
 
         var question = new QuestionWindow("Did iRacing show the reply to !help in the chat?", "It lists the admin commands. If nothing appeared, you may not be an admin in this session.");
         var content = (FrameworkElement)question.Content;

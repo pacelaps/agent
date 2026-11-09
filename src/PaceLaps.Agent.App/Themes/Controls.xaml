@@ -262,7 +262,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="MenuItem">
-                    <Border x:Name="Box" Height="36" CornerRadius="6" Padding="12,0" Background="Transparent">
+                    <Border x:Name="Box" MinHeight="36" CornerRadius="6" Padding="12,0" Background="Transparent">
                         <ContentPresenter ContentSource="Header" VerticalAlignment="Center" TextBlock.Foreground="{TemplateBinding Foreground}" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -278,7 +278,7 @@
         </Setter>
     </Style>
 
-    <Style TargetType="Separator">
+    <Style x:Key="MenuLine" TargetType="Separator">
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Separator">
