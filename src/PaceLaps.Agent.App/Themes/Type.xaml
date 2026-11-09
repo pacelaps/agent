@@ -1,11 +1,12 @@
 <!--
     The app's type, as on pacelaps.com: Barlow Condensed italic capitals for headlines (display), JetBrains Mono for
-    labels, times and ids (mono), and Windows' own Segoe UI for body text. Both brand fonts are in the exe
-    (Assets/Fonts, SIL Open Font License). WPF has no text-transform: views pass headline text through ToUpper.
+    labels, times and ids (mono), and Inter for body text, all three in the exe (Assets/Fonts, SIL Open Font
+    License; Inter's weights are cut from the website's variable font). WPF has no text-transform or letter-spacing:
+    the Upper converter writes capitals, and spaced ones for the small labels.
 -->
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <FontFamily x:Key="Body">Segoe UI</FontFamily>
+    <FontFamily x:Key="Body">pack://application:,,,/Assets/Fonts/#Inter</FontFamily>
     <FontFamily x:Key="DisplayFont">pack://application:,,,/Assets/Fonts/#Barlow Condensed ExtraBold</FontFamily>
     <FontFamily x:Key="DisplayBoldFont">pack://application:,,,/Assets/Fonts/#Barlow Condensed</FontFamily>
     <FontFamily x:Key="CondensedFont">pack://application:,,,/Assets/Fonts/#Barlow Condensed SemiBold</FontFamily>

@@ -55,10 +55,17 @@ public sealed class CheckBorder : IValueConverter
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotSupportedException();
 }
 
-/// <summary>Headlines in capitals (WPF has no text-transform).</summary>
+/// <summary>
+/// Headlines in capitals (WPF has no text-transform). Parameter "spaced": the small labels' letter spacing, a hair space
+/// between the letters (WPF has no letter-spacing either).
+/// </summary>
 public sealed class Upper : IValueConverter
 {
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture) => (value as string)?.ToUpper(CultureInfo.CurrentCulture) ?? "";
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        var upper = (value as string)?.ToUpper(CultureInfo.CurrentCulture) ?? "";
+        return parameter as string == "spaced" ? string.Join(' ', upper.ToCharArray()) : upper;
+    }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotSupportedException();
 }

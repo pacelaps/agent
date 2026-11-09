@@ -27,14 +27,14 @@
                                 <Ellipse Width="8" Height="8" Fill="{Binding View.Strip, Converter={StaticResource StripDot}}" />
                             </Grid>
                             <TextBlock Style="{StaticResource Eyebrow}" Margin="8,0,0,0" VerticalAlignment="Center"
-                                       Text="{Binding View.Eyebrow, Converter={StaticResource Upper}}" />
+                                       Text="{Binding View.Eyebrow, Converter={StaticResource Upper}, ConverterParameter=spaced}" />
                         </StackPanel>
                         <TextBlock Style="{StaticResource Display}" Margin="0,10,0,0" Text="{Binding View.Title, Converter={StaticResource Upper}}" />
                         <TextBlock Style="{StaticResource BodyText}" Margin="0,10,0,0" MaxWidth="470" HorizontalAlignment="Left" Text="{Binding View.Sentence}" />
                     </StackPanel>
                     <StackPanel Grid.Column="1" VerticalAlignment="Bottom" HorizontalAlignment="Right">
                         <StackPanel HorizontalAlignment="Right" Visibility="{Binding View.SideName, Converter={StaticResource Shown}}">
-                            <TextBlock Style="{StaticResource Eyebrow}" HorizontalAlignment="Right" Text="{Binding View.SideLabel, Converter={StaticResource Upper}}" />
+                            <TextBlock Style="{StaticResource Eyebrow}" HorizontalAlignment="Right" Text="{Binding View.SideLabel, Converter={StaticResource Upper}, ConverterParameter=spaced}" />
                             <TextBlock Style="{StaticResource DisplaySmall}" Margin="0,4,0,0" HorizontalAlignment="Right" TextAlignment="Right" MaxWidth="260"
                                        Text="{Binding View.SideName, Converter={StaticResource Upper}}" />
                         </StackPanel>
@@ -64,7 +64,7 @@
                 <DataTemplate>
                     <Border Style="{StaticResource Card}" Margin="0,0,12,0" Padding="16,14" BorderBrush="{Binding Check, Converter={StaticResource CheckBorder}}">
                         <StackPanel>
-                            <TextBlock Style="{StaticResource Eyebrow}" Text="{Binding Label, Converter={StaticResource Upper}}" />
+                            <TextBlock Style="{StaticResource Eyebrow}" Text="{Binding Label, Converter={StaticResource Upper}, ConverterParameter=spaced}" />
                             <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
                                 <Ellipse Width="8" Height="8" VerticalAlignment="Center" Fill="{Binding Check, Converter={StaticResource CheckBrush}}" />
                                 <TextBlock Style="{StaticResource Value}" Margin="8,0,0,0" Text="{Binding Value}"

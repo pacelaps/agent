@@ -43,8 +43,8 @@
                 <StackPanel DockPanel.Dock="Bottom">
                     <Border BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="10" Padding="12" Visibility="{Binding Paired, Converter={StaticResource Shown}}">
                         <StackPanel>
-                            <TextBlock Style="{StaticResource Eyebrow}" Text="PAIRED WITH" />
-                            <TextBlock Text="{Binding PairedHost}" Margin="0,4,0,0" FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Style="{StaticResource Eyebrow}" Text="{Binding Source='Paired with', Converter={StaticResource Upper}, ConverterParameter=spaced}" />
+                            <TextBlock Text="{Binding PairedHost}" Margin="0,4,0,0" FontSize="12" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" ToolTip="{Binding PairedHost}" />
                             <TextBlock Style="{StaticResource Mono}" Text="{Binding AgentId}" Margin="0,2,0,0" FontSize="11" Foreground="{StaticResource FgSubtle}" />
                         </StackPanel>
                     </Border>
