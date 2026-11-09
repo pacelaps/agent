@@ -30,6 +30,18 @@ internal static class Program
             return 0;
         }
 
+        if (args is ["--render", var renderDir])
+        {
+            // Development only: the windows as images (RenderWindows). A release build has no use for it.
+            if (ReleaseBuild.Server(typeof(Program).Assembly) is not null)
+            {
+                return 2;
+            }
+
+            ApplicationConfiguration.Initialize();
+            return RenderWindows.Run(renderDir);
+        }
+
         using var instance = SingleInstance.TryAcquire();
         if (instance is null)
         {

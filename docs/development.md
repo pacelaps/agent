@@ -18,6 +18,10 @@ The tray app (manual check: `docs/tray-check.md`):
 dotnet run --project src/PaceLaps.Agent.Tray
 ```
 
+To check the windows without clicking through the states, a local build draws them in example states to PNG files
+(and the tray icons), at this PC's scaling: `pacelaps-agent.exe --render <folder>` (from `src/PaceLaps.Agent.Tray/bin/...`;
+release builds refuse it).
+
 It starts Sleeping: no connection to the server until Activate, which reads the settings and the credentials, connects and runs the self-test; Sleep or a failed self-test closes the connection. Its menu has Status, Activate, Sleep, Pair, Settings (edits `config.json`, start with Windows), the log folder and Exit. One instance per Windows session; a second start opens the first one's status window. The console's `run --server` runs on the same code (`Hosting/AgentRuntime`).
 
 With a Race Control server from the console (steps: `docs/integration-test.md`), pair once, then run:

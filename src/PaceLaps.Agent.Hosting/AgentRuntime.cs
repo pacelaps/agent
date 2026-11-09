@@ -78,6 +78,9 @@ public sealed class AgentRuntime : IAsyncDisposable
     /// <summary>The last self-test, kept after the agent went back to sleep so the operator can read it.</summary>
     public SelfTestReport? LastSelfTest { get; private set; }
 
+    /// <summary>When <see cref="LastSelfTest"/> ended.</summary>
+    public DateTimeOffset? LastSelfTestAt { get; private set; }
+
     /// <summary>Why the agent last went back to Sleeping (a failed self-test names the step).</summary>
     public string? LastFailure { get; private set; }
 
@@ -130,7 +133,10 @@ public sealed class AgentRuntime : IAsyncDisposable
             _loop = _parts.RunLoop ? Task.Run(() => host.RunAsync(token), CancellationToken.None) : Task.CompletedTask;
 
             var report = await host.ActivateAsync(ct).ConfigureAwait(false);
-            LastSelfTest = report ?? LastSelfTest;
+            if (report is not null)
+            {
+                (LastSelfTest, LastSelfTestAt) = (report, _parts.Clock.UtcNow);
+            }
             if (host.States.State == AgentState.Sleeping)
             {
                 LastFailure = host.States.LastFailure;

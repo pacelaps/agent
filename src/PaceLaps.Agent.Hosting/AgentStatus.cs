@@ -51,6 +51,8 @@ public sealed record AgentStatus
 
     public SelfTestReport? LastSelfTest { get; init; }
 
+    public DateTimeOffset? LastSelfTestAt { get; init; }
+
     public LocalFailsafeSettings LocalFailsafe { get; init; } = new();
 
     public string? LocalFailsafeHeld { get; init; }
@@ -84,6 +86,7 @@ public sealed record AgentStatus
             ClockOffset = host?.ClockOffset,
             EventsBuffered = host?.Events.Count ?? 0,
             LastSelfTest = runtime.LastSelfTest,
+            LastSelfTestAt = runtime.LastSelfTestAt,
             LocalFailsafe = runtime.Settings?.LocalFailsafe ?? settings.LocalFailsafe,
             LocalFailsafeHeld = host?.LocalFailsafeCopies.Held is { } held ? $"{held.Procedure} v{held.Version}" : null,
             LocalFailsafeSince = host?.LocalFailsafe.Since,

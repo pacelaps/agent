@@ -183,7 +183,7 @@ internal sealed class TrayContext : ApplicationContext
         _last = status;
         if (_statusForm is { Visible: true } form)
         {
-            form.Show(status, view, _recent);
+            form.Show(status, _recent);
         }
     }
 
@@ -213,8 +213,8 @@ internal sealed class TrayContext : ApplicationContext
 
     private void ShowStatus()
     {
-        _statusForm ??= new StatusForm(this);
-        _statusForm.Show(_runtime.Status(), TrayPresenter.Present(_runtime.Status()), _recent);
+        _statusForm ??= new StatusForm(new StatusActions(ShowPairing, Activate, SleepAsync, OpenLogFolder, ShowAbout));
+        _statusForm.Show(_runtime.Status(), _recent);
         _statusForm.Show();
         _statusForm.WindowState = FormWindowState.Normal;
         _statusForm.Activate();

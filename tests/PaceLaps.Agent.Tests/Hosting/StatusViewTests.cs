@@ -1,0 +1,100 @@
+using PaceLaps.Agent.Core.Config;
+using PaceLaps.Agent.Core.Contracts;
+using PaceLaps.Agent.Core.SelfTest;
+using PaceLaps.Agent.Hosting;
+using PaceLaps.Agent.Hosting.Tray;
+
+namespace PaceLaps.Agent.Tests.Hosting;
+
+public sealed class StatusViewTests
+{
+    private static readonly Uri Server = new("https://racecontrol.pacelaps.com/");
+    private static readonly ChannelSet Ready = new(ChannelReadiness.Disabled, ChannelReadiness.Ready, ChannelReadiness.Ready);
+
+    private static AgentStatus Sleeping() => new() { State = AgentState.Sleeping, AgentId = "agt_01", Server = Server, SimRunning = true };
+
+    private static AgentStatus Active(bool executor = true) => new()
+    {
+        State = AgentState.Active, AgentId = "agt_01", Server = Server, ServerOnline = true, Realtime = true, IsExecutor = executor, Epoch = 3,
+        SessionName = "Round 4", Channels = Ready, SimRunning = true, SimInSession = true, ClockOffset = TimeSpan.FromMilliseconds(12),
+    };
+
+    [Fact]
+    public void Each_state_says_what_is_going_on_and_offers_the_next_step()
+    {
+        Assert.Equal(("Not paired yet", StatusAction.Pair), Head(Sleeping() with { AgentId = null }));
+        Assert.Equal(("Sleeping", StatusAction.Activate), Head(Sleeping()));
+        Assert.Equal(("Not activated", StatusAction.Activate), Head(Sleeping() with { Problem = "iRacing isn't in a session." }));
+        Assert.Equal("iRacing isn't in a session.", StatusView.From(Sleeping() with { Problem = "iRacing isn't in a session." }).Sentence);
+        Assert.Equal(("Self-test running", StatusAction.None), Head(Sleeping() with { State = AgentState.SelfTest }));
+        Assert.Equal(("Ready", StatusAction.Sleep), Head(Active() with { State = AgentState.Ready, SessionName = null }));
+        Assert.Equal(("In a session", StatusAction.Sleep), Head(Active()));
+        Assert.Contains("types race control's commands into iRacing for Round 4", StatusView.From(Active()).Sentence, StringComparison.Ordinal);
+        Assert.StartsWith("Standby for Round 4", StatusView.From(Active(executor: false)).Sentence, StringComparison.Ordinal);
+        Assert.StartsWith("View only", StatusView.From(Active(executor: false) with { Channels = Ready with { Typed = ChannelReadiness.Disabled } }).Sentence, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Problems_come_first_in_red()
+    {
+        var offline = StatusView.From(Active() with { ServerOnline = false });
+        Assert.Equal((TrayIcon.Problem, "Can't reach Race Control"), (offline.Tone, offline.Title));
+        Assert.Equal(StatusCheck.Problem, offline.Rows.Single(r => r.Label == "Race Control").Check);
+
+        Assert.Equal(("Typing into iRacing failed", StatusAction.Sleep), Head(Active() with { Channels = Ready with { Typed = ChannelReadiness.Failed } }));
+
+        var failsafe = StatusView.From(Active() with { ServerOnline = false, LocalFailsafeSince = DateTimeOffset.UnixEpoch, LocalFailsafe = new LocalFailsafeSettings { Enabled = true } });
+        Assert.Equal("Local failsafe running", failsafe.Title);
+        Assert.Equal(StatusCheck.Problem, failsafe.LocalFailsafe.Check);
+    }
+
+    [Fact]
+    public void The_rows_show_iracing_race_control_the_session_and_the_pairing()
+    {
+        Assert.Equal(
+            [("iRacing", StatusCheck.Ok, "In a session"), ("Race Control", StatusCheck.Ok, "Connected"), ("Session", StatusCheck.Ok, "Round 4: sends the commands"),
+             ("Pairing", StatusCheck.Ok, "Paired with racecontrol.pacelaps.com")],
+            StatusView.From(Active()).Rows.Select(r => (r.Label, r.Check, r.Text)));
+        Assert.Equal(
+            [("iRacing", StatusCheck.Off, "Running, not in a session"), ("Race Control", StatusCheck.Off, "Not connected while sleeping"), ("Session", StatusCheck.Off, "None"),
+             ("Pairing", StatusCheck.Ok, "Paired with racecontrol.pacelaps.com")],
+            StatusView.From(Sleeping()).Rows.Select(r => (r.Label, r.Check, r.Text)));
+        Assert.Equal(StatusCheck.Problem, StatusView.From(Active() with { SimRunning = false, SimInSession = false }).Rows[0].Check);
+    }
+
+    [Fact]
+    public void The_last_self_test_is_listed_step_by_step()
+    {
+        var report = new SelfTestReport(false,
+            [new SelfTestStep(1, "sim and telemetry", true, "build 2026.11.02.01"), new SelfTestStep(5, "typed channel", false, "no reply to !help (admin rights?)"),
+             new SelfTestStep(6, "macro channel", true, "disabled", SelfTestStepResult.Skipped)], Ready, null);
+        var view = StatusView.From(Sleeping() with { LastSelfTest = report, LastSelfTestAt = DateTimeOffset.UnixEpoch });
+
+        Assert.StartsWith("Failed at ", view.SelfTestSummary, StringComparison.Ordinal);
+        Assert.Equal([("iRacing", StatusCheck.Ok), ("Typing into iRacing", StatusCheck.Problem), ("Chat macros", StatusCheck.Off)],
+            view.SelfTestSteps.Select(r => (r.Label, r.Check)));
+        Assert.Equal("Not run yet. Activate runs it.", StatusView.From(Sleeping()).SelfTestSummary);
+    }
+
+    [Fact]
+    public void Technical_terms_stay_in_the_details()
+    {
+        var view = StatusView.From(Active());
+        Assert.Contains(view.Details, d => d.Contains("epoch 3", StringComparison.Ordinal));
+        Assert.Contains(view.Details, d => d.Contains("live (websocket)", StringComparison.Ordinal));
+
+        string[] internals = ["epoch", "observer", "channel", "websocket", "long-poll", "executor"];
+        foreach (var status in new[] { Sleeping(), Sleeping() with { AgentId = null }, Active(), Active(executor: false), Active() with { ServerOnline = false } })
+        {
+            var v = StatusView.From(status);
+            var texts = new[] { v.Title, v.Sentence, v.SelfTestSummary, v.LocalFailsafe.Text }.Concat(v.Rows.Select(r => r.Label + " " + r.Text));
+            Assert.All(texts, text => Assert.DoesNotContain(internals, word => text.Contains(word, StringComparison.OrdinalIgnoreCase)));
+        }
+    }
+
+    private static (string, StatusAction) Head(AgentStatus s)
+    {
+        var view = StatusView.From(s);
+        return (view.Title, view.Action);
+    }
+}
