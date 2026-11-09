@@ -11,6 +11,8 @@ public enum Screen
     Status,
     SelfTest,
     Settings,
+    Welcome,
+    Pairing,
 }
 
 /// <summary>A screen that isn't built yet (the WPF plan's later steps).</summary>
@@ -38,8 +40,16 @@ public sealed partial class ShellModel : ObservableObject
     public SelfTestPageModel SelfTest { get; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(CurrentPage))]
+    [NotifyPropertyChangedFor(nameof(CurrentPage), nameof(ShowRail))]
     private Screen _screen = Screen.Status;
+
+    /// <summary>The first start and pairing fill the window; the other screens have the rail.</summary>
+    public bool ShowRail => Screen is not (Screen.Welcome or Screen.Pairing);
+
+    /// <summary>Set by the controller, which has the pairing and the start with Windows.</summary>
+    public WelcomePageModel? Welcome { get; set; }
+
+    public PairingPageModel? Pairing { get; set; }
 
     [ObservableProperty]
     private bool _paired;
@@ -53,12 +63,22 @@ public sealed partial class ShellModel : ObservableObject
     public object CurrentPage => Screen switch
     {
         Screen.SelfTest => SelfTest,
+        Screen.Welcome => (object?)Welcome ?? Status,
+        Screen.Pairing => (object?)Pairing ?? Status,
         Screen.Settings => _settings,
         _ => Status,
     };
 
     [RelayCommand]
     private void Navigate(Screen screen) => Screen = screen;
+
+    partial void OnScreenChanged(Screen value)
+    {
+        if (value == Screen.Pairing)
+        {
+            Pairing?.Open();
+        }
+    }
 
     public void Update(AgentStatus status)
     {

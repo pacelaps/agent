@@ -8,6 +8,7 @@ using PaceLaps.Agent.Core.Config;
 using PaceLaps.Agent.Core.Contracts;
 using PaceLaps.Agent.Core.SelfTest;
 using PaceLaps.Agent.Hosting;
+using PaceLaps.Agent.Hosting.Tray;
 
 namespace PaceLaps.Agent.App.Render;
 
@@ -34,6 +35,28 @@ public static class RenderScreens
             {
                 model.SelfTest.Asking = "Did iRacing show the reply to !help in the chat?";
             }
+            foreach (var scale in new[] { 1.0, 1.5 })
+            {
+                Save(new ShellView { DataContext = model }, 1000, 660, scale, Path.Combine(dir, $"{name}{(scale == 1 ? "" : "@150")}.png"));
+            }
+        }
+
+        var temp = Path.Combine(Path.GetTempPath(), "pacelaps-render");
+        Directory.CreateDirectory(temp);
+        var flow = new PairingFlow(new CredentialStore(Path.Combine(temp, "credentials.bin")), new ConfigStore(Path.Combine(temp, "config.json")), "0.13.0",
+            new PaceLaps.Agent.Core.Time.SystemClock(), fixedServer: Server);
+        var unpaired = new AgentStatus { State = AgentState.Sleeping, Server = Server, SimRunning = true };
+        foreach (var (name, screen) in new[] { ("welcome", Screen.Welcome), ("pairing", Screen.Pairing) })
+        {
+            var model = new ShellModel("0.13.0", _ => Task.CompletedTask);
+            model.Welcome = new WelcomePageModel(new NoAutoStart(), () => { });
+            model.Pairing = new PairingPageModel(flow, _ => { }, () => { });
+            model.Pairing.Preview(new PairingCodeMessage
+            {
+                PairingId = "p1", UserCode = "K7Q-4MD", VerificationUrl = "https://racecontrol.pacelaps.com/pair", ExpiresAt = DateTimeOffset.Now.AddMinutes(9.7), IntervalSec = 3,
+            });
+            model.Update(unpaired);
+            model.Screen = screen;
             foreach (var scale in new[] { 1.0, 1.5 })
             {
                 Save(new ShellView { DataContext = model }, 1000, 660, scale, Path.Combine(dir, $"{name}{(scale == 1 ? "" : "@150")}.png"));
@@ -75,6 +98,15 @@ public static class RenderScreens
         yield return ("selftest-failed", sleeping with { LastSelfTest = failed, LastSelfTestAt = DateTimeOffset.Now }, Screen.SelfTest);
         yield return ("selftest-passed", active, Screen.SelfTest);
         yield return ("settings-placeholder", active, Screen.Settings);
+    }
+
+    private sealed class NoAutoStart : PaceLaps.Agent.Hosting.Tray.IAutoStart
+    {
+        public bool Enabled => false;
+
+        public void Set(bool enabled)
+        {
+        }
     }
 
     private static List<FinishedCommand> Commands()

@@ -11,6 +11,12 @@
         <DataTemplate DataType="{x:Type shell:SelfTestPageModel}">
             <shell:SelfTestPage />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type shell:WelcomePageModel}">
+            <shell:WelcomePage />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type shell:PairingPageModel}">
+            <shell:PairingPage />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type shell:PlaceholderPage}">
             <StackPanel Margin="28,24">
                 <TextBlock Style="{StaticResource Display}" FontSize="46" Text="{Binding Title, Converter={StaticResource Upper}}" />
@@ -41,7 +47,7 @@
         </Grid>
 
         <!-- Navigation rail -->
-        <Border DockPanel.Dock="Left" Width="210" BorderBrush="{StaticResource LineSubtle}" BorderThickness="0,0,1,0">
+        <Border DockPanel.Dock="Left" Width="210" BorderBrush="{StaticResource LineSubtle}" BorderThickness="0,0,1,0" Visibility="{Binding ShowRail, Converter={StaticResource Shown}}">
             <DockPanel Margin="12,16">
                 <StackPanel DockPanel.Dock="Bottom">
                     <Border BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="10" Padding="12" Visibility="{Binding Paired, Converter={StaticResource Shown}}">

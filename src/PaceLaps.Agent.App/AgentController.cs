@@ -50,6 +50,8 @@ public sealed class AgentController : IDisposable
         _logger = logger;
         _shell = new ShellModel(version, ActAsync);
         prompt.Asking += question => _shell.SelfTest.Asking = question;
+        _shell.Welcome = new WelcomePageModel(autoStart, () => _shell.Screen = Screen.Pairing);
+        _shell.Pairing = new PairingPageModel(pairing, Paired, () => _shell.Screen = _runtime.Status().Paired ? Screen.Status : Screen.Welcome);
         _icons = new TrayIconSet((int)Math.Round(SystemParameters.SmallIconWidth * DpiScale()));
         _menu = new TrayMenu(new TrayActions(OpenWindow, Activate, SleepAsync, OpenSettings, OpenDownloadPage, OpenLogFolder, ExitAsync));
         _tray = new TaskbarIcon
@@ -70,6 +72,7 @@ public sealed class AgentController : IDisposable
         if (!_runtime.Status().Paired)
         {
             // First start: the window says what to do (the tray icon alone is easy to miss).
+            _shell.Screen = Screen.Welcome;
             OpenWindow();
         }
     }
@@ -114,7 +117,7 @@ public sealed class AgentController : IDisposable
             case StatusAction.Sleep:
                 return SleepAsync();
             default:
-                // Pairing in the app comes with the first start and pairing screens; the console pairs meanwhile.
+                _shell.Screen = Screen.Pairing;
                 OpenWindow();
                 return Task.CompletedTask;
         }
@@ -152,6 +155,13 @@ public sealed class AgentController : IDisposable
     }
 
     private Task SleepAsync() => _runtime.SleepAsync();
+
+    private void Paired(PairingOutcome outcome)
+    {
+        _shell.Screen = Screen.Status;
+        Refresh();
+        _tray.ShowNotification("Paired", "Next: join your session in iRacing as an admin, then Activate.", NotificationIcon.Info);
+    }
 
     /// <summary>
     /// Windows drops keystrokes from a normal program into an elevated one (spike 2): ask before the self-test rather

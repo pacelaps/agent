@@ -21,6 +21,7 @@
     <Resource Include="Assets\Fonts\*.ttf" />
     <Resource Include="Assets\pacelaps-agent.ico" />
     <Resource Include="Assets\tray-*.png" />
+    <Resource Include="Assets\logo-256.png" />
   </ItemGroup>
 
   <ItemGroup>
