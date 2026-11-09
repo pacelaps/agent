@@ -17,11 +17,8 @@
         <DataTemplate DataType="{x:Type shell:PairingPageModel}">
             <shell:PairingPage />
         </DataTemplate>
-        <DataTemplate DataType="{x:Type shell:PlaceholderPage}">
-            <StackPanel Margin="28,24">
-                <TextBlock Style="{StaticResource Display}" FontSize="46" Text="{Binding Title, Converter={StaticResource Upper}}" />
-                <TextBlock Style="{StaticResource BodyText}" Margin="0,12,0,0" Text="{Binding Text}" />
-            </StackPanel>
+        <DataTemplate DataType="{x:Type shell:SettingsPageModel}">
+            <shell:SettingsPage />
         </DataTemplate>
     </UserControl.Resources>
 

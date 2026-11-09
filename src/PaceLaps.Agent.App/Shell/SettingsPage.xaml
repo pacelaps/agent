@@ -1,0 +1,178 @@
+<UserControl x:Class="PaceLaps.Agent.App.Shell.SettingsPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- The design canvas's "Settings": four cards with switches and fields, Save and Cancel. DataContext: SettingsPageModel. -->
+    <UserControl.Resources>
+        <Style x:Key="RowTitle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Foreground" Value="{StaticResource Fg}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style x:Key="Hint" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{StaticResource FgSubtle}" />
+            <Setter Property="Margin" Value="0,3,0,0" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style x:Key="Row" TargetType="DockPanel">
+            <Setter Property="Margin" Value="18,12" />
+            <Setter Property="LastChildFill" Value="True" />
+        </Style>
+        <Style x:Key="CardHead" TargetType="TextBlock" BasedOn="{StaticResource Eyebrow}">
+            <Setter Property="Margin" Value="18,14,18,2" />
+        </Style>
+    </UserControl.Resources>
+
+    <DockPanel Margin="28,24,28,20">
+        <DockPanel DockPanel.Dock="Top">
+            <TextBlock DockPanel.Dock="Right" Style="{StaticResource Small}" VerticalAlignment="Bottom" Margin="0,0,0,6" Text="Changes apply at the next Activate" />
+            <TextBlock Style="{StaticResource Display}" FontSize="46" LineHeight="44" Text="SETTINGS" />
+        </DockPanel>
+
+        <!-- Footer -->
+        <DockPanel DockPanel.Dock="Bottom" Margin="0,14,0,0">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <Button Style="{StaticResource Btn}" MinHeight="40" Content="Cancel" Command="{Binding CancelCommand}" />
+                <Button Style="{StaticResource BtnPrimary}" MinHeight="40" Margin="10,0,0,0" Content="Save" Command="{Binding SaveCommand}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Style="{StaticResource LinkButton}" FontSize="13" Content="Open the settings file" Command="{Binding OpenFileCommand}" />
+                <TextBlock Margin="16,0,0,0" FontSize="13" Foreground="{StaticResource GreenText}" Text="{Binding Message}" />
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Errors -->
+        <Border DockPanel.Dock="Bottom" Margin="0,14,0,0" Padding="14,10" CornerRadius="10" Background="{StaticResource RedSoft}" BorderBrush="{StaticResource RedBorder}" BorderThickness="1"
+                Visibility="{Binding Errors, Converter={StaticResource Shown}}">
+            <TextBlock FontSize="13" Foreground="{StaticResource RedText}" TextWrapping="Wrap" Text="{Binding Errors}" />
+        </Border>
+
+        <ScrollViewer Margin="0,16,0,0" VerticalScrollBarVisibility="Auto" Focusable="False">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="14" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource CardHead}" Text="{Binding Source='General', Converter={StaticResource Upper}, ConverterParameter=spaced}" />
+                            <DockPanel Style="{StaticResource Row}">
+                                <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding StartWithWindows}" AutomationProperties.Name="Start with Windows" VerticalAlignment="Center" />
+                                <StackPanel Margin="0,0,12,0">
+                                    <TextBlock Style="{StaticResource RowTitle}" Text="Start with Windows" />
+                                    <TextBlock Style="{StaticResource Hint}" Text="It starts asleep." />
+                                </StackPanel>
+                            </DockPanel>
+                            <Border Height="1" Background="{StaticResource LineSubtle}" />
+                            <DockPanel Style="{StaticResource Row}">
+                                <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding CheckForUpdates}" AutomationProperties.Name="Look for updates" VerticalAlignment="Center" />
+                                <StackPanel Margin="0,0,12,0">
+                                    <TextBlock Style="{StaticResource RowTitle}" Text="Look for updates" />
+                                    <TextBlock Style="{StaticResource Hint}" Text="Once a day. Sends nothing about you." />
+                                </StackPanel>
+                            </DockPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource Card}" Margin="0,14,0,0">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource CardHead}" Text="{Binding Source='Local failsafe', Converter={StaticResource Upper}, ConverterParameter=spaced}" />
+                            <DockPanel Style="{StaticResource Row}">
+                                <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding LocalFailsafeEnabled}" AutomationProperties.Name="Run the local failsafe" VerticalAlignment="Center" />
+                                <StackPanel Margin="0,0,12,0">
+                                    <TextBlock Style="{StaticResource RowTitle}" Text="Run it when Race Control is gone" />
+                                    <TextBlock Style="{StaticResource Hint}" Text="Only if your league asks for it." />
+                                </StackPanel>
+                            </DockPanel>
+                            <Border Height="1" Background="{StaticResource LineSubtle}" />
+                            <DockPanel Style="{StaticResource Row}">
+                                <TextBox DockPanel.Dock="Right" Style="{StaticResource Field}" Width="80" Text="{Binding LocalFailsafeDelay, UpdateSourceTrigger=PropertyChanged}"
+                                         AutomationProperties.Name="Start after, seconds" IsEnabled="{Binding LocalFailsafeEnabled}" />
+                                <StackPanel Margin="0,0,12,0">
+                                    <TextBlock Style="{StaticResource RowTitle}" Text="Start after" />
+                                    <TextBlock Style="{StaticResource Hint}" Text="Seconds without Race Control, 10 to 300." />
+                                </StackPanel>
+                            </DockPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource Card}" Margin="0,14,0,0" Visibility="{Binding AsksForServer, Converter={StaticResource Shown}}">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource CardHead}" Text="{Binding Source='Development build', Converter={StaticResource Upper}, ConverterParameter=spaced}" />
+                            <DockPanel Style="{StaticResource Row}">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource RowTitle}" Text="Race Control's address" />
+                                    <TextBox Style="{StaticResource Field}" Margin="0,8,0,0" Text="{Binding Server, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Race Control's address" />
+                                </StackPanel>
+                            </DockPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2">
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource CardHead}" Text="{Binding Source='In the session', Converter={StaticResource Upper}, ConverterParameter=spaced}" />
+                            <DockPanel Style="{StaticResource Row}">
+                                <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding TypedWithoutFocus}" AutomationProperties.Name="Type without bringing iRacing to the front" VerticalAlignment="Center" />
+                                <StackPanel Margin="0,0,12,0">
+                                    <TextBlock Style="{StaticResource RowTitle}" Text="Type without bringing iRacing to the front" />
+                                    <TextBlock Style="{StaticResource Hint}" Text="Turn off only if commands stop arriving." />
+                                </StackPanel>
+                            </DockPanel>
+                            <Border Height="1" Background="{StaticResource LineSubtle}" />
+                            <DockPanel Style="{StaticResource Row}">
+                                <TextBox DockPanel.Dock="Right" Style="{StaticResource Field}" Width="96" Text="{Binding League, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="League id" />
+                                <StackPanel Margin="0,0,12,0">
+                                    <TextBlock Style="{StaticResource RowTitle}" Text="League id" />
+                                    <TextBlock Style="{StaticResource Hint}" Text="Only for hosted sessions outside a league." />
+                                </StackPanel>
+                            </DockPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource Card}" Margin="0,14,0,0">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource CardHead}" Text="{Binding Source='Chat macros', Converter={StaticResource Upper}, ConverterParameter=spaced}" />
+                            <DockPanel Style="{StaticResource Row}">
+                                <CheckBox DockPanel.Dock="Right" Style="{StaticResource Switch}" IsChecked="{Binding MacrosEnabled}" AutomationProperties.Name="Use chat macros" VerticalAlignment="Center" />
+                                <StackPanel Margin="0,0,12,0">
+                                    <TextBlock Style="{StaticResource RowTitle}" Text="Use chat macros" />
+                                    <TextBlock Style="{StaticResource Hint}" Text="Optional. Enter the slots exactly as in iRacing." />
+                                </StackPanel>
+                            </DockPanel>
+                            <StackPanel Margin="18,0,18,14" Visibility="{Binding MacrosEnabled, Converter={StaticResource Shown}}">
+                                <ItemsControl ItemsSource="{Binding MacroSlots}" Focusable="False">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid Columns="3" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <DockPanel Margin="0,0,8,8">
+                                                <TextBlock DockPanel.Dock="Left" Width="22" Style="{StaticResource Mono}" Foreground="{StaticResource FgSubtle}" VerticalAlignment="Center" Text="{Binding Number}" />
+                                                <TextBox Style="{StaticResource Field}" Height="32" FontSize="12" Text="{Binding Text, UpdateSourceTrigger=PropertyChanged}" />
+                                            </DockPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <DockPanel Margin="0,4,0,0">
+                                    <Button DockPanel.Dock="Right" Style="{StaticResource Btn}" MinHeight="36" Padding="14,0" Margin="8,0,0,0" Content="Browse" Command="{Binding BrowseAppIniCommand}" />
+                                    <TextBox Style="{StaticResource Field}" FontSize="12" Text="{Binding AppIni, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="iRacing's app.ini"
+                                             ToolTip="iRacing's app.ini, to check the slots (Documents\iRacing\app.ini when empty)" />
+                                </DockPanel>
+                            </StackPanel>
+                            <TextBlock Margin="18,0,18,14" Style="{StaticResource Hint}" Text="Off: commands are typed into the chat."
+                                       Visibility="{Binding MacrosEnabled, Converter={StaticResource Shown}, ConverterParameter=invert}" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>

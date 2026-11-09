@@ -15,17 +15,12 @@ public enum Screen
     Pairing,
 }
 
-/// <summary>A screen that isn't built yet (the WPF plan's later steps).</summary>
-public sealed record PlaceholderPage(string Title, string Text);
-
 /// <summary>
 /// The app window's model: the screen shown, the pairing card at the bottom of the rail, and the screens' models. The
 /// controller hands it every new status; nothing here talks to the agent directly.
 /// </summary>
 public sealed partial class ShellModel : ObservableObject
 {
-    private readonly PlaceholderPage _settings = new("Settings", "The settings screen comes in the next steps.");
-
     public ShellModel(string version, Func<StatusAction, Task> act)
     {
         Version = version;
@@ -51,6 +46,8 @@ public sealed partial class ShellModel : ObservableObject
 
     public PairingPageModel? Pairing { get; set; }
 
+    public SettingsPageModel? Settings { get; set; }
+
     [ObservableProperty]
     private bool _paired;
 
@@ -65,7 +62,7 @@ public sealed partial class ShellModel : ObservableObject
         Screen.SelfTest => SelfTest,
         Screen.Welcome => (object?)Welcome ?? Status,
         Screen.Pairing => (object?)Pairing ?? Status,
-        Screen.Settings => _settings,
+        Screen.Settings => (object?)Settings ?? Status,
         _ => Status,
     };
 
@@ -77,6 +74,10 @@ public sealed partial class ShellModel : ObservableObject
         if (value == Screen.Pairing)
         {
             Pairing?.Open();
+        }
+        else if (value == Screen.Settings)
+        {
+            Settings?.Load();
         }
     }
 

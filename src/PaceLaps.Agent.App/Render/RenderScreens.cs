@@ -29,8 +29,9 @@ public static class RenderScreens
         app.InitializeComponent();
         foreach (var (name, status, screen) in Samples())
         {
-            var model = new ShellModel("0.13.0", _ => Task.CompletedTask) { Screen = screen };
+            var model = new ShellModel("0.13.0", _ => Task.CompletedTask);
             model.Update(status);
+            model.Screen = screen;
             if (name == "selftest-running")
             {
                 model.SelfTest.Asking = "Did iRacing show the reply to !help in the chat?";
@@ -46,17 +47,24 @@ public static class RenderScreens
         var flow = new PairingFlow(new CredentialStore(Path.Combine(temp, "credentials.bin")), new ConfigStore(Path.Combine(temp, "config.json")), "0.13.0",
             new PaceLaps.Agent.Core.Time.SystemClock(), fixedServer: Server);
         var unpaired = new AgentStatus { State = AgentState.Sleeping, Server = Server, SimRunning = true };
-        foreach (var (name, screen) in new[] { ("welcome", Screen.Welcome), ("pairing", Screen.Pairing) })
+        foreach (var (name, screen) in new[] { ("welcome", Screen.Welcome), ("pairing", Screen.Pairing), ("settings", Screen.Settings), ("settings-macros", Screen.Settings) })
         {
             var model = new ShellModel("0.13.0", _ => Task.CompletedTask);
             model.Welcome = new WelcomePageModel(new NoAutoStart(), () => { });
             model.Pairing = new PairingPageModel(flow, _ => { }, () => { });
+            model.Settings = new SettingsPageModel(new ConfigStore(Path.Combine(temp, "config.json")), new NoAutoStart(), null);
             model.Pairing.Preview(new PairingCodeMessage
             {
                 PairingId = "p1", UserCode = "K7Q-4MD", VerificationUrl = "https://racecontrol.pacelaps.com/pair", ExpiresAt = DateTimeOffset.Now.AddMinutes(9.7), IntervalSec = 3,
             });
             model.Update(unpaired);
             model.Screen = screen;
+            if (name == "settings-macros")
+            {
+                model.Settings.MacrosEnabled = true;
+                model.Settings.MacroSlots[13].Text = "!pitclose";
+                model.Settings.MacroSlots[14].Text = "!pitopen";
+            }
             foreach (var scale in new[] { 1.0, 1.5 })
             {
                 Save(new ShellView { DataContext = model }, 1000, 660, scale, Path.Combine(dir, $"{name}{(scale == 1 ? "" : "@150")}.png"));
@@ -97,7 +105,6 @@ public static class RenderScreens
         var failed = new SelfTestReport(false, [.. progress, new SelfTestStep(5, "typed channel", false, "no reply to !help (admin rights?)")], Channels, null);
         yield return ("selftest-failed", sleeping with { LastSelfTest = failed, LastSelfTestAt = DateTimeOffset.Now }, Screen.SelfTest);
         yield return ("selftest-passed", active, Screen.SelfTest);
-        yield return ("settings-placeholder", active, Screen.Settings);
     }
 
     private sealed class NoAutoStart : PaceLaps.Agent.Hosting.Tray.IAutoStart
