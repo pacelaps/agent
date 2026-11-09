@@ -55,9 +55,25 @@ public sealed class QuestionWindow : Window
     private static Brush Brush(string key) => (Brush)Application.Current.Resources[key];
 }
 
-/// <summary>The self-test asks the operator through a <see cref="QuestionWindow"/> on the app's thread.</summary>
+/// <summary>
+/// The self-test asks the operator through a <see cref="QuestionWindow"/> on the app's thread; <see cref="Asking"/> tells
+/// the app's self-test screen what is being asked (null once answered).
+/// </summary>
 public sealed class QuestionPrompt(Dispatcher ui) : IOperatorPrompt
 {
+    public event Action<string?>? Asking;
+
     public Task<bool> ConfirmAsync(string question, CancellationToken ct) =>
-        ui.InvokeAsync(() => new QuestionWindow(question).ShowDialog() == true).Task;
+        ui.InvokeAsync(() =>
+        {
+            Asking?.Invoke(question);
+            try
+            {
+                return new QuestionWindow(question).ShowDialog() == true;
+            }
+            finally
+            {
+                Asking?.Invoke(null);
+            }
+        }).Task;
 }

@@ -38,7 +38,7 @@ public sealed class AgentController : IDisposable
     private bool _exiting;
 
     public AgentController(AgentRuntime runtime, RecentLog recent, PairingFlow pairing, ConfigStore config, IAutoStart autoStart,
-        Win32WindowFocus focus, UpdateWatch updates, string version, ILogger logger)
+        Win32WindowFocus focus, UpdateWatch updates, QuestionPrompt prompt, string version, ILogger logger)
     {
         _ = recent;
         _runtime = runtime;
@@ -49,6 +49,7 @@ public sealed class AgentController : IDisposable
         _updates = updates;
         _logger = logger;
         _shell = new ShellModel(version, ActAsync);
+        prompt.Asking += question => _shell.SelfTest.Asking = question;
         _icons = new TrayIconSet((int)Math.Round(SystemParameters.SmallIconWidth * DpiScale()));
         _menu = new TrayMenu(new TrayActions(OpenWindow, Activate, SleepAsync, OpenSettings, OpenDownloadPage, OpenLogFolder, ExitAsync));
         _tray = new TaskbarIcon
@@ -124,6 +125,12 @@ public sealed class AgentController : IDisposable
         if (!TypingCanWork())
         {
             return;
+        }
+
+        if (_window is not null)
+        {
+            // The self-test runs now: show it step by step.
+            _shell.Screen = Screen.SelfTest;
         }
 
         _ = ActivateAsync();

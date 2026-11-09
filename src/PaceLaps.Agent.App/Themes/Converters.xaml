@@ -10,4 +10,5 @@
     <t:Shown x:Key="Shown" />
     <t:Is x:Key="Is" />
     <t:CheckResult x:Key="CheckResult" />
+    <t:StepBar x:Key="StepBar" />
 </ResourceDictionary>

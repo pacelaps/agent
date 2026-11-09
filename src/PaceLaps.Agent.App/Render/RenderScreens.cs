@@ -30,6 +30,10 @@ public static class RenderScreens
         {
             var model = new ShellModel("0.13.0", _ => Task.CompletedTask) { Screen = screen };
             model.Update(status);
+            if (name == "selftest-running")
+            {
+                model.SelfTest.Asking = "Did iRacing show the reply to !help in the chat?";
+            }
             foreach (var scale in new[] { 1.0, 1.5 })
             {
                 Save(new ShellView { DataContext = model }, 1000, 660, scale, Path.Combine(dir, $"{name}{(scale == 1 ? "" : "@150")}.png"));
@@ -65,6 +69,11 @@ public static class RenderScreens
         yield return ("status-offline", active with { ServerOnline = false, EventsBuffered = 7 }, Screen.Status);
         yield return ("status-failsafe", active with { ServerOnline = false, EventsBuffered = 7, LocalFailsafeSince = DateTimeOffset.Now.AddSeconds(-95), RecentCommands = FailsafeCommands() }, Screen.Status);
         yield return ("status-not-paired", sleeping with { AgentId = null, SimInSession = false, CarCount = 0 }, Screen.Status);
+        var progress = Passed().Steps.Take(4).ToList();
+        yield return ("selftest-running", sleeping with { State = AgentState.SelfTest, SelfTestProgress = progress }, Screen.SelfTest);
+        var failed = new SelfTestReport(false, [.. progress, new SelfTestStep(5, "typed channel", false, "no reply to !help (admin rights?)")], Channels, null);
+        yield return ("selftest-failed", sleeping with { LastSelfTest = failed, LastSelfTestAt = DateTimeOffset.Now }, Screen.SelfTest);
+        yield return ("selftest-passed", active, Screen.SelfTest);
         yield return ("settings-placeholder", active, Screen.Settings);
     }
 

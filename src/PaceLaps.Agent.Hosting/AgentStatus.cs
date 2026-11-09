@@ -66,6 +66,9 @@ public sealed record AgentStatus
     /// <summary>The commands finished lately, newest first.</summary>
     public IReadOnlyList<FinishedCommand> RecentCommands { get; init; } = [];
 
+    /// <summary>The steps of the running self-test so far (while State is SelfTest).</summary>
+    public IReadOnlyList<SelfTestStep> SelfTestProgress { get; init; } = [];
+
     public LocalFailsafeSettings LocalFailsafe { get; init; } = new();
 
     public string? LocalFailsafeHeld { get; init; }
@@ -104,6 +107,7 @@ public sealed record AgentStatus
             LastSelfTest = runtime.LastSelfTest,
             LastSelfTestAt = runtime.LastSelfTestAt,
             RecentCommands = runtime.RecentCommands.Items(),
+            SelfTestProgress = runtime.SelfTestProgress,
             LocalFailsafe = runtime.Settings?.LocalFailsafe ?? settings.LocalFailsafe,
             LocalFailsafeHeld = host?.LocalFailsafeCopies.Held is { } held ? $"{held.Procedure} v{held.Version}" : null,
             LocalFailsafeSince = host?.LocalFailsafe.Since,

@@ -131,7 +131,7 @@ public sealed class Is : IValueConverter
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotSupportedException();
 }
 
-/// <summary>The colour of a result word (Verified green, Failed red, Sent neutral).</summary>
+/// <summary>The colour of a result word (Verified green, Failed red, Sent neutral; parameter "brand": neutral is brand blue).</summary>
 public sealed class CheckResult : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture) => value switch
@@ -139,7 +139,23 @@ public sealed class CheckResult : IValueConverter
         StatusCheck.Ok => Theme.Brush("GreenText"),
         StatusCheck.Warning => Theme.Brush("YellowText"),
         StatusCheck.Problem => Theme.Brush("RedText"),
-        _ => Theme.Brush("FgMuted"),
+        _ => parameter as string == "brand" ? Theme.Brush("BrandText") : Theme.Brush("FgMuted"),
+    };
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotSupportedException();
+}
+
+/// <summary>A segment of the self-test's step bar: its result when done, blue while running, a line when still to come.</summary>
+public sealed class StepBar : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture) => value switch
+    {
+        SelfTestLine { State: StepState.Running } => Theme.Brush("Brand"),
+        SelfTestLine { State: StepState.Done, Check: StatusCheck.Problem } => Theme.Brush("Red"),
+        SelfTestLine { State: StepState.Done, Check: StatusCheck.Warning } => Theme.Brush("Yellow"),
+        SelfTestLine { State: StepState.Done, Check: StatusCheck.Ok } => Theme.Brush("Green"),
+        SelfTestLine { State: StepState.Done } => Theme.Brush("Grey"),
+        _ => Theme.Brush("Line"),
     };
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotSupportedException();

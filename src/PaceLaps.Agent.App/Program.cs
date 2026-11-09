@@ -76,7 +76,7 @@ public static class Program
             using var updates = new UpdateWatch(AgentVersion, clock, () => ReleaseServer is not null && config.TryLoad().Config.CheckForUpdates,
                 loggers.CreateLogger<UpdateWatch>());
             using var controller = new AgentController(runtime, recent, new PairingFlow(credentials, config, AgentVersion, clock, fixedServer: ReleaseServer),
-                config, RunKeyAutoStart.ForThisProgram(), focus, updates, AgentVersion, loggers.CreateLogger<AgentController>());
+                config, RunKeyAutoStart.ForThisProgram(), focus, updates, prompt, AgentVersion, loggers.CreateLogger<AgentController>());
             instance.ShowRequested += () => app.Dispatcher.BeginInvoke(controller.OpenWindow);
             controller.Start();
             return app.Run();

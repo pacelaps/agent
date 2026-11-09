@@ -84,6 +84,11 @@ public sealed class AgentRuntime : IAsyncDisposable
     /// <summary>The commands finished lately, across Sleep and Activate (the app's Last commands).</summary>
     public RecentCommands RecentCommands { get; } = new();
 
+    /// <summary>The steps of the self-test that runs now (or ran last), as they finish.</summary>
+    public IReadOnlyList<SelfTestStep> SelfTestProgress => Volatile.Read(ref _selfTestProgress);
+
+    private IReadOnlyList<SelfTestStep> _selfTestProgress = [];
+
     /// <summary>Why the agent last went back to Sleeping (a failed self-test names the step).</summary>
     public string? LastFailure { get; private set; }
 
@@ -131,6 +136,8 @@ public sealed class AgentRuntime : IAsyncDisposable
                 _parts.Clock, _parts.Loggers, _parts.MacroConfig(appIni), _parts.LocalFailsafeStore);
             host.States.Changed += (from, to, reason) => StateChanged?.Invoke(from, to, reason);
             host.Executor.Finished += RecentCommands.Add;
+            Volatile.Write(ref _selfTestProgress, []);
+            host.SelfTestStepFinished += step => Volatile.Write(ref _selfTestProgress, [.. _selfTestProgress, step]);
             (Host, Connection, Problem, LastFailure) = (host, connection, null, null);
             _stop = new CancellationTokenSource();
             var token = _stop.Token;

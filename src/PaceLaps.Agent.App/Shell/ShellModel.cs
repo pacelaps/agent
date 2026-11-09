@@ -22,18 +22,20 @@ public sealed record PlaceholderPage(string Title, string Text);
 /// </summary>
 public sealed partial class ShellModel : ObservableObject
 {
-    private readonly PlaceholderPage _selfTest = new("Self-test", "The self-test screen comes in the next steps.");
     private readonly PlaceholderPage _settings = new("Settings", "The settings screen comes in the next steps.");
 
     public ShellModel(string version, Func<StatusAction, Task> act)
     {
         Version = version;
         Status = new StatusPageModel(act);
+        SelfTest = new SelfTestPageModel(() => _ = act(StatusAction.Activate));
     }
 
     public string Version { get; }
 
     public StatusPageModel Status { get; }
+
+    public SelfTestPageModel SelfTest { get; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(CurrentPage))]
@@ -50,7 +52,7 @@ public sealed partial class ShellModel : ObservableObject
 
     public object CurrentPage => Screen switch
     {
-        Screen.SelfTest => _selfTest,
+        Screen.SelfTest => SelfTest,
         Screen.Settings => _settings,
         _ => Status,
     };
@@ -61,6 +63,7 @@ public sealed partial class ShellModel : ObservableObject
     public void Update(AgentStatus status)
     {
         Status.View = StatusView.From(status);
+        SelfTest.View = SelfTestView.From(status);
         Paired = status.Paired;
         PairedHost = status.Server?.Host ?? "";
         AgentId = status.AgentId ?? "";
