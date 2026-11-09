@@ -24,6 +24,20 @@ public enum StatusAction
 
 public sealed record StatusRow(string Label, StatusCheck Check, string Text);
 
+/// <summary>The thin strip on top of the app's state card (the WPF plan, W3): green only while all is well in a session.</summary>
+public enum StatusStrip
+{
+    Grey,
+    Blue,
+    Amber,
+    Green,
+    Red,
+    Hazard,
+}
+
+/// <summary>One of the status screen's tiles: what it is about, how it is, in a word, and a line under it.</summary>
+public sealed record StatusTile(string Label, StatusCheck Check, string Value, string Detail);
+
 /// <summary>
 /// What the status window shows (the agent polish plan, 3.3): a header in the state's colour with a sentence on what is
 /// going on and the one button that fits; rows for iRacing, Race Control, the session and the pairing; the last
@@ -44,8 +58,27 @@ public sealed record StatusView(
     {
         var tone = TrayPresenter.Present(s).Icon;
         var (title, sentence, action) = HeaderOf(s);
-        return new StatusView(tone, title, sentence, action, RowsOf(s), SummaryOf(s), StepsOf(s.LastSelfTest), FailsafeOf(s), DetailsOf(s));
+        var (sideLabel, sideName, role) = SideOf(s);
+        return new StatusView(tone, title, sentence, action, RowsOf(s), SummaryOf(s), StepsOf(s.LastSelfTest), FailsafeOf(s), DetailsOf(s))
+        {
+            Strip = StripOf(s, tone), Eyebrow = EyebrowOf(s), SideLabel = sideLabel, SideName = sideName, Role = role, Tiles = TilesOf(s),
+        };
     }
+
+    public StatusStrip Strip { get; init; }
+
+    /// <summary>The small line over the title: what is live, or since when something is wrong.</summary>
+    public string Eyebrow { get; init; } = "";
+
+    /// <summary>The card's right side: a label and a name (the session, or the failsafe's procedure); null when there is none.</summary>
+    public string? SideLabel { get; init; }
+
+    public string? SideName { get; init; }
+
+    /// <summary>The role chip under the session's name (In a session only).</summary>
+    public string? Role { get; init; }
+
+    public IReadOnlyList<StatusTile> Tiles { get; init; } = [];
 
     /// <summary>The label on the header's button.</summary>
     public static string ActionText(StatusAction action) => action switch
@@ -78,17 +111,80 @@ public sealed record StatusView(
                 "Join your session in iRacing as an admin, then Activate. While it sleeps, the agent doesn't talk to Race Control.", StatusAction.Activate),
             { State: AgentState.Ready } => ("Ready",
                 s.NotActiveReason ?? "Waiting for a session. The agent joins by itself once Race Control has one for your iRacing session.", StatusAction.Sleep),
-            _ => ("In a session", Role(s), StatusAction.Sleep),
+            _ => ("In a session", RoleSentence(s), StatusAction.Sleep),
         };
     }
 
-    private static string Role(AgentStatus s)
+    private static string RoleSentence(AgentStatus s)
     {
         var session = s.SessionName is { } name ? $" for {name}" : "";
         return s.IsExecutor ? $"This agent types race control's commands into iRacing{session}. You can drive; iRacing only comes to the front for the rare retry."
             : s.Channels?.Typed == ChannelReadiness.Disabled ? $"View only{session}: stewards can play incident replays here. This agent never sends commands."
             : $"Standby{session}: another agent sends the commands, and this one takes over if it drops out.";
     }
+
+    private static StatusStrip StripOf(AgentStatus s, TrayIcon tone) => s switch
+    {
+        { LocalFailsafeSince: not null } => StatusStrip.Hazard,
+        _ when tone == TrayIcon.Problem => StatusStrip.Red,
+        _ when tone == TrayIcon.Busy => StatusStrip.Blue,
+        { State: AgentState.Active } => StatusStrip.Green,
+        { State: AgentState.Ready } => StatusStrip.Amber,
+        _ => StatusStrip.Grey,
+    };
+
+    private static string EyebrowOf(AgentStatus s)
+    {
+        var connected = s.State is AgentState.Ready or AgentState.Active;
+        return s switch
+        {
+            { LocalFailsafeSince: { } since } => $"Race Control lost at {since.ToLocalTime().ToString("HH:mm:ss", CultureInfo.InvariantCulture)}",
+            _ when connected && s.ServerOnline == false => "Retrying",
+            { Busy: true } or { State: AgentState.SelfTest } => "Self-test",
+            _ when connected => "Live" + (s.TrackName is { } track ? $" · {track}" : ""),
+            { Paired: false } => "First start",
+            _ => "Asleep · not connected to Race Control",
+        };
+    }
+
+    private static (string? Label, string? Name, string? Role) SideOf(AgentStatus s) => s switch
+    {
+        { LocalFailsafeSince: not null } => ("Running", s.LocalFailsafeHeld ?? "Local failsafe", null),
+        { State: AgentState.Active } => ("Session", s.SessionName ?? "Joined", OperatorWords.Role(s) switch
+        {
+            "sends the commands" => "Sends the commands",
+            "standby" => "Standby",
+            var other => char.ToUpperInvariant(other[0]) + other[1..],
+        }),
+        { State: AgentState.Ready } => ("Session", "None yet", null),
+        _ => (null, null, null),
+    };
+
+    private static List<StatusTile> TilesOf(AgentStatus s)
+    {
+        var connected = s.State is AgentState.Ready or AgentState.Active;
+        var viewOnly = s.Channels?.Typed == ChannelReadiness.Disabled;
+        var cars = s.CarCount > 0 ? $"{s.CarCount} cars" : "";
+        return
+        [
+            s.SimInSession ? new StatusTile("iRacing", StatusCheck.Ok, "In the session", connected ? Join(viewOnly ? "View only" : "Admin rights", cars) : cars)
+                : s.SimRunning ? new StatusTile("iRacing", connected ? StatusCheck.Warning : StatusCheck.Off, "Running", "Not in a session")
+                : new StatusTile("iRacing", connected ? StatusCheck.Problem : StatusCheck.Off, "Not running", "Start iRacing and join your session"),
+            !connected || s.ServerOnline is null ? new StatusTile("Race Control", StatusCheck.Off, s.State == AgentState.SelfTest ? "Connecting" : "Asleep", "Not connected while sleeping")
+                : s.ServerOnline == true ? new StatusTile("Race Control", StatusCheck.Ok, "Connected", s.Realtime == true ? "Live updates" : "Updates by polling")
+                : new StatusTile("Race Control", StatusCheck.Problem, "Can't reach it", s.EventsBuffered > 0 ? $"Retrying · {s.EventsBuffered} events waiting" : "Retrying"),
+            !connected ? new StatusTile("Typing", StatusCheck.Off, "Not tested", "The self-test checks it")
+                : viewOnly ? new StatusTile("Typing", StatusCheck.Off, "Off", "No admin rights: replays only")
+                : s.Channels?.Typed == ChannelReadiness.Failed ? new StatusTile("Typing", StatusCheck.Problem, "Failed", "Sleep, then Activate to test again")
+                : new StatusTile("Typing", StatusCheck.Ok, "Ready", s.TypedWithoutFocus ? "Without taking focus" : "Brings iRacing to the front"),
+            s.LocalFailsafeSince is { } since ? new StatusTile("Local failsafe", StatusCheck.Problem, "Running", $"Since {since.ToLocalTime().ToString("HH:mm:ss", CultureInfo.InvariantCulture)}")
+                : !s.LocalFailsafe.Enabled ? new StatusTile("Local failsafe", StatusCheck.Off, "Off", "Turn it on in the settings")
+                : new StatusTile("Local failsafe", connected && s.LocalFailsafeHeld is null && s.State == AgentState.Active ? StatusCheck.Warning : StatusCheck.Ok,
+                    connected ? "Armed" : "On", $"After {s.LocalFailsafe.DelaySeconds} s without Race Control"),
+        ];
+    }
+
+    private static string Join(string a, string b) => b.Length == 0 ? a : $"{a} · {b}";
 
     private static List<StatusRow> RowsOf(AgentStatus s)
     {

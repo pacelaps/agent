@@ -92,6 +92,36 @@ public sealed class StatusViewTests
         }
     }
 
+    [Fact]
+    public void The_strip_is_green_only_while_all_is_well_in_a_session()
+    {
+        Assert.Equal(StatusStrip.Green, StatusView.From(Active()).Strip);
+        Assert.Equal(StatusStrip.Amber, StatusView.From(Active() with { State = AgentState.Ready, SessionName = null }).Strip);
+        Assert.Equal(StatusStrip.Grey, StatusView.From(Sleeping()).Strip);
+        Assert.Equal(StatusStrip.Blue, StatusView.From(Sleeping() with { State = AgentState.SelfTest }).Strip);
+        Assert.Equal(StatusStrip.Red, StatusView.From(Active() with { ServerOnline = false }).Strip);
+        Assert.Equal(StatusStrip.Hazard, StatusView.From(Active() with { ServerOnline = false, LocalFailsafeSince = DateTimeOffset.UnixEpoch }).Strip);
+    }
+
+    [Fact]
+    public void The_card_names_the_session_and_the_role_and_the_tiles_say_how_each_part_is()
+    {
+        var view = StatusView.From(Active() with { TrackName = "Okayama International Circuit", CarCount = 22 });
+        Assert.Equal("Live · Okayama International Circuit", view.Eyebrow);
+        Assert.Equal(("Session", "Round 4", "Sends the commands"), (view.SideLabel, view.SideName, view.Role));
+        Assert.Equal(
+            [("iRacing", StatusCheck.Ok, "In the session", "Admin rights · 22 cars"), ("Race Control", StatusCheck.Ok, "Connected", "Live updates"),
+             ("Typing", StatusCheck.Ok, "Ready", "Without taking focus"), ("Local failsafe", StatusCheck.Off, "Off", "Turn it on in the settings")],
+            view.Tiles.Select(t => (t.Label, t.Check, t.Value, t.Detail)));
+
+        var asleep = StatusView.From(Sleeping());
+        Assert.Equal(("Asleep · not connected to Race Control", (string?)null), (asleep.Eyebrow, asleep.SideName));
+        Assert.Equal(StatusCheck.Problem, StatusView.From(Active() with { ServerOnline = false, EventsBuffered = 7 }).Tiles[1].Check);
+        Assert.Equal("Retrying · 7 events waiting", StatusView.From(Active() with { ServerOnline = false, EventsBuffered = 7 }).Tiles[1].Detail);
+        Assert.Equal(("Running", "Local failsafe v2"), (StatusView.From(Active() with { LocalFailsafeSince = DateTimeOffset.UnixEpoch, LocalFailsafeHeld = "Local failsafe v2" }).SideLabel,
+            StatusView.From(Active() with { LocalFailsafeSince = DateTimeOffset.UnixEpoch, LocalFailsafeHeld = "Local failsafe v2" }).SideName));
+    }
+
     private static (string, StatusAction) Head(AgentStatus s)
     {
         var view = StatusView.From(s);

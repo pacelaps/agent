@@ -1,0 +1,12 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:t="clr-namespace:PaceLaps.Agent.App.Themes">
+    <t:StripBrush x:Key="StripBrush" />
+    <t:StripDot x:Key="StripDot" />
+    <t:CheckBrush x:Key="CheckBrush" />
+    <t:CheckBorder x:Key="CheckBorder" />
+    <t:ProblemCard x:Key="ProblemCard" />
+    <t:Upper x:Key="Upper" />
+    <t:Shown x:Key="Shown" />
+    <t:Is x:Key="Is" />
+</ResourceDictionary>

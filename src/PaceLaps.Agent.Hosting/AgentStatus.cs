@@ -23,6 +23,15 @@ public sealed record AgentStatus
 
     public bool SimInSession { get; init; }
 
+    /// <summary>The track of iRacing's session, if it names one.</summary>
+    public string? TrackName { get; init; }
+
+    /// <summary>Cars racing in iRacing's session (no spectators, no pace car).</summary>
+    public int CarCount { get; init; }
+
+    /// <summary>The setting: commands typed without bringing iRacing to the front.</summary>
+    public bool TypedWithoutFocus { get; init; } = true;
+
     public Uri? Server { get; init; }
 
     /// <summary>The agent id from pairing; null when this PC is not paired with <see cref="Server"/>.</summary>
@@ -73,6 +82,9 @@ public sealed record AgentStatus
             Busy = runtime.Busy,
             SimRunning = sim.IsConnected,
             SimInSession = sim.Session is not null,
+            TrackName = sim.Session?.Track?.Name,
+            CarCount = sim.Session is { } session ? session.Cars.Count(c => !c.IsSpectator && c.CarIdx != session.PaceCarIdx) : 0,
+            TypedWithoutFocus = (runtime.Settings ?? settings).TypedWithoutFocus,
             Server = server,
             AgentId = credentials is not null && server is not null && ServerAddress.Same(credentials.Server, server) ? credentials.AgentId : null,
             SettingsErrors = settingsErrors,
