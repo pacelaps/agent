@@ -1,0 +1,104 @@
+{
+  "v": 1,
+  "kind": "penalty_catalog",
+  "exportedAt": "2026-11-05T12:00:00.000Z",
+  "entries": [
+    {
+      "code": "VW",
+      "name": "Warning",
+      "action": null,
+      "explanation": "An official warning from race control. After three warnings you get a 10-second time penalty, then 20 seconds at the next one."
+    },
+    {
+      "code": "SP2",
+      "name": "2 penalty points",
+      "action": null,
+      "explanation": "2 penalty points. At 10 points you get a drive-through (SPDT) and your points go back to 0. Points carry over to the next race."
+    },
+    {
+      "code": "SP3",
+      "name": "3 penalty points",
+      "action": null,
+      "explanation": "3 penalty points. At 10 points you get a drive-through (SPDT) and your points go back to 0. Points carry over to the next race."
+    },
+    {
+      "code": "SP5",
+      "name": "5 penalty points",
+      "action": null,
+      "explanation": "5 penalty points. At 10 points you get a drive-through (SPDT) and your points go back to 0. Points carry over to the next race."
+    },
+    {
+      "code": "S5",
+      "name": "5-second time penalty",
+      "action": "time",
+      "action_seconds": 5,
+      "explanation": "5 seconds are added to your race time after the race. Nothing to serve on track: keep racing."
+    },
+    {
+      "code": "S10",
+      "name": "10-second time penalty",
+      "action": "time",
+      "action_seconds": 10,
+      "explanation": "10 seconds are added to your race time after the race. Nothing to serve on track: keep racing."
+    },
+    {
+      "code": "S20",
+      "name": "20-second time penalty",
+      "action": "time",
+      "action_seconds": 20,
+      "explanation": "20 seconds are added to your race time after the race. Nothing to serve on track: keep racing."
+    },
+    {
+      "code": "S30",
+      "name": "30-second time penalty",
+      "action": "time",
+      "action_seconds": 30,
+      "explanation": "30 seconds are added to your race time after the race. Nothing to serve on track: keep racing."
+    },
+    {
+      "code": "DT",
+      "name": "Drive-through",
+      "action": "drive_through",
+      "explanation": "Drive through the pit lane at the pit speed limit without stopping. iRacing shows the black flag until you have served it."
+    },
+    {
+      "code": "SPDT",
+      "name": "Cumulative drive-through (10 points)",
+      "action": "drive_through",
+      "explanation": "You reached 10 penalty points: drive through the pit lane at the pit speed limit. Your points go back to 0. iRacing shows the black flag until you have served it."
+    },
+    {
+      "code": "SG10",
+      "name": "10-second stop and go",
+      "action": "stop_and_go",
+      "action_seconds": 10,
+      "explanation": "Stop in your pit box for 10 seconds, then rejoin. iRacing shows the black flag until you have served it."
+    },
+    {
+      "code": "SG20",
+      "name": "20-second stop and go",
+      "action": "stop_and_go",
+      "action_seconds": 20,
+      "explanation": "Stop in your pit box for 20 seconds, then rejoin. iRacing shows the black flag until you have served it."
+    },
+    {
+      "code": "SG30",
+      "name": "30-second stop and go",
+      "action": "stop_and_go",
+      "action_seconds": 30,
+      "explanation": "Stop in your pit box for 30 seconds, then rejoin. iRacing shows the black flag until you have served it."
+    },
+    {
+      "code": "GD3",
+      "name": "3-place grid drop",
+      "action": null,
+      "explanation": "You start 3 places further back in the next race. Nothing changes in this race."
+    },
+    {
+      "code": "DSQ",
+      "name": "Disqualification",
+      "action": "dq",
+      "explanation": "You are disqualified from this race and get no result."
+    }
+  ]
+}

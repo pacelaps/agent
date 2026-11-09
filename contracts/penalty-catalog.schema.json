@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pacelaps.com/schemas/penalty-catalog.schema.json",
+  "title": "Penalty catalog",
+  "description": "A league's penalty catalog as JSON (spec: Penalty catalog): the Penalty catalog page exports it and imports it. An import adds the codes that are new, updates the ones in the catalog to what the document says, and leaves entries the document does not name alone. The page also accepts a bare list of entries. Strict: unknown fields are rejected.",
+  "type": "object",
+  "required": ["v", "kind", "entries"],
+  "additionalProperties": false,
+  "properties": {
+    "v": { "$ref": "common.schema.json#/$defs/version" },
+    "kind": { "const": "penalty_catalog" },
+    "exportedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "entries": {
+      "type": "array",
+      "maxItems": 200,
+      "items": { "$ref": "#/$defs/entry" }
+    }
+  },
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "required": ["code", "name", "action", "explanation"],
+      "additionalProperties": false,
+      "properties": {
+        "code": { "type": "string", "pattern": "^[A-Z0-9]{1,8}$", "description": "Unique within the league's catalog; an import matches entries by it." },
+        "name": { "type": "string", "minLength": 1, "maxLength": 40 },
+        "action": {
+          "description": "What iRacing does: a black flag (drive_through, stop_and_go), end of line, disqualify, remove, or nothing (time: seconds added to the race time in the results; null: a message only).",
+          "enum": ["drive_through", "stop_and_go", "eol", "dq", "remove", "time", null]
+        },
+        "action_seconds": { "type": "integer", "minimum": 1, "maximum": 600, "description": "Stop and go: 1 to 300 seconds in the pit box. Time: 1 to 600 seconds added. Only with those two actions." },
+        "explanation": { "type": "string", "minLength": 1, "maxLength": 300, "description": "The message for drivers, shown under the penalty's banner." }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "action": { "const": "stop_and_go" } } },
+          "then": { "required": ["action_seconds"], "properties": { "action_seconds": { "maximum": 300 } } }
+        },
+        {
+          "if": { "properties": { "action": { "const": "time" } } },
+          "then": { "required": ["action_seconds"] }
+        },
+        {
+          "if": { "properties": { "action": { "enum": ["drive_through", "eol", "dq", "remove", null] } } },
+          "then": { "not": { "required": ["action_seconds"] } }
+        }
+      ]
+    }
+  }
+}

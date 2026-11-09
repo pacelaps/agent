@@ -7,7 +7,14 @@
     <RootNamespace>PaceLaps.Agent.Tray</RootNamespace>
     <AssemblyName>pacelaps-agent</AssemblyName>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <ApplicationIcon>Assets\pacelaps-agent.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <!-- The PaceLaps mark (Assets/README.md): the program icon and the tray icons' base images. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\pacelaps-agent.ico" />
+    <EmbeddedResource Include="Assets\tray-*.png" />
+  </ItemGroup>
 
   <!-- A release build belongs to one server: scripts/publish.ps1 -Server (the release workflow) builds it in. -->
   <ItemGroup Condition="'$(ReleaseServer)' != ''">

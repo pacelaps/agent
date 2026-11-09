@@ -25,6 +25,7 @@ internal sealed class SettingsForm : Form
     private readonly TextBox _appIni = new() { Width = 340 };
     private readonly CheckBox _withoutFocus = new() { Text = "Type without bringing iRacing to the front", AutoSize = true };
     private readonly CheckBox _startWithWindows = new() { Text = "Start with Windows (sleeping)", AutoSize = true };
+    private readonly CheckBox _checkForUpdates = new() { Text = "Look for a new version once a day", AutoSize = true };
     private readonly Label _errors = new() { AutoSize = true, ForeColor = Color.DarkRed, MaximumSize = new Size(560, 0) };
 
     private readonly Uri? _fixedServer;
@@ -35,7 +36,8 @@ internal sealed class SettingsForm : Form
         _fixedServer = fixedServer;
         _config = config;
         _autoStart = autoStart;
-        Text = "PaceLaps Race Control: settings";
+        Text = $"{OperatorWords.ProductName}: settings";
+        Icon = TrayIcons.Program;
         StartPosition = FormStartPosition.CenterScreen;
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = MinimizeBox = false;
@@ -74,6 +76,7 @@ internal sealed class SettingsForm : Form
         Row(grid, "Typed commands", _withoutFocus);
         Row(grid, "", Hint("off: iRacing comes to the front for every command"));
         Row(grid, "Windows", _startWithWindows);
+        Row(grid, "Updates", _checkForUpdates);
 
         var buttons = new FlowLayoutPanel { FlowDirection = FlowDirection.RightToLeft, AutoSize = true, Dock = DockStyle.Fill };
         buttons.Controls.AddRange([cancel, save]);
@@ -106,6 +109,7 @@ internal sealed class SettingsForm : Form
         _appIni.Text = model.AppIni;
         _withoutFocus.Checked = model.TypedWithoutFocus;
         _startWithWindows.Checked = model.StartWithWindows;
+        _checkForUpdates.Checked = model.CheckForUpdates;
     }
 
     private SettingsModel Read()
@@ -120,6 +124,7 @@ internal sealed class SettingsForm : Form
             AppIni = _appIni.Text,
             TypedWithoutFocus = _withoutFocus.Checked,
             StartWithWindows = _startWithWindows.Checked,
+            CheckForUpdates = _checkForUpdates.Checked,
         };
         for (var i = 0; i < _slots.Length; i++)
         {

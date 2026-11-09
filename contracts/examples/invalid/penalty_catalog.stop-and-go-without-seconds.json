@@ -1,0 +1,12 @@
+{
+  "v": 1,
+  "kind": "penalty_catalog",
+  "entries": [
+    {
+      "code": "SG",
+      "name": "Stop and go",
+      "action": "stop_and_go",
+      "explanation": "Stop in your pit box."
+    }
+  ]
+}

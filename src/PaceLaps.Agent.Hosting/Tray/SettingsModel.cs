@@ -30,6 +30,9 @@ public sealed class SettingsModel
     /// <summary>Typed commands without bringing iRacing to the front (spec-feedback 37); on by default.</summary>
     public bool TypedWithoutFocus { get; set; } = true;
 
+    /// <summary>The update notice's daily check; on by default.</summary>
+    public bool CheckForUpdates { get; set; } = true;
+
     public bool StartWithWindows { get; set; }
 
     public static SettingsModel From(AgentConfig config, bool startWithWindows)
@@ -43,6 +46,7 @@ public sealed class SettingsModel
             LocalFailsafeDelay = config.LocalFailsafe.DelaySeconds.ToString(CultureInfo.InvariantCulture),
             AppIni = config.AppIni ?? "",
             TypedWithoutFocus = config.TypedWithoutFocus,
+            CheckForUpdates = config.CheckForUpdates,
             StartWithWindows = startWithWindows,
         };
         foreach (var (slot, text) in config.Macros.Slots)
@@ -77,6 +81,7 @@ public sealed class SettingsModel
             },
             ["appIni"] = Blank(AppIni) ? null : AppIni.Trim(),
             ["typedWithoutFocus"] = TypedWithoutFocus,
+            ["checkForUpdates"] = CheckForUpdates,
         };
         var (config, errors) = AgentConfig.Parse(JsonSerializer.Serialize(doc));
         return errors.Count == 0 ? (config, errors) : (null, errors);

@@ -1,0 +1,57 @@
+{
+  "v": 1,
+  "kind": "race_state",
+  "at": "2026-11-05T18:41:07.250Z",
+  "flag": {
+    "state": "yellow",
+    "label": "Caution",
+    "detail": "Full course caution"
+  },
+  "session": {
+    "type": "Race",
+    "track": "Spa-Francorchamps \u00b7 Grand Prix",
+    "lap": 12,
+    "laps": 30,
+    "timeLeftSec": null,
+    "finished": false
+  },
+  "classes": [
+    {
+      "id": 4098,
+      "name": "GT3",
+      "colour": "#ffda59"
+    },
+    {
+      "id": 2268,
+      "name": "GT4",
+      "colour": "#33ceff"
+    }
+  ],
+  "cars": [
+    {
+      "num": "12",
+      "classId": 4098,
+      "pos": 1,
+      "posClass": 1,
+      "onPitRoad": false,
+      "connected": true,
+      "driver": "Max Example"
+    },
+    {
+      "num": "7",
+      "classId": 4098,
+      "pos": 2,
+      "posClass": 2,
+      "onPitRoad": true,
+      "connected": true
+    },
+    {
+      "num": "31",
+      "classId": 2268,
+      "pos": 3,
+      "posClass": 1,
+      "onPitRoad": false,
+      "connected": false
+    }
+  ]
+}

@@ -9,7 +9,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <Version>0.1.0</Version>
+    <!-- The next release's version, so a local build says which release it leads to; publish.ps1 -Version sets a release's. -->
+    <Version>0.13.0</Version>
+    <Product>PaceLaps Agent</Product>
+    <Company>PaceLaps</Company>
+    <Copyright>Christopher Monje, PaceLaps</Copyright>
     <Authors>PaceLaps</Authors>
   </PropertyGroup>
 </Project>

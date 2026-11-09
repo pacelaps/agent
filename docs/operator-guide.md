@@ -2,9 +2,13 @@ PaceLaps Race Control: operator guide
 ==================================
 
 The agent runs on an iRacing session admin's PC and types race control's commands into the iRacing chat. While it
-sleeps, it sends and receives nothing.
+sleeps, it doesn't talk to Race Control.
 
-You need Windows 10 or 11 (64-bit), iRacing, admin rights in the session and a steward account for the league.
+How it works: the agent types race control's commands into the iRacing chat, as an admin would. iRacing comes to
+the front only for the self-test and, rarely, to repeat a command that didn't arrive. PaceLaps doesn't modify
+iRacing: the agent reads the session through iRacing's SDK, like overlays do.
+
+You need Windows 10 or 11 (64-bit), iRacing, iRacing session admin rights and a steward account for the league.
 
 
 Install
@@ -21,7 +25,8 @@ Install
      green  in a session
      red    a problem: hover over the icon
 
-Run iRacing and the agent the same way: both normally, or both as administrator.
+The agent needs no Windows administrator rights. Only if you start iRacing as administrator, start the agent that
+way too: Windows doesn't let a normal program type into one running as administrator.
 
 
 Pair (once per PC)
@@ -43,6 +48,7 @@ Right-click the icon, "Settings...". Changes apply at the next Activate.
   is down. A steward ends it in race control.
 - "Type without bringing iRacing to the front": on by default. Turn it off only if commands stop arriving.
 - Start with Windows: off by default. It starts sleeping.
+- Updates: once a day the agent looks on downloads.pacelaps.com for a new version. It sends nothing about you.
 
 
 In a session
@@ -69,11 +75,16 @@ When something is wrong
 - "Open the log folder" in the menu: send the newest agent-*.log if asked. Logs contain no passwords or tokens.
 - Server unreachable: nothing to do. Events are sent once it's back.
 
+More checks: https://pacelaps.com/docs/race-control/troubleshooting
+Still stuck? Write to support@pacelaps.com.
+
 
 Update
 ------
 
-Exit the agent, replace pacelaps-agent.exe, start it again. Pairing and settings stay.
+When a new version is out, a notification says so and the menu shows "Update available". It opens what's new and
+the download page. To update: right-click, "Sleep", exit the agent, replace pacelaps-agent.exe, start it again.
+Pairing and settings stay.
 
 
 Remove

@@ -1,0 +1,154 @@
+{
+    "v": 1,
+    "kind": "audit_export",
+    "algorithm": "pacelaps-audit-v1",
+    "exportedAt": "2026-11-08T21:20:00.000Z",
+    "chain": "s:7",
+    "league": {
+        "iracingLeagueId": 7700,
+        "name": "PaceLaps GT Series"
+    },
+    "session": {
+        "id": "7",
+        "name": "Round 4 Race",
+        "openedAt": "2026-11-08T19:00:00.000Z",
+        "closedAt": "2026-11-08T21:14:00.000Z"
+    },
+    "checkpoint": {
+        "seq": 5,
+        "hash": "ce762290438ca91fc9af440e81d9545ae9bd5d142e19f3a4e35136e38586ff5a"
+    },
+    "entries": [
+        {
+            "chain": "s:7",
+            "seq": 1,
+            "prevHash": "0000000000000000000000000000000000000000000000000000000000000000",
+            "eventTime": "2026-11-08T19:00:00.000Z",
+            "recordedTime": "2026-11-08T19:00:00.000Z",
+            "sessionNum": null,
+            "sessionTimeSec": null,
+            "lap": null,
+            "actorType": "steward",
+            "actorId": "stw_k3m9q2x7v4pd",
+            "action": "session.opened",
+            "parameters": {
+                "source": "manual"
+            },
+            "affects": null,
+            "executorAgentId": null,
+            "result": null,
+            "correlationId": null,
+            "correctsSeq": null,
+            "hash": "bebc84666b50aae33f96b0f1965ed5d6ceeee6023369a6c2c694c2a5ff0fb7a4"
+        },
+        {
+            "chain": "s:7",
+            "seq": 2,
+            "prevHash": "bebc84666b50aae33f96b0f1965ed5d6ceeee6023369a6c2c694c2a5ff0fb7a4",
+            "eventTime": "2026-11-08T19:12:03.250Z",
+            "recordedTime": "2026-11-08T19:12:03.250Z",
+            "sessionNum": 2,
+            "sessionTimeSec": 812.0,
+            "lap": 6,
+            "actorType": "agent",
+            "actorId": "agt_cis9radddzj7",
+            "action": "incident.added",
+            "parameters": {
+                "car": "44",
+                "delta": 4,
+                "note": "Kontakt in Kurve 1 – Überholverbot ⚠",
+                "lapDistPct": 1.0e-7
+            },
+            "affects": {
+                "scope": "car",
+                "cars": [
+                    "44"
+                ]
+            },
+            "executorAgentId": null,
+            "result": null,
+            "correlationId": null,
+            "correctsSeq": null,
+            "hash": "0634c26b3d5dd0667ebe635ca5e1fcf902aa57c4d7a1007c99a32fc486dad0f1"
+        },
+        {
+            "chain": "s:7",
+            "seq": 3,
+            "prevHash": "0634c26b3d5dd0667ebe635ca5e1fcf902aa57c4d7a1007c99a32fc486dad0f1",
+            "eventTime": "2026-11-08T19:12:40.125Z",
+            "recordedTime": "2026-11-08T19:12:40.125Z",
+            "sessionNum": 2,
+            "sessionTimeSec": 849.375,
+            "lap": 6,
+            "actorType": "steward",
+            "actorId": "stw_k3m9q2x7v4pd",
+            "action": "message.sent",
+            "parameters": {
+                "text": "CAUTION / PITS CLOSED",
+                "type": "flag",
+                "visibleTo": {
+                    "scope": "all"
+                },
+                "sticky": true,
+                "lead": 1.5
+            },
+            "affects": null,
+            "executorAgentId": null,
+            "result": "sent",
+            "correlationId": null,
+            "correctsSeq": null,
+            "hash": "ce027a885aeb34a4aac99d445501b65b5f818ea7c81846af43d665819881dbf5"
+        },
+        {
+            "chain": "s:8",
+            "seq": 4,
+            "prevHash": "ce027a885aeb34a4aac99d445501b65b5f818ea7c81846af43d665819881dbf5",
+            "eventTime": "2026-11-08T19:13:00.000Z",
+            "recordedTime": "2026-11-08T19:13:00.000Z",
+            "sessionNum": 2,
+            "sessionTimeSec": 869.0,
+            "lap": 7,
+            "actorType": "steward",
+            "actorId": "stw_k3m9q2x7v4pd",
+            "action": "penalty.issued",
+            "parameters": {
+                "car": "44",
+                "code": "DT",
+                "name": "Drive-through",
+                "params": {},
+                "reapply": []
+            },
+            "affects": {
+                "scope": "car",
+                "cars": [
+                    "44"
+                ]
+            },
+            "executorAgentId": null,
+            "result": null,
+            "correlationId": null,
+            "correctsSeq": null,
+            "hash": "08b87db3a79c0a65c98c9f92385def04224bb67a05cee7e0e023b15ee1f03dd1"
+        },
+        {
+            "chain": "s:7",
+            "seq": 5,
+            "prevHash": "08b87db3a79c0a65c98c9f92385def04224bb67a05cee7e0e023b15ee1f03dd1",
+            "eventTime": "2026-11-08T21:14:00.000Z",
+            "recordedTime": "2026-11-08T21:14:00.000Z",
+            "sessionNum": null,
+            "sessionTimeSec": null,
+            "lap": null,
+            "actorType": "steward",
+            "actorId": "stw_k3m9q2x7v4pd",
+            "action": "session.closed",
+            "parameters": {},
+            "affects": null,
+            "executorAgentId": null,
+            "result": null,
+            "correlationId": null,
+            "correctsSeq": null,
+            "hash": "ce762290438ca91fc9af440e81d9545ae9bd5d142e19f3a4e35136e38586ff5a"
+        }
+    ]
+}

@@ -4,6 +4,10 @@ on:
   push:
   pull_request:
 
+# Builds and tests only: the token can read, nothing more (pull requests come from anyone once the repository is public).
+permissions:
+  contents: read
+
 jobs:
   build-and-test:
     runs-on: windows-latest
@@ -27,6 +31,15 @@ jobs:
       - name: Package
         shell: pwsh
         run: ./scripts/publish.ps1
+
+      # The upload to downloads.pacelaps.com: the bucket helpers, and a dry run on the package just built.
+      - name: Downloads script
+        shell: pwsh
+        run: |
+          ./scripts/downloads-lib.tests.ps1
+          $zip = Get-ChildItem artifacts -Filter 'pacelaps-agent-*-win-x64.zip' | Select-Object -First 1
+          $version = $zip.Name -replace '^pacelaps-agent-(.+)-win-x64\.zip$', '$1'
+          ./scripts/upload-downloads.ps1 -Version $version -DryRun
 
       - uses: actions/upload-artifact@v4
         with:

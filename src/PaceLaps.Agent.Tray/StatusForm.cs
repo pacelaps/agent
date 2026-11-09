@@ -21,7 +21,8 @@ internal sealed class StatusForm : Form
 
     public StatusForm(TrayContext tray)
     {
-        Text = "PaceLaps Race Control";
+        Text = OperatorWords.ProductName;
+        Icon = TrayIcons.Program;
         StartPosition = FormStartPosition.CenterScreen;
         Size = new Size(760, 640);
         MinimumSize = new Size(520, 420);

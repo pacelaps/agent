@@ -1,0 +1,13 @@
+{
+  "v": 1,
+  "kind": "penalty_catalog",
+  "entries": [
+    {
+      "code": "DT",
+      "name": "Drive-through",
+      "action": "drive_through",
+      "action_seconds": 10,
+      "explanation": "Drive through."
+    }
+  ]
+}

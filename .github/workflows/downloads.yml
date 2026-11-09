@@ -1,0 +1,40 @@
+name: Downloads
+
+# Publishes an existing GitHub release on downloads.pacelaps.com (Cloudflare R2), for releases made before the
+# release workflow did it, or to repeat a failed upload. Actions > Downloads > Run workflow, with the tag (v0.12.0).
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag, for example v0.12.0'
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  downloads:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch the release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          if ($env:TAG -notmatch '^v\d+\.\d+\.\d+(-[0-9A-Za-z.]+)?$') { throw "'$env:TAG' is not a tag like v1.2.3" }
+          gh release download $env:TAG --pattern '*.zip' --pattern '*.zip.sha256' --dir artifacts
+          $published = gh release view $env:TAG --json publishedAt --jq .publishedAt
+          "PUBLISHED=$published" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Upload
+        shell: pwsh
+        env:
+          TAG: ${{ inputs.tag }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+        run: ./scripts/upload-downloads.ps1 -Version $env:TAG.TrimStart('v') -Released $env:PUBLISHED

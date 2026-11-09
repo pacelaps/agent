@@ -10,13 +10,15 @@ public sealed record DetectedEvent(EventType Type, object Data);
 /// <summary>
 /// Compares successive views of the sim and reports flag changes, session changes and incident count increases.
 /// The first observation only sets the baseline. Incident counts that go down (a new session resets them) reset
-/// the baseline without an event.
+/// the baseline without an event. So does a new driver in a car (a team race's driver swap): iRacing's
+/// CurDriverIncidentCount is the count of the driver at the wheel, so the incoming driver's points from an earlier
+/// stint would otherwise read as a new incident.
 /// </summary>
 public sealed class EventDetector
 {
     private IReadOnlyList<string>? _flags;
     private SessionChangeData? _identity;
-    private Dictionary<string, int>? _incidents;
+    private Dictionary<string, (int Total, int CustId)>? _incidents;
 
     public IReadOnlyList<DetectedEvent> Observe(SimSession session, SimFrame frame)
     {
@@ -41,16 +43,16 @@ public sealed class EventDetector
 
         var incidents = session.Cars.Where(c => !c.IsSpectator && !c.IsPaceCar && c.Incidents is not null)
             .GroupBy(c => c.Number)
-            .ToDictionary(g => g.Key, g => g.First().Incidents!.Value);
+            .ToDictionary(g => g.Key, g => (Total: g.First().Incidents!.Value, g.First().CustId));
         if (_incidents is not null)
         {
-            foreach (var (car, total) in incidents)
+            foreach (var (car, (total, custId)) in incidents)
             {
-                if (_incidents.TryGetValue(car, out var before) && total > before)
+                if (_incidents.TryGetValue(car, out var seen) && seen.CustId == custId && total > seen.Total)
                 {
                     var c = session.CarByNumber(car);
                     var state = c is null ? null : frame.Car(c.CarIdx);
-                    events.Add(new DetectedEvent(EventType.Incident, new IncidentData(car, total - before, total, identity.Num,
+                    events.Add(new DetectedEvent(EventType.Incident, new IncidentData(car, total - seen.Total, total, identity.Num,
                         Math.Round(frame.SessionTime, 3), Math.Max(0, state?.LapCompleted ?? 0), Math.Round(Math.Clamp(state?.LapDistPct ?? 0f, 0f, 1f), 4))));
                 }
             }

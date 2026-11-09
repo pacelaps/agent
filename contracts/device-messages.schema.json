@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://pacelaps.com/schemas/device-messages.schema.json",
-  "title": "Devices and server: clock ping, state snapshot, shown report",
+  "title": "Devices and server: clock ping, state snapshot, shown report, race state",
   "description": "PROVISIONAL. Derived from the message catalogue (clock ping, state snapshot) and the synchronized display rules (devices report when they displayed a message). Finalize in step 2.",
   "oneOf": [
     {
@@ -15,6 +15,9 @@
     },
     {
       "$ref": "#/$defs/shownReport"
+    },
+    {
+      "$ref": "#/$defs/raceState"
     }
   ],
   "$defs": {
@@ -133,6 +136,17 @@
               }
             }
           ]
+        },
+        "race": {
+          "description": "The race state for the first draw (raceState); null without telemetry. Optional: older servers send none.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/raceState"
+            }
+          ]
         }
       }
     },
@@ -178,6 +192,198 @@
           "type": "number",
           "minimum": 0,
           "description": "Round trip of the ping sample the offset came from. The offset is accurate to about half of it, which bounds how exact shownAt is."
+        }
+      }
+    },
+    "raceState": {
+      "type": "object",
+      "description": "The race as every driver may see it (spec-feedback 45, the driver's race control page): the flag, the session, the classes and the running order by car number. Built by the server from the latest snapshot (App\\Drivers\\PublicRaceState) and pushed as race.state on event.{id}.all when it changes, at most once a second; the state snapshot carries it for the first draw. Never names, customer ids or anything from the stewards' channel.",
+      "required": [
+        "v",
+        "kind",
+        "at",
+        "flag",
+        "session",
+        "classes",
+        "cars"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "v": {
+          "$ref": "common.schema.json#/$defs/version"
+        },
+        "kind": {
+          "const": "race_state"
+        },
+        "at": {
+          "$ref": "common.schema.json#/$defs/timestamp",
+          "description": "When the snapshot it was built from was taken (server clock)."
+        },
+        "flag": {
+          "type": "object",
+          "required": [
+            "state",
+            "label",
+            "detail"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "state": {
+              "enum": [
+                "green",
+                "green_held",
+                "yellow",
+                "red",
+                "white",
+                "grey"
+              ],
+              "description": "In the race state palette, as race control's header (App\\RaceControl\\FlagState)."
+            },
+            "label": {
+              "type": "string",
+              "maxLength": 40
+            },
+            "detail": {
+              "type": "string",
+              "maxLength": 80
+            }
+          }
+        },
+        "session": {
+          "type": "object",
+          "required": [
+            "type",
+            "track",
+            "lap",
+            "laps",
+            "timeLeftSec",
+            "finished"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "type": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 40
+            },
+            "track": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "maxLength": 120
+            },
+            "lap": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 1
+            },
+            "laps": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 1
+            },
+            "timeLeftSec": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "description": "While racing, as of at."
+            },
+            "finished": {
+              "type": "boolean"
+            },
+            "trackId": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 1,
+              "description": "The layout's iRacing TrackID (snapshot session.track.id), for the Track map card."
+            }
+          }
+        },
+        "classes": {
+          "type": "array",
+          "description": "The session's classes in the league's class order, with the name and colour race control shows.",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "colour"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "name": {
+                "type": "string",
+                "maxLength": 60
+              },
+              "colour": {
+                "type": "string",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              }
+            }
+          }
+        },
+        "cars": {
+          "type": "array",
+          "description": "The cars in the session (no pace car), by overall position. A car number only: no driver names.",
+          "items": {
+            "type": "object",
+            "required": [
+              "num",
+              "classId",
+              "pos",
+              "posClass",
+              "onPitRoad",
+              "connected"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "num": {
+                "$ref": "common.schema.json#/$defs/carNumber"
+              },
+              "classId": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "pos": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 1
+              },
+              "posClass": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 1
+              },
+              "onPitRoad": {
+                "type": "boolean"
+              },
+              "connected": {
+                "type": "boolean"
+              }
+            }
+          }
         }
       }
     }

@@ -26,6 +26,11 @@ internal sealed class TrayContext : ApplicationContext
     private readonly ToolStripMenuItem _activate;
     private readonly ToolStripMenuItem _sleep;
     private readonly ToolStripMenuItem _pair;
+    private readonly ToolStripMenuItem _update;
+    private readonly ToolStripSeparator _updateSeparator = new() { Visible = false };
+    private readonly UpdateWatch _updates;
+    private readonly string _version;
+    private string? _updateShown;
     private readonly Timer _timer = new() { Interval = 500 };
     private readonly SynchronizationContext _ui;
     private StatusForm? _statusForm;
@@ -33,8 +38,10 @@ internal sealed class TrayContext : ApplicationContext
     private bool _exiting;
 
     public TrayContext(AgentRuntime runtime, RecentLog recent, PairingFlow pairing, ConfigStore config, IAutoStart autoStart,
-        Win32WindowFocus focus, ILogger logger)
+        Win32WindowFocus focus, UpdateWatch updates, string version, ILogger logger)
     {
+        _updates = updates;
+        _version = version;
         _runtime = runtime;
         _recent = recent;
         _pairing = pairing;
@@ -44,11 +51,14 @@ internal sealed class TrayContext : ApplicationContext
         _logger = logger;
         _ui = SynchronizationContext.Current!;
         _activate = new ToolStripMenuItem("&Activate (run the self-test)", null, (_, _) => Activate());
-        _sleep = new ToolStripMenuItem("S&leep (stop all traffic)", null, async (_, _) => await _runtime.SleepAsync());
-        _pair = new ToolStripMenuItem("&Pair with a server...", null, (_, _) => ShowPairing());
+        _sleep = new ToolStripMenuItem("S&leep (disconnect from Race Control)", null, async (_, _) => await _runtime.SleepAsync());
+        _update = new ToolStripMenuItem("", null, (_, _) => ShowUpdate()) { Visible = false };
+        _pair = new ToolStripMenuItem("&Pair with Race Control...", null, (_, _) => ShowPairing());
         var menu = new ContextMenuStrip();
         menu.Items.AddRange(
         [
+            _update,
+            _updateSeparator,
             new ToolStripMenuItem("&Status...", null, (_, _) => ShowStatus()) { Font = new Font(menu.Font, FontStyle.Bold) },
             new ToolStripSeparator(),
             _activate,
@@ -57,6 +67,7 @@ internal sealed class TrayContext : ApplicationContext
             _pair,
             new ToolStripMenuItem("S&ettings...", null, (_, _) => ShowSettings()),
             new ToolStripMenuItem("Open the &log folder", null, (_, _) => OpenLogFolder()),
+            new ToolStripMenuItem($"A&bout {OperatorWords.ProductName}", null, (_, _) => ShowAbout()),
             new ToolStripSeparator(),
             new ToolStripMenuItem("E&xit", null, async (_, _) => await ExitAsync()),
         ]);
@@ -103,6 +114,7 @@ internal sealed class TrayContext : ApplicationContext
             _tray.Dispose();
             _icons.Dispose();
             _statusForm?.Dispose();
+            _updates.Dispose();
         }
 
         base.Dispose(disposing);
@@ -117,7 +129,7 @@ internal sealed class TrayContext : ApplicationContext
         catch (Exception e)
         {
             _logger.LogError(e, "Activate failed");
-            _tray.ShowBalloonTip(5000, "Activate failed", e.Message, ToolTipIcon.Error);
+            _tray.ShowBalloonTip(5000, "Couldn't activate", "Something went wrong. Open the status window and the log folder for details.", ToolTipIcon.Error);
         }
 
         Refresh();
@@ -139,7 +151,7 @@ internal sealed class TrayContext : ApplicationContext
         return simElevated == "no" || MessageBox.Show(
             $"iRacing runs as administrator ({simElevated}) and this program doesn't, so Windows would drop its keystrokes.\n\n" +
             "Run both the same way. Run the self-test anyway?",
-            "PaceLaps Race Control", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.Yes;
+            OperatorWords.ProductName, MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.Yes;
     }
 
     private void Refresh()
@@ -166,10 +178,36 @@ internal sealed class TrayContext : ApplicationContext
             _tray.ShowBalloonTip(5000, notice.Title, notice.Text, notice.Warning ? ToolTipIcon.Warning : ToolTipIcon.Info);
         }
 
+        RefreshUpdate(status);
+
         _last = status;
         if (_statusForm is { Visible: true } form)
         {
             form.Show(status, view, _recent);
+        }
+    }
+
+    /// <summary>The update notice: a check when one is due, the menu line, and one notification per version.</summary>
+    private void RefreshUpdate(AgentStatus status)
+    {
+        _ = _updates.CheckIfDueAsync();
+        var offer = _updates.Offer;
+        var text = TrayPresenter.UpdateMenuText(offer);
+        _update.Visible = _updateSeparator.Visible = text is not null;
+        _update.Text = text ?? "";
+        if (TrayPresenter.UpdateNotice(offer, _updateShown, status) is { } notice)
+        {
+            _tray.ShowBalloonTip(5000, notice.Title, notice.Text, ToolTipIcon.Info);
+            _updateShown = offer!.Version;
+        }
+    }
+
+    private void ShowUpdate()
+    {
+        if (_updates.Offer is { } offer)
+        {
+            using var form = new UpdateForm(offer, _version);
+            form.ShowDialog();
         }
     }
 
@@ -180,6 +218,12 @@ internal sealed class TrayContext : ApplicationContext
         _statusForm.Show();
         _statusForm.WindowState = FormWindowState.Normal;
         _statusForm.Activate();
+    }
+
+    private void ShowAbout()
+    {
+        using var form = new AboutForm(_version, _pairing.FixedServer);
+        form.ShowDialog();
     }
 
     private void ShowPairing()
@@ -204,8 +248,8 @@ internal sealed class TrayContext : ApplicationContext
         }
 
         if (_runtime.State != AgentState.Sleeping && MessageBox.Show(
-                $"The agent is {_runtime.State}. Exit puts it to sleep first. Exit?",
-                "PaceLaps Race Control", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) != DialogResult.Yes)
+                "The agent is connected to Race Control. Exit puts it to sleep first. Exit?",
+                OperatorWords.ProductName, MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) != DialogResult.Yes)
         {
             return;
         }

@@ -60,21 +60,24 @@ internal static class Program
         var runtime = new AgentRuntime(parts, config, credentials, AgentVersion, new RuntimeOverrides { Server = releaseServer });
         try
         {
+            // The update notice: downloaded (release) builds only, unless the setting is off.
+            var updates = new UpdateWatch(AgentVersion, clock, () => releaseServer is not null && config.TryLoad().Config.CheckForUpdates,
+                loggers.CreateLogger<UpdateWatch>());
             using var context = new TrayContext(runtime, recent, new PairingFlow(credentials, config, AgentVersion, clock, fixedServer: releaseServer), config,
-                RunKeyAutoStart.ForThisProgram(), focus, loggers.CreateLogger<TrayContext>());
+                RunKeyAutoStart.ForThisProgram(), focus, updates, AgentVersion, loggers.CreateLogger<TrayContext>());
             instance.ShowRequested += context.ShowStatusFromAnotherStart;
             Application.Run(context);
         }
         catch (Exception e)
         {
             logger.LogCritical(e, "The tray app failed");
-            MessageBox.Show($"The agent failed: {e.Message}\n\nLogs: {AgentLogging.LogDirectory}", "PaceLaps Race Control",
+            MessageBox.Show($"The agent stopped after an error.\n\nThe log folder has the details: {AgentLogging.LogDirectory}", OperatorWords.ProductName,
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
             return 1;
         }
         finally
         {
-            // Sleep stops all traffic before the program ends.
+            // Sleep disconnects from Race Control before the program ends.
             runtime.DisposeAsync().AsTask().GetAwaiter().GetResult();
             logger.LogInformation("Stop tray app");
         }

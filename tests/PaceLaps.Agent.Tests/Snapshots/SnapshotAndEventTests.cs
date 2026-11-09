@@ -312,6 +312,40 @@ public sealed class EventDetectorTests
         Assert.Empty(detector.Observe(SimFixtures.Session(cars: [(1, "12", 0)]), SimFixtures.Frame()));
         Assert.Single(detector.Observe(SimFixtures.Session(cars: [(1, "12", 1)]), SimFixtures.Frame()));
     }
+
+    /// <summary>The session with car 12 driven by the given customer id (a team race's drivers), car 33 unchanged.</summary>
+    private static SimSession Driving(int custId, int incidents12, int incidents33 = 0)
+    {
+        var session = SimFixtures.Session(cars: [(1, "12", incidents12), (2, "33", incidents33)]);
+        return session with { Cars = session.Cars.Select(c => c.Number == "12" ? c with { CustId = custId } : c).ToList() };
+    }
+
+    [Fact]
+    public void A_driver_swap_starts_a_new_count_instead_of_a_false_incident()
+    {
+        var detector = new EventDetector();
+        detector.Observe(Driving(custId: 200001, incidents12: 4), SimFixtures.Frame());
+
+        // Driver B comes back in with 6x from an earlier stint: no incident, the new baseline is 6.
+        Assert.Empty(detector.Observe(Driving(custId: 200002, incidents12: 6), SimFixtures.Frame()));
+        // B's next incident counts from there.
+        var data = Assert.IsType<IncidentData>(Assert.Single(detector.Observe(Driving(custId: 200002, incidents12: 8), SimFixtures.Frame())).Data);
+        Assert.Equal(("12", 2, 8), (data.Car, data.Delta, data.Total));
+        // Back to A with 4x: lower, a new baseline, no event; then A's 1x.
+        Assert.Empty(detector.Observe(Driving(custId: 200001, incidents12: 4), SimFixtures.Frame()));
+        Assert.Equal(1, Assert.IsType<IncidentData>(Assert.Single(detector.Observe(Driving(custId: 200001, incidents12: 5), SimFixtures.Frame())).Data).Delta);
+    }
+
+    [Fact]
+    public void A_swap_in_one_car_does_not_hide_an_incident_in_another()
+    {
+        var detector = new EventDetector();
+        detector.Observe(Driving(custId: 200001, incidents12: 4, incidents33: 0), SimFixtures.Frame());
+
+        var e = Assert.Single(detector.Observe(Driving(custId: 200002, incidents12: 6, incidents33: 2), SimFixtures.Frame()));
+
+        Assert.Equal("33", Assert.IsType<IncidentData>(e.Data).Car);
+    }
 }
 
 public sealed class EventBufferTests

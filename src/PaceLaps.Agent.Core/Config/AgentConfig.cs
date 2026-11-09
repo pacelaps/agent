@@ -7,7 +7,7 @@ namespace PaceLaps.Agent.Core.Config;
 /// <summary>
 /// The operator's settings, kept in <c>config.json</c> next to the credentials (spec: Packaging, "a config file"): the
 /// server, the league to report in a hosted session, the macro channel with its slots, the local failsafe and its
-/// delay, where the sim's app.ini is, and whether typed commands go without the focus switch. The tray app's settings screen edits the same file; the console's options
+/// delay, where the sim's app.ini is, whether typed commands go without the focus switch, and whether to look for updates. The tray app's settings screen edits the same file; the console's options
 /// override it. Parsing reports every bad setting by name instead of failing on the first.
 /// </summary>
 public sealed record AgentConfig
@@ -29,6 +29,12 @@ public sealed record AgentConfig
     /// the focus way, as before, should an iRacing build stop accepting the posted way.
     /// </summary>
     public bool TypedWithoutFocus { get; init; } = true;
+
+    /// <summary>
+    /// Look for a newer release once a day (the update notice; downloaded builds only). On by default; it reads two
+    /// public files from the download server and sends nothing about the agent.
+    /// </summary>
+    public bool CheckForUpdates { get; init; } = true;
 
     /// <summary>Reads config.json. Unknown or invalid settings are errors; missing ones take their defaults.</summary>
     public static (AgentConfig Config, IReadOnlyList<string> Errors) Parse(string json)
@@ -72,6 +78,9 @@ public sealed record AgentConfig
                 case "typedWithoutFocus":
                     config = config with { TypedWithoutFocus = ReadBool(p.Value, "typedWithoutFocus", errors) };
                     break;
+                case "checkForUpdates":
+                    config = config with { CheckForUpdates = ReadBool(p.Value, "checkForUpdates", errors) };
+                    break;
                 default:
                     errors.Add($"unknown setting '{p.Name}'");
                     break;
@@ -100,6 +109,7 @@ public sealed record AgentConfig
             },
             ["appIni"] = AppIni,
             ["typedWithoutFocus"] = TypedWithoutFocus,
+            ["checkForUpdates"] = CheckForUpdates,
         };
 
         return JsonSerializer.Serialize(doc, new JsonSerializerOptions { WriteIndented = true });

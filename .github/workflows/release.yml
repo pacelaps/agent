@@ -1,7 +1,8 @@
 name: Release
 
 # Push a tag like v0.5.0 on main: the tests run, the package is built with that version and attached to a GitHub
-# release with its SHA-256 checksum. Versions below 1.0 and versions with a suffix (v1.0.0-rc.1) are prereleases.
+# release with its SHA-256 checksum, and published on downloads.pacelaps.com. Versions below 1.0 and versions with a
+# suffix (v1.0.0-rc.1) are prereleases.
 on:
   push:
     tags:
@@ -37,3 +38,13 @@ jobs:
           if ($version.StartsWith('0.') -or $version.Contains('-')) { $flags += '--prerelease' }
           $assets = Get-ChildItem artifacts -File | Where-Object { $_.Name -like '*.zip' -or $_.Name -like '*.zip.sha256' } | ForEach-Object { $_.FullName }
           gh release create $env:GITHUB_REF_NAME @assets --title "Agent $version" --notes "Unzip, start pacelaps-agent.exe and follow README.txt. The program is not signed yet: Windows SmartScreen asks once (More info, Run anyway). Check the zip against the .sha256 file." @flags
+
+      # downloads.pacelaps.com (Cloudflare R2): the website's download page (scripts/upload-downloads.ps1).
+      - name: Downloads
+        shell: pwsh
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+        run: ./scripts/upload-downloads.ps1 -Version ($env:GITHUB_REF_NAME.TrimStart('v'))

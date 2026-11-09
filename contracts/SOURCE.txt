@@ -1,1 +1,1 @@
-﻿Copied from webservice/contracts at commit 01de1bc. Do not edit here; run scripts/sync-contracts.ps1.
+﻿Copied from webservice/contracts at commit 497d2a8. Do not edit here; run scripts/sync-contracts.ps1.

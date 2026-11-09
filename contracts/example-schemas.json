@@ -19,10 +19,12 @@
     "event": "agent-messages.schema.json",
     "clock_": "device-messages.schema.json",
     "state_snapshot": "device-messages.schema.json",
+    "race_state": "device-messages.schema.json",
     "shown": "device-messages.schema.json",
     "hello": "agent-messages.schema.json",
     "heartbeat": "agent-messages.schema.json",
     "command_status": "agent-messages.schema.json",
-    "pairing_": "agent-pairing.schema.json"
+    "pairing_": "agent-pairing.schema.json",
+    "penalty_catalog": "penalty-catalog.schema.json"
   }
 }

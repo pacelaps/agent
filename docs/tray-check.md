@@ -20,8 +20,10 @@ or run `src\PaceLaps.Agent.Tray\bin\x64\Debug\net10.0-windows\win-x64\pacelaps-a
 | 6 | Right-click, Settings. Change the league id to `abc`, Save. | Not saved; the error names `league`. Set it back (or empty), tick the local failsafe, set 45 s, Save. The status window shows "Local failsafe: on (after 45 s)". |
 | 7 | Settings: tick Start with Windows, Save. Open it again. | Still ticked. (Registry value "PaceLaps Agent" under HKCU\Software\Microsoft\Windows\CurrentVersion\Run.) Untick it and Save. |
 | 7b | Settings: "Send typed commands without bringing iRacing to the front" is ticked (the default). Untick it, Save, open again. | Unticked; `config.json` has `"typedWithoutFocus": false`. Tick it again and Save. |
+| 7c | Settings: "Look for a new version once a day" is ticked (the default). | `config.json` has `"checkForUpdates": true` after a Save. A local build never checks; step 11 uses a release build. |
 | 8 | Right-click, Activate (iRacing not running). | Blue while the self-test runs, then a notification "Self-test failed: Step 1 ..." and a red icon. The status window shows the failed step; the state is Sleeping again. |
 | 9 | Right-click, Open the log folder. | Explorer opens `%LOCALAPPDATA%\PaceLaps\Agent\logs`. |
 | 10 | Right-click, Exit. | The icon goes away. |
+| 11 | Update notice: `./scripts/publish.ps1 -Version 0.1.0 -Server https://racecontrol.pacelaps.com`, unzip it, start that `pacelaps-agent.exe` (exit the other one first). | Within seconds a notification "Update available: PaceLaps Agent <newest> is available." and the menu's top line "Update available: <newest>...". It opens a window with what's new; Open the download page opens pacelaps.com/download. The Sleep item reads "Sleep (disconnect from Race Control)". The log has "Update check: <newest> is available". |
 
 Write down anything that looks wrong or reads badly, with the step number.

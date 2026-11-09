@@ -79,6 +79,10 @@ if (Test-Path $stage) {
 New-Item -ItemType Directory $stage | Out-Null
 Copy-Item $exe $stage
 Copy-Item (Join-Path $root 'docs/operator-guide.md') (Join-Path $stage 'README.txt')
+# The agent is free software under the GPL-3.0 (IRSDKSharper's licence): the licence and the libraries' notices travel with it.
+Copy-Item (Join-Path $root 'LICENSE') (Join-Path $stage 'LICENSE.txt')
+Copy-Item (Join-Path $root 'THIRD-PARTY-NOTICES.md') (Join-Path $stage 'THIRD-PARTY-NOTICES.txt')
+Copy-Item (Join-Path $root 'licenses/dotnet-runtime-notices.txt') (Join-Path $stage 'dotnet-runtime-notices.txt')
 
 $zip = Join-Path $artifacts "$name.zip"
 if (Test-Path $zip) {

@@ -1,4 +1,5 @@
 using PaceLaps.Agent.Core.Contracts;
+using PaceLaps.Agent.Core.Updates;
 
 namespace PaceLaps.Agent.Hosting.Tray;
 
@@ -37,12 +38,12 @@ public static class TrayPresenter
             };
         var detail = Problem(s) ?? s.State switch
         {
-            AgentState.Active => (s.IsExecutor ? "executor" : s.Channels?.Typed == ChannelReadiness.Disabled ? "view only (replays)" : "observer") + (s.SessionName is { } name ? $", {name}" : ""),
-            AgentState.Ready => s.NotActiveReason ?? "no session yet",
-            AgentState.SelfTest => "self-test running",
-            _ => s.Paired ? "Activate to run the self-test" : "not paired yet",
+            AgentState.Active => OperatorWords.Role(s) + (s.SessionName is { } name ? $" ({name})" : ""),
+            AgentState.Ready => s.NotActiveReason ?? "waiting for a session",
+            AgentState.SelfTest => "answer its questions",
+            _ => s.Paired ? "Activate in your session" : "not paired yet",
         };
-        var tooltip = $"PaceLaps Race Control: {s.State}, {detail}";
+        var tooltip = $"{OperatorWords.ProductName}: {OperatorWords.State(s)}, {detail}";
         return new TrayView(icon, tooltip.Length <= MaxTooltip ? tooltip : tooltip[..(MaxTooltip - 3)] + "...",
             CanActivate: s.State == AgentState.Sleeping && !busy,
             CanSleep: s.State != AgentState.Sleeping,
@@ -61,8 +62,8 @@ public static class TrayPresenter
         if (now.LastSelfTest is { } report && !ReferenceEquals(report, before.LastSelfTest))
         {
             notices.Add(report.Passed
-                ? new TrayNotice("Self-test passed", "The agent is ready.", false)
-                : new TrayNotice("Self-test failed", report.Steps.FirstOrDefault(x => !x.Passed) is { } step ? $"Step {step.Number} {step.Name}: {step.Detail}" : "See the status window.", true));
+                ? new TrayNotice("Self-test passed", "Ready. The agent joins your session by itself.", false)
+                : new TrayNotice("Self-test failed", report.Steps.FirstOrDefault(x => !x.Passed) is { } step ? OperatorWords.Step(step) : "See the status window.", true));
         }
         else if (now.State == AgentState.Sleeping && now.Problem is { } problem && problem != before.Problem)
         {
@@ -71,40 +72,52 @@ public static class TrayPresenter
 
         if (now.IsExecutor && !before.IsExecutor)
         {
-            notices.Add(new TrayNotice("Executor", $"This agent sends the commands{(now.SessionName is { } s ? $" for {s}" : "")}.", false));
+            notices.Add(new TrayNotice("You send the commands", $"This agent types race control's commands{(now.SessionName is { } s ? $" for {s}" : "")}.", false));
         }
         else if (!now.IsExecutor && before.IsExecutor && now.State is AgentState.Ready or AgentState.Active)
         {
-            notices.Add(new TrayNotice("No longer the executor", "Another agent sends the commands now.", false));
+            notices.Add(new TrayNotice("Standby", "Another agent sends the commands now.", false));
         }
 
         if (before.ServerOnline == true && now.ServerOnline == false)
         {
-            notices.Add(new TrayNotice("Server unreachable", "Events are sent once it's back.", true));
+            notices.Add(new TrayNotice("Can't reach Race Control", "What happens in the race is sent once it's back.", true));
         }
         else if (before.ServerOnline == false && now.ServerOnline == true)
         {
-            notices.Add(new TrayNotice("Server reachable again", "Sending buffered events.", false));
+            notices.Add(new TrayNotice("Race Control is back", "Sending what happened meanwhile.", false));
         }
 
         if (now.Channels?.Typed == ChannelReadiness.Failed && before.Channels?.Typed != ChannelReadiness.Failed)
         {
-            notices.Add(new TrayNotice("Typing into iRacing failed", "Another agent takes over. Run the self-test again.", true));
+            notices.Add(new TrayNotice("Typing into iRacing failed", "Another agent takes over. Sleep, then Activate to test again.", true));
         }
 
         if (now.LocalFailsafeSince is not null && before.LocalFailsafeSince is null)
         {
-            notices.Add(new TrayNotice("Local failsafe started", $"No server: running {now.LocalFailsafeHeld}. A steward releases it in race control.", true));
+            notices.Add(new TrayNotice("Local failsafe started", $"No Race Control: running {now.LocalFailsafeHeld}. A steward ends it in race control.", true));
         }
 
         return notices;
     }
 
+    /// <summary>The menu's update line, or null while there is no newer release.</summary>
+    public static string? UpdateMenuText(UpdateOffer? offer) => offer is null ? null : $"Update available: {offer.Version}...";
+
+    /// <summary>
+    /// The notification for a newer release: once per version, and never while the agent is Active or running its
+    /// self-test (a race is on); it comes when the agent is Ready or Sleeping again.
+    /// </summary>
+    public static TrayNotice? UpdateNotice(UpdateOffer? offer, string? alreadyShown, AgentStatus now) =>
+        offer is null || offer.Version == alreadyShown || now.State is AgentState.Active or AgentState.SelfTest
+            ? null
+            : new TrayNotice("Update available", $"PaceLaps Agent {offer.Version} is available. Open the menu to see what's new.", false);
+
     /// <summary>What is wrong right now, if anything: shown red.</summary>
     private static string? Problem(AgentStatus s) => s switch
     {
-        { LocalFailsafeSince: not null } => "LOCAL FAILSAFE RUNNING",
-        { State: AgentState.Ready or AgentState.Active, ServerOnline: false } => "server unreachable",
+        { LocalFailsafeSince: not null } => "local failsafe running",
+        { State: AgentState.Ready or AgentState.Active, ServerOnline: false } => "can't reach Race Control",
         { State: AgentState.Ready or AgentState.Active, Channels.Typed: ChannelReadiness.Failed } => "typing into iRacing failed",
         { State: AgentState.Sleeping, Problem: { } p } => p,
         { SettingsErrors.Count: > 0 } => "the settings file has errors",

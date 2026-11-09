@@ -1,5 +1,8 @@
 # Phase 0 spike results
 
+The checks in iRacing that the agent's design rests on. The raw logs and recordings each result names stay with the
+developer (they hold session data); the results below are what they showed.
+
 ## How to run
 
 Build with `dotnet build` in the `agent` folder. Then run, in a normal (not administrator) terminal:
@@ -50,7 +53,7 @@ Record for every run: date, iRacing build/version, agent build (git commit), win
 | 8 | Can the agent read the operator's name and detect session admin? | pass | 2026-10-25 | Name readable; DriverIsAdmin true as host, false without admin rights |
 | 9 | How does a caution extend? | pass | 2026-10-25 | At one to go, !pacelaps +n, !pacelaps n and !yellow all extend; !pacelaps only after the first caution lap; cap 20 |
 | 10 | Can the macro configuration be read? | pass | 2026-10-25 | Macro texts in app.ini [Autochat Messages]; key bindings binary (controls.cfg), not read |
-| 11 | Are the session identity fields available? | open (no league session) | 2026-10-25 | Ids read in an official session (league 0); needs a league session |
+| 11 | Are the session identity fields available? | pass | 2026-11-09 | League id 15457 read in a league session, without admin rights |
 | 12 | Which harmless command can verify the typed channel? | pass (sender's view) | 2026-10-25 | !help: reply to the sender, no race effect |
 | 13 | Can a caution be thrown without the AI pace car? | fail | 2026-10-25 | No session option to disable the pace car: fallback applies |
 | 14 | Do Spotter and Crew Chief react to iRacing's flags? | pass | 2026-10-25 | Crew Chief and iRacing's built-in spotter announced caution, green and black flags |
@@ -283,13 +286,17 @@ Record for every run: date, iRacing build/version, agent build (git commit), win
 - **Pass criteria:** The league id is not zero and matches the league
 - **If it fails:** The operator selects the league in the agent
 
-- **Result:** open: no league session was available.
-- **Date / iRacing build / agent build:** 2026-10-25 12:50 UTC / 2026.10.01.01 / spikes-4-14 (3e47989)
+- **Result:** pass
+- **Date / iRacing build / agent build:** 2026-11-09 18:16 UTC / 2026.11.02.01 / 0.1.0+eeaf516
 - **Notes:**
-  - In an official testing session: league id 0, season id 6463, session id 325843427, sub-session id 89629604. In the hosted sessions of the other spikes, league id 0 and sub-session id 0.
-  - The fields exist and are read. Whether the league id is set in a league session is still to see.
-- **Logs:** `docs/spike-logs/spike-11-20261025-125005Z-bc81.jsonl`
-- **Consequence:** none yet. The proof of concept already supports the fallback (`--league`, the operator selects the league). Re-run `spike11` in a league session.
+  - In a league session (a practice of another league, the user joined as a driver without admin rights): league id
+    15457, season id 0, session id 327492457, sub-session id 89997704. The summary's league page id is the league id.
+  - Earlier (2026-10-25, build 2026.10.01.01): in an official testing session league id 0, season id 6463; in the
+    hosted sessions of the other spikes league id 0 and sub-session id 0.
+  - The agent reads the league id without admin rights.
+- **Logs:** `docs/spike-logs/spike-11-20261109-181633Z-e355.jsonl`, `docs/spike-logs/spike-11-20261025-125005Z-bc81.jsonl`
+- **Consequence:** none. The agent takes the league from the session; the fallback (the operator selects the league)
+  stays for hosted sessions outside a league.
 
 ## Spike 12: Which harmless command can verify the typed channel?
 
@@ -569,9 +576,22 @@ For class names and colours from iRacing. Runner: console `classes-record`
   - **Class ids:** the Mazda MX-5 Cup was class 74 here and in the results check of 2026-11-03 (another day, same
     track): the ids look like iRacing's own fixed class ids. The event: `EventType` Race, `Category` SportsCar,
     `LeagueID` 0, `NumCarClasses` 5.
-  - **Still open:** a hosted session, to see whether `CarClassShortName` is filled in there, whether it is the
-    admin's name or iRacing's, and whether a class the admin builds gets an id of its own.
   - **Recording:** `docs/recordings/classes-default.jsonl` (local, not committed).
+
+- **Checked in the sim, part 2** (2026-11-09, iRacing 2026.11.02.01, a league's practice at Okayama International
+  Circuit, the user as a driver without admin rights, three classes, 9 cars): pass.
+  - **Name:** `CarClassShortName` is filled in: "M2", "GT4", "CUP". These look like the names the league gave its
+    classes (all capitals, and a "GT4" class of two car models); not confirmed against the league's session setup.
+  - **Class ids:** 89882, 89883, 89884, not iRacing's fixed ids (74 for the MX-5 Cup in the AI session): a class
+    the league builds gets an id of its own.
+  - **Colour:** as in part 1, text `0xrrggbb` (`0xff5888`, `0x33ceff`, `0xffda59`), the same on all cars of a class.
+    (The recorder prints each value with its type, "0xff5888 (String)"; the type is not part of the value.) The pace
+    car is class 11 with colour `0x000000` and no name.
+  - **Same per class:** all cars of a class carried the same name and colour. `NumCarClasses` 4 counts the pace car's
+    class.
+  - **Consequence:** none for the code: the agent sends the name, the colour and the car models (0.12+), and race
+    control shows the stewards' name first, then iRacing's.
+  - **Recording:** `docs/recordings/classes-20261109-181721Z.jsonl` (local, not committed).
 
 ## Results check: iRacing's results through the finish (added 2026-11-03)
 

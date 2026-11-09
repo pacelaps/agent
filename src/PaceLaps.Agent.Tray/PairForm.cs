@@ -24,6 +24,7 @@ internal sealed class PairForm : Form
     {
         _flow = flow;
         Text = "Pair with PaceLaps Race Control";
+        Icon = TrayIcons.Program;
         StartPosition = FormStartPosition.CenterScreen;
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = MinimizeBox = false;

@@ -1,3 +1,4 @@
+using PaceLaps.Agent.Hosting.Tray;
 using PaceLaps.Agent.Core.SelfTest;
 
 namespace PaceLaps.Agent.Tray;
@@ -24,7 +25,8 @@ internal sealed class DialogPrompt(SynchronizationContext ui) : IOperatorPrompt
     {
         public ConfirmForm(string question)
         {
-            Text = "PaceLaps Race Control: self-test";
+            Text = $"{OperatorWords.ProductName}: self-test";
+            Icon = TrayIcons.Program;
             TopMost = true;
             StartPosition = FormStartPosition.CenterScreen;
             FormBorderStyle = FormBorderStyle.FixedDialog;
