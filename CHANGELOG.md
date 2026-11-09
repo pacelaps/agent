@@ -6,9 +6,13 @@ heading is `## <version> – <yyyy-mm-dd>`; `scripts/upload-downloads.ps1` publi
 
 ## Unreleased
 
-- Tells you when a new version is out: a notification and "Update available" in the menu, with what's new and a link to the download page. Turn it off in the settings.
-- The Sleep item now reads "Sleep (disconnect from Race Control)".
+- A new app window in the PaceLaps look: the status at a glance (iRacing, Race Control, typing, the local failsafe), the last commands with their result, the self-test step by step, and the settings.
+- A welcome on the first start, and pairing with the code in large characters, a copy button and the time left.
+- Notifications in the PaceLaps look at the bottom right of iRacing's screen. They never take the focus from the sim.
+- The PaceLaps icon by the clock, with a badge in the state's colour.
+- Tells you when a new version is out: a notification and "Update available" in the menu, which opens the download page. Turn it off in the settings.
 - Team races: a driver swap no longer shows up as an incident.
+- The agent is now free software under the GNU GPL version 3; the source is on GitHub.
 
 ## 0.12.0 – 2026-11-04
 

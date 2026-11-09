@@ -17,6 +17,9 @@
         <DataTemplate DataType="{x:Type shell:PairingPageModel}">
             <shell:PairingPage />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type shell:AboutPageModel}">
+            <shell:AboutPage />
+        </DataTemplate>
         <DataTemplate DataType="{x:Type shell:SettingsPageModel}">
             <shell:SettingsPage />
         </DataTemplate>
@@ -47,6 +50,8 @@
         <Border DockPanel.Dock="Left" Width="210" BorderBrush="{StaticResource LineSubtle}" BorderThickness="0,0,1,0" Visibility="{Binding ShowRail, Converter={StaticResource Shown}}">
             <DockPanel Margin="12,16">
                 <StackPanel DockPanel.Dock="Bottom">
+                    <RadioButton Style="{StaticResource NavItem}" GroupName="Rail" Height="34" FontSize="13" Margin="0,0,0,8" Command="{Binding NavigateCommand}" CommandParameter="{x:Static shell:Screen.About}"
+                                 IsChecked="{Binding Screen, Mode=OneWay, Converter={StaticResource Is}, ConverterParameter=About}" Content="About and help" />
                     <Border BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="10" Padding="12" Visibility="{Binding Paired, Converter={StaticResource Shown}}">
                         <StackPanel>
                             <TextBlock Style="{StaticResource Eyebrow}" Text="{Binding Source='Paired with', Converter={StaticResource Upper}, ConverterParameter=spaced}" />

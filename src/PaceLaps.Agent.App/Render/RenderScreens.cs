@@ -60,17 +60,18 @@ public static class RenderScreens
         var flow = new PairingFlow(new CredentialStore(Path.Combine(temp, "credentials.bin")), new ConfigStore(Path.Combine(temp, "config.json")), "0.13.0",
             new PaceLaps.Agent.Core.Time.SystemClock(), fixedServer: Server);
         var unpaired = new AgentStatus { State = AgentState.Sleeping, Server = Server, SimRunning = true };
-        foreach (var (name, screen) in new[] { ("welcome", Screen.Welcome), ("pairing", Screen.Pairing), ("settings", Screen.Settings), ("settings-macros", Screen.Settings) })
+        foreach (var (name, screen) in new[] { ("welcome", Screen.Welcome), ("pairing", Screen.Pairing), ("settings", Screen.Settings), ("settings-macros", Screen.Settings), ("about", Screen.About) })
         {
             var model = new ShellModel("0.13.0", _ => Task.CompletedTask);
             model.Welcome = new WelcomePageModel(new NoAutoStart(), () => { });
             model.Pairing = new PairingPageModel(flow, _ => { }, () => { });
             model.Settings = new SettingsPageModel(new ConfigStore(Path.Combine(temp, "config.json")), new NoAutoStart(), null);
+            model.About = new AboutPageModel("0.13.0", Server);
             model.Pairing.Preview(new PairingCodeMessage
             {
                 PairingId = "p1", UserCode = "K7Q-4MD", VerificationUrl = "https://racecontrol.pacelaps.com/pair", ExpiresAt = DateTimeOffset.Now.AddMinutes(9.7), IntervalSec = 3,
             });
-            model.Update(unpaired);
+            model.Update(name == "about" ? Samples().First().Status : unpaired);
             model.Screen = screen;
             if (name == "settings-macros")
             {

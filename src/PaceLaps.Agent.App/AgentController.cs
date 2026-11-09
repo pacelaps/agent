@@ -53,6 +53,7 @@ public sealed class AgentController : IDisposable
         prompt.Asking += question => _shell.SelfTest.Asking = question;
         _shell.Welcome = new WelcomePageModel(autoStart, () => _shell.Screen = Screen.Pairing);
         _shell.Settings = new SettingsPageModel(config, autoStart, pairing.FixedServer);
+        _shell.About = new AboutPageModel(version, pairing.FixedServer);
         _shell.Pairing = new PairingPageModel(pairing, Paired, () => _shell.Screen = _runtime.Status().Paired ? Screen.Status : Screen.Welcome);
         _icons = new TrayIconSet((int)Math.Round(SystemParameters.SmallIconWidth * DpiScale()));
         _menu = new TrayMenu(new TrayActions(OpenWindow, Activate, SleepAsync, OpenSettings, OpenDownloadPage, OpenLogFolder, ExitAsync));

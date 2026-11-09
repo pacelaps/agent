@@ -13,6 +13,7 @@ public enum Screen
     Settings,
     Welcome,
     Pairing,
+    About,
 }
 
 /// <summary>
@@ -48,6 +49,8 @@ public sealed partial class ShellModel : ObservableObject
 
     public SettingsPageModel? Settings { get; set; }
 
+    public AboutPageModel? About { get; set; }
+
     [ObservableProperty]
     private bool _paired;
 
@@ -63,6 +66,7 @@ public sealed partial class ShellModel : ObservableObject
         Screen.Welcome => (object?)Welcome ?? Status,
         Screen.Pairing => (object?)Pairing ?? Status,
         Screen.Settings => (object?)Settings ?? Status,
+        Screen.About => (object?)About ?? Status,
         _ => Status,
     };
 
