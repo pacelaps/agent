@@ -122,6 +122,25 @@ public sealed class StatusViewTests
             StatusView.From(Active() with { LocalFailsafeSince = DateTimeOffset.UnixEpoch, LocalFailsafeHeld = "Local failsafe v2" }).SideName));
     }
 
+    [Fact]
+    public void Last_commands_show_what_was_typed_how_it_ended_and_how_long_it_took()
+    {
+        var at = new DateTimeOffset(2026, 11, 10, 20, 46, 58, TimeSpan.Zero);
+        var commands = Enumerable.Range(0, 8).Select(i => new PaceLaps.Agent.Core.Commands.FinishedCommand($"c{i}", "pit_close", "!pitclose", CommandOutcome.Sent, null, at, TimeSpan.FromMilliseconds(161), false))
+            .Prepend(new PaceLaps.Agent.Core.Commands.FinishedCommand("y", "yellow", "!yellow Full course caution", CommandOutcome.Verified, "via typed", at, TimeSpan.FromMilliseconds(166.4), false))
+            .Prepend(new PaceLaps.Agent.Core.Commands.FinishedCommand("b", "black_flag", "!black #42 D", CommandOutcome.Failed, "typing failed", at, TimeSpan.FromMilliseconds(900), true))
+            .ToList();
+
+        var view = StatusView.From(Active() with { RecentCommands = commands });
+
+        Assert.Equal(StatusView.CommandLines, view.Commands.Count);
+        Assert.Equal(("!black #42 D", "Failed", StatusCheck.Problem, "900 ms", true, "typing failed"),
+            (view.Commands[0].Text, view.Commands[0].Result, view.Commands[0].Check, view.Commands[0].Took, view.Commands[0].Local, view.Commands[0].Detail));
+        Assert.Equal(("!yellow Full course caution", "Verified", StatusCheck.Ok, "166 ms", (string?)null),
+            (view.Commands[1].Text, view.Commands[1].Result, view.Commands[1].Check, view.Commands[1].Took, view.Commands[1].Detail));
+        Assert.Equal(at.ToLocalTime().ToString("HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture), view.Commands[1].Time);
+    }
+
     private static (string, StatusAction) Head(AgentStatus s)
     {
         var view = StatusView.From(s);

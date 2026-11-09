@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using PaceLaps.Agent.App.Shell;
+using PaceLaps.Agent.Core.Commands;
 using PaceLaps.Agent.Core.Config;
 using PaceLaps.Agent.Core.Contracts;
 using PaceLaps.Agent.Core.SelfTest;
@@ -54,6 +55,7 @@ public static class RenderScreens
             State = AgentState.Active, ServerOnline = true, Realtime = true, IsExecutor = true, Epoch = 3, SessionName = "Round 4 Race", Channels = Channels,
             TrackName = "Okayama International Circuit", ClockOffset = TimeSpan.FromMilliseconds(14), LocalFailsafe = new LocalFailsafeSettings { Enabled = true, DelaySeconds = 30 },
             LocalFailsafeHeld = "Local failsafe v2", LastSelfTest = Passed(), LastSelfTestAt = DateTimeOffset.Now.AddMinutes(-12),
+            RecentCommands = Commands(),
         };
 
         yield return ("status-executor", active, Screen.Status);
@@ -61,9 +63,33 @@ public static class RenderScreens
         yield return ("status-ready", active with { State = AgentState.Ready, SessionName = null, IsExecutor = false }, Screen.Status);
         yield return ("status-sleeping", sleeping with { LastSelfTest = Passed(), LastSelfTestAt = DateTimeOffset.Now.AddHours(-2) }, Screen.Status);
         yield return ("status-offline", active with { ServerOnline = false, EventsBuffered = 7 }, Screen.Status);
-        yield return ("status-failsafe", active with { ServerOnline = false, EventsBuffered = 7, LocalFailsafeSince = DateTimeOffset.Now.AddSeconds(-95) }, Screen.Status);
+        yield return ("status-failsafe", active with { ServerOnline = false, EventsBuffered = 7, LocalFailsafeSince = DateTimeOffset.Now.AddSeconds(-95), RecentCommands = FailsafeCommands() }, Screen.Status);
         yield return ("status-not-paired", sleeping with { AgentId = null, SimInSession = false, CarCount = 0 }, Screen.Status);
         yield return ("settings-placeholder", active, Screen.Settings);
+    }
+
+    private static List<FinishedCommand> Commands()
+    {
+        var now = DateTimeOffset.Now;
+        return
+        [
+            new("c4", "yellow", "!yellow Full course caution", CommandOutcome.Verified, "via typed; caution flag", now.AddSeconds(-14), TimeSpan.FromMilliseconds(166), false),
+            new("c3", "pit_close", "!pitclose", CommandOutcome.Sent, "via typed", now.AddMinutes(-3), TimeSpan.FromMilliseconds(161), false),
+            new("c2", "black_flag", "!black #42 D", CommandOutcome.Verified, "via typed; black flag", now.AddMinutes(-4), TimeSpan.FromMilliseconds(172), false),
+            new("c1", "announce", "Pit lane closes in 5 minutes", CommandOutcome.Sent, "via typed", now.AddMinutes(-8), TimeSpan.FromMilliseconds(158), false),
+        ];
+    }
+
+    private static List<FinishedCommand> FailsafeCommands()
+    {
+        var now = DateTimeOffset.Now;
+        return
+        [
+            new("local_3", "pace_laps_add", "!pacelaps +1", CommandOutcome.Sent, "via typed", now.AddSeconds(-20), TimeSpan.FromMilliseconds(163), true),
+            new("local_2", "yellow", "!yellow Full course yellow, race control lost connection", CommandOutcome.Verified, "via typed; caution flag", now.AddSeconds(-94), TimeSpan.FromMilliseconds(170), true),
+            new("local_1", "restart", "!restart single", CommandOutcome.Sent, "via typed", now.AddSeconds(-95), TimeSpan.FromMilliseconds(159), true),
+            .. Commands().Skip(1),
+        ];
     }
 
     private static SelfTestReport Passed() => new(true,

@@ -38,6 +38,9 @@ public enum StatusStrip
 /// <summary>One of the status screen's tiles: what it is about, how it is, in a word, and a line under it.</summary>
 public sealed record StatusTile(string Label, StatusCheck Check, string Value, string Detail);
 
+/// <summary>A line of the status screen's "Last commands": when, what was typed, how it ended, how long it took.</summary>
+public sealed record StatusCommand(string Time, string Text, string Result, StatusCheck Check, string Took, bool Local, string? Detail);
+
 /// <summary>
 /// What the status window shows (the agent polish plan, 3.3): a header in the state's colour with a sentence on what is
 /// going on and the one button that fits; rows for iRacing, Race Control, the session and the pairing; the last
@@ -62,6 +65,7 @@ public sealed record StatusView(
         return new StatusView(tone, title, sentence, action, RowsOf(s), SummaryOf(s), StepsOf(s.LastSelfTest), FailsafeOf(s), DetailsOf(s))
         {
             Strip = StripOf(s, tone), Eyebrow = EyebrowOf(s), SideLabel = sideLabel, SideName = sideName, Role = role, Tiles = TilesOf(s),
+            Commands = CommandsOf(s),
         };
     }
 
@@ -79,6 +83,11 @@ public sealed record StatusView(
     public string? Role { get; init; }
 
     public IReadOnlyList<StatusTile> Tiles { get; init; } = [];
+
+    /// <summary>The last commands this agent finished, newest first (at most <see cref="CommandLines"/>).</summary>
+    public IReadOnlyList<StatusCommand> Commands { get; init; } = [];
+
+    public const int CommandLines = 6;
 
     /// <summary>The label on the header's button.</summary>
     public static string ActionText(StatusAction action) => action switch
@@ -183,6 +192,16 @@ public sealed record StatusView(
                     connected ? "Armed" : "On", $"After {s.LocalFailsafe.DelaySeconds} s without Race Control"),
         ];
     }
+
+    private static List<StatusCommand> CommandsOf(AgentStatus s) => s.RecentCommands.Take(CommandLines).Select(c => new StatusCommand(
+            c.At.ToLocalTime().ToString("HH:mm:ss", CultureInfo.InvariantCulture),
+            c.Text,
+            c.Outcome switch { CommandOutcome.Verified => "Verified", CommandOutcome.Failed => "Failed", _ => "Sent" },
+            c.Outcome switch { CommandOutcome.Verified => StatusCheck.Ok, CommandOutcome.Failed => StatusCheck.Problem, _ => StatusCheck.Off },
+            $"{Math.Max(0, (int)c.Took.TotalMilliseconds).ToString(CultureInfo.InvariantCulture)} ms",
+            c.Local,
+            c.Outcome == CommandOutcome.Failed ? c.Detail : null))
+        .ToList();
 
     private static string Join(string a, string b) => b.Length == 0 ? a : $"{a} · {b}";
 

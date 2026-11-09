@@ -81,6 +81,9 @@ public sealed class AgentRuntime : IAsyncDisposable
     /// <summary>When <see cref="LastSelfTest"/> ended.</summary>
     public DateTimeOffset? LastSelfTestAt { get; private set; }
 
+    /// <summary>The commands finished lately, across Sleep and Activate (the app's Last commands).</summary>
+    public RecentCommands RecentCommands { get; } = new();
+
     /// <summary>Why the agent last went back to Sleeping (a failed self-test names the step).</summary>
     public string? LastFailure { get; private set; }
 
@@ -127,6 +130,7 @@ public sealed class AgentRuntime : IAsyncDisposable
             var host = new AgentHost(options, _parts.Sim, connection.Link, _parts.Typed, _parts.Macro, macros, _parts.Replay, _parts.Prompt,
                 _parts.Clock, _parts.Loggers, _parts.MacroConfig(appIni), _parts.LocalFailsafeStore);
             host.States.Changed += (from, to, reason) => StateChanged?.Invoke(from, to, reason);
+            host.Executor.Finished += RecentCommands.Add;
             (Host, Connection, Problem, LastFailure) = (host, connection, null, null);
             _stop = new CancellationTokenSource();
             var token = _stop.Token;

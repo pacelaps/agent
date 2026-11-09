@@ -9,4 +9,5 @@
     <t:Upper x:Key="Upper" />
     <t:Shown x:Key="Shown" />
     <t:Is x:Key="Is" />
+    <t:CheckResult x:Key="CheckResult" />
 </ResourceDictionary>

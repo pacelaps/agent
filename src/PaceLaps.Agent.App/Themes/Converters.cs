@@ -130,3 +130,17 @@ public sealed class Is : IValueConverter
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotSupportedException();
 }
+
+/// <summary>The colour of a result word (Verified green, Failed red, Sent neutral).</summary>
+public sealed class CheckResult : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture) => value switch
+    {
+        StatusCheck.Ok => Theme.Brush("GreenText"),
+        StatusCheck.Warning => Theme.Brush("YellowText"),
+        StatusCheck.Problem => Theme.Brush("RedText"),
+        _ => Theme.Brush("FgMuted"),
+    };
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotSupportedException();
+}

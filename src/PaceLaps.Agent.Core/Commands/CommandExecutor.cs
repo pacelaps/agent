@@ -10,6 +10,12 @@ using Microsoft.Extensions.Logging.Abstractions;
 
 namespace PaceLaps.Agent.Core.Commands;
 
+/// <summary>
+/// A command this agent finished, for the operator's list of recent commands: what was typed (or what the command
+/// does, for one that types nothing), how it ended and how long it took from queueing. Local only, never sent.
+/// </summary>
+public sealed record FinishedCommand(string Id, string Type, string Text, CommandOutcome Outcome, string? Detail, DateTimeOffset At, TimeSpan Took, bool Local);
+
 /// <summary>Where command status steps go (the server link in the host).</summary>
 public interface IStatusSink
 {
@@ -107,6 +113,12 @@ public sealed class CommandExecutor
     /// <summary>The typed channel failed <see cref="TypedFailuresBeforeChannelFails"/> times in a row; the reason of the last.</summary>
     public event Action<string>? TypedChannelFailed;
 
+    /// <summary>A command got its result (the server's and the local failsafe's): for the operator's recent commands.</summary>
+    public event Action<FinishedCommand>? Finished;
+
+    /// <summary>Queued commands' text and start, until their result (<see cref="Finished"/>).</summary>
+    private readonly Dictionary<string, (string Type, string Text, TimeSpan Queued, bool Local)> _pending = new(StringComparer.Ordinal);
+
     /// <summary>The executor epoch the server assigned. Commands with an older epoch are rejected.</summary>
     public long Epoch { get; set; }
 
@@ -150,6 +162,7 @@ public sealed class CommandExecutor
         }
 
         _logger.LogInformation("Command {Id} {Type} queued: {Text}", command.Id, command.Type, rendered.Command!.ChatText);
+        Pending(command.Id, rendered.Command!, local: false);
         _queue.Writer.TryWrite((command, rendered.Command!));
     }
 
@@ -179,6 +192,7 @@ public sealed class CommandExecutor
             IssuedAt = _clock.UtcNow, IssuedBy = "local-failsafe",
         };
         _logger.LogInformation("Local failsafe command {Id} {Type} queued: {Text}", id, type, rendered.Command!.ChatText);
+        Pending(id, rendered.Command!, local: true);
         _queue.Writer.TryWrite((command, rendered.Command!));
         return done.Task;
     }
@@ -451,6 +465,18 @@ public sealed class CommandExecutor
     private void Result(string id, CommandOutcome outcome, string? detail)
     {
         TaskCompletionSource<(CommandOutcome, string?)>? local;
+        (string Type, string Text, TimeSpan Queued, bool Local) pending;
+        bool wasPending;
+        lock (_gate)
+        {
+            wasPending = _pending.Remove(id, out pending);
+        }
+
+        if (wasPending)
+        {
+            Finished?.Invoke(new FinishedCommand(id, pending.Type, pending.Text, outcome, detail, _clock.UtcNow, _clock.Elapsed - pending.Queued, pending.Local));
+        }
+
         lock (_gate)
         {
             if (_local.Remove(id, out local))
@@ -484,6 +510,20 @@ public sealed class CommandExecutor
         }
 
         _sink.Report(status);
+    }
+
+    private void Pending(string id, RenderedCommand rendered, bool local)
+    {
+        var text = rendered.ChatText ?? rendered.Type switch
+        {
+            "replay_jump" => rendered.Car is { } car ? $"Replay of #{car}" : "Replay",
+            "replay_live" => "Replay back to live",
+            var type => type,
+        };
+        lock (_gate)
+        {
+            _pending[id] = (rendered.Type, text, _clock.Elapsed, local);
+        }
     }
 
     private void Remember(string id)

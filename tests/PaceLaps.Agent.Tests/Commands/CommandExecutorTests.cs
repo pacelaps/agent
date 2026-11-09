@@ -73,6 +73,20 @@ public sealed class CommandExecutorTests
     }
 
     [Fact]
+    public async Task A_finished_command_is_reported_with_its_text_and_outcome_for_the_operator()
+    {
+        var finished = new List<FinishedCommand>();
+        _executor.Finished += finished.Add;
+        _sim.FrameSource = () => _desktop.Typed.Contains("!yellow", StringComparison.Ordinal) ? Caution() : SimFixtures.Frame();
+
+        await Run(Cmd("c1", "yellow"), Cmd("c2", "yellow", epoch: 0));
+
+        var only = Assert.Single(finished);
+        Assert.Equal(("c1", "yellow", "!yellow", CommandOutcome.Verified, false), (only.Id, only.Type, only.Text, only.Outcome, only.Local));
+        Assert.True(only.Took >= TimeSpan.Zero);
+    }
+
+    [Fact]
     public async Task Every_status_the_executor_sends_is_valid_against_the_contract()
     {
         await Run(Cmd("a", "yellow"), Cmd("b", "pit_close"), Cmd("c", "clear", """{"car":"x"}"""), Cmd("d", "black_flag", """{"car":"12","mode":"drive_through"}"""));

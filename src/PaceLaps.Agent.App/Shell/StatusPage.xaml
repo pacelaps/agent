@@ -77,30 +77,68 @@
             </ItemsControl.ItemTemplate>
         </ItemsControl>
 
-        <!-- The last self-test -->
-        <Border Grid.Row="2" Style="{StaticResource Card}" Margin="0,16,0,0" Padding="18,16">
-            <DockPanel>
-                <DockPanel DockPanel.Dock="Top">
-                    <TextBlock DockPanel.Dock="Right" Style="{StaticResource Small}" Text="{Binding View.SelfTestSummary}" />
-                    <TextBlock Style="{StaticResource CardTitle}" Text="Self-test" />
+        <!-- Last commands and the last self-test -->
+        <Grid Grid.Row="2" Margin="0,16,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="12" />
+                <ColumnDefinition Width="2*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Style="{StaticResource Card}" Padding="18,16">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top" Style="{StaticResource CardTitle}" Text="Last commands" />
+                    <Grid ClipToBounds="True">
+                        <TextBlock Style="{StaticResource Small}" Margin="0,10,0,0" Text="None yet. The commands this agent types show here."
+                                   Visibility="{Binding View.Commands, Converter={StaticResource Shown}, ConverterParameter=invert}" />
+                        <ItemsControl Margin="0,8,0,0" ItemsSource="{Binding View.Commands}" Focusable="False" VerticalAlignment="Top">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="{StaticResource LineSubtle}" BorderThickness="0,1,0,0" Padding="0,7">
+                                        <Grid ToolTip="{Binding Detail}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="70" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="76" />
+                                                <ColumnDefinition Width="56" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Style="{StaticResource Mono}" Foreground="{StaticResource FgSubtle}" Text="{Binding Time}" />
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,10,0">
+                                                <Border Visibility="{Binding Local, Converter={StaticResource Shown}}" Background="{StaticResource YellowSoft}" CornerRadius="4" Padding="5,0" Margin="0,0,6,0">
+                                                    <TextBlock Style="{StaticResource Eyebrow}" FontSize="10" Foreground="{StaticResource YellowText}" Text="FAILSAFE" />
+                                                </Border>
+                                                <TextBlock Style="{StaticResource Mono}" Text="{Binding Text}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Text}" />
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="2" Style="{StaticResource Mono}" Text="{Binding Result}"
+                                                       Foreground="{Binding Check, Converter={StaticResource CheckResult}}" />
+                                            <TextBlock Grid.Column="3" Style="{StaticResource Mono}" Foreground="{StaticResource FgMuted}" TextAlignment="Right" Text="{Binding Took}" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Grid>
                 </DockPanel>
-                <ItemsControl Margin="0,10,0,0" VerticalAlignment="Top" ItemsSource="{Binding View.SelfTestSteps}" Focusable="False">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <UniformGrid Columns="2" />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <DockPanel Margin="0,4,16,4">
-                                <Ellipse DockPanel.Dock="Left" Width="8" Height="8" VerticalAlignment="Center" Fill="{Binding Check, Converter={StaticResource CheckBrush}}" />
-                                <TextBlock DockPanel.Dock="Left" Margin="8,0,10,0" FontSize="13" FontWeight="SemiBold" Text="{Binding Label}" />
-                                <TextBlock FontSize="13" Foreground="{StaticResource FgMuted}" TextTrimming="CharacterEllipsis" Text="{Binding Text}" ToolTip="{Binding Text}" />
-                            </DockPanel>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </DockPanel>
-        </Border>
+            </Border>
+
+            <Border Grid.Column="2" Style="{StaticResource Card}" Padding="18,16">
+                <DockPanel>
+                    <DockPanel DockPanel.Dock="Top">
+                        <TextBlock DockPanel.Dock="Right" Style="{StaticResource Small}" Text="{Binding View.SelfTestSummary}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" MaxWidth="170" />
+                        <TextBlock Style="{StaticResource CardTitle}" Text="Self-test" />
+                    </DockPanel>
+                    <ItemsControl Margin="0,10,0,0" VerticalAlignment="Top" ItemsSource="{Binding View.SelfTestSteps}" Focusable="False">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <DockPanel Margin="0,4" ToolTip="{Binding Text}">
+                                    <ContentControl DockPanel.Dock="Left" Content="{Binding Check}" ContentTemplate="{StaticResource CheckMark}" Focusable="False" VerticalAlignment="Center" />
+                                    <TextBlock Margin="8,0,0,0" FontSize="13" Text="{Binding Label}" TextTrimming="CharacterEllipsis" />
+                                </DockPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </DockPanel>
+            </Border>
+        </Grid>
     </Grid>
 </UserControl>

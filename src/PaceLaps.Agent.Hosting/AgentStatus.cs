@@ -1,3 +1,4 @@
+using PaceLaps.Agent.Core.Commands;
 using System.Globalization;
 using PaceLaps.Agent.Core.Config;
 using PaceLaps.Agent.Core.Contracts;
@@ -62,6 +63,9 @@ public sealed record AgentStatus
 
     public DateTimeOffset? LastSelfTestAt { get; init; }
 
+    /// <summary>The commands finished lately, newest first.</summary>
+    public IReadOnlyList<FinishedCommand> RecentCommands { get; init; } = [];
+
     public LocalFailsafeSettings LocalFailsafe { get; init; } = new();
 
     public string? LocalFailsafeHeld { get; init; }
@@ -99,6 +103,7 @@ public sealed record AgentStatus
             EventsBuffered = host?.Events.Count ?? 0,
             LastSelfTest = runtime.LastSelfTest,
             LastSelfTestAt = runtime.LastSelfTestAt,
+            RecentCommands = runtime.RecentCommands.Items(),
             LocalFailsafe = runtime.Settings?.LocalFailsafe ?? settings.LocalFailsafe,
             LocalFailsafeHeld = host?.LocalFailsafeCopies.Held is { } held ? $"{held.Procedure} v{held.Version}" : null,
             LocalFailsafeSince = host?.LocalFailsafe.Since,
