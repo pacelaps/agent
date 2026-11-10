@@ -26,7 +26,7 @@ jobs:
 
       - name: Package
         shell: pwsh
-        run: ./scripts/publish.ps1 -Version ($env:GITHUB_REF_NAME.TrimStart('v')) -Server https://racecontrol.pacelaps.com
+        run: ./scripts/publish.ps1 -Version ($env:GITHUB_REF_NAME.TrimStart('v')) -Server https://app.pacelaps.com
 
       - name: Release
         shell: pwsh

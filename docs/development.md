@@ -67,7 +67,7 @@ The operator's package is one self-contained exe (no .NET needed on the PC; not 
 
 ```
 ./scripts/publish.ps1                  # artifacts/pacelaps-agent-<version>-win-x64.zip (development version)
-./scripts/publish.ps1 -Version 0.5.0 -Server https://racecontrol.pacelaps.com   # a release: pairs only with that server
+./scripts/publish.ps1 -Version 0.5.0 -Server https://app.pacelaps.com   # a release: pairs only with that server
 ```
 
 The script runs the packaged exe with `--version` (it prints the version and exits without showing anything) and fails if it does not start. A release: push a tag `vX.Y.Z` on main; `.github/workflows/release.yml` tests, builds the package with that version and the production server built in (its pairing screen and settings show that server; local builds take any) and attaches the zip and checksum to a GitHub release (a prerelease below 1.0 or with a suffix). The exe is not signed yet: SmartScreen asks once, as the operator guide says. Updates are manual (exit, replace the exe); settings and pairing stay in `%LOCALAPPDATA%\PaceLaps\Agent`.

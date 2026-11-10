@@ -19,7 +19,7 @@ namespace PaceLaps.Agent.App.Render;
 /// </summary>
 public static class RenderScreens
 {
-    private static readonly Uri Server = new("https://racecontrol.pacelaps.com/");
+    private static readonly Uri Server = new("https://app.pacelaps.com/");
     private static readonly ChannelSet Channels = new(ChannelReadiness.Disabled, ChannelReadiness.Ready, ChannelReadiness.Ready);
 
     public static int Run(string dir)
@@ -69,7 +69,7 @@ public static class RenderScreens
             model.About = new AboutPageModel("0.13.0", Server);
             model.Pairing.Preview(new PairingCodeMessage
             {
-                PairingId = "p1", UserCode = "K7Q-4MD", VerificationUrl = "https://racecontrol.pacelaps.com/pair", ExpiresAt = DateTimeOffset.Now.AddMinutes(9.7), IntervalSec = 3,
+                PairingId = "p1", UserCode = "K7Q-4MD", VerificationUrl = "https://app.pacelaps.com/pair", ExpiresAt = DateTimeOffset.Now.AddMinutes(9.7), IntervalSec = 3,
             });
             model.Update(name == "about" ? Samples().First().Status : unpaired);
             model.Screen = screen;

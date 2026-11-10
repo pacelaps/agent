@@ -8,7 +8,7 @@ namespace PaceLaps.Agent.Tests.Hosting;
 
 public sealed class StatusViewTests
 {
-    private static readonly Uri Server = new("https://racecontrol.pacelaps.com/");
+    private static readonly Uri Server = new("https://app.pacelaps.com/");
     private static readonly ChannelSet Ready = new(ChannelReadiness.Disabled, ChannelReadiness.Ready, ChannelReadiness.Ready);
 
     private static AgentStatus Sleeping() => new() { State = AgentState.Sleeping, AgentId = "agt_01", Server = Server, SimRunning = true };
@@ -53,11 +53,11 @@ public sealed class StatusViewTests
     {
         Assert.Equal(
             [("iRacing", StatusCheck.Ok, "In a session"), ("Race Control", StatusCheck.Ok, "Connected"), ("Session", StatusCheck.Ok, "Round 4: sends the commands"),
-             ("Pairing", StatusCheck.Ok, "Paired with racecontrol.pacelaps.com")],
+             ("Pairing", StatusCheck.Ok, "Paired with app.pacelaps.com")],
             StatusView.From(Active()).Rows.Select(r => (r.Label, r.Check, r.Text)));
         Assert.Equal(
             [("iRacing", StatusCheck.Off, "Running, not in a session"), ("Race Control", StatusCheck.Off, "Not connected while sleeping"), ("Session", StatusCheck.Off, "None"),
-             ("Pairing", StatusCheck.Ok, "Paired with racecontrol.pacelaps.com")],
+             ("Pairing", StatusCheck.Ok, "Paired with app.pacelaps.com")],
             StatusView.From(Sleeping()).Rows.Select(r => (r.Label, r.Check, r.Text)));
         Assert.Equal(StatusCheck.Problem, StatusView.From(Active() with { SimRunning = false, SimInSession = false }).Rows[0].Check);
     }
