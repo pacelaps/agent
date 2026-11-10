@@ -163,6 +163,13 @@ public sealed class AgentHost : IStatusSink
     /// <summary>The league's macros policy as the server last said it (allowed until it says otherwise).</summary>
     public MacrosPolicy MacrosPolicy => _macrosOff ? MacrosPolicy.Off : MacrosPolicy.Allowed;
 
+    /// <summary>Each self-test step as it finishes (SelfTestRunner.StepFinished).</summary>
+    public event Action<SelfTestStep>? SelfTestStepFinished
+    {
+        add => _selfTest.StepFinished += value;
+        remove => _selfTest.StepFinished -= value;
+    }
+
     public SelfTestReport? LastSelfTest { get; private set; }
 
     /// <summary>The copy of the league's local failsafe this agent holds (spec: Local failsafe).</summary>

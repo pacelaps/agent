@@ -1,3 +1,4 @@
+using PaceLaps.Agent.Core.Commands;
 using System.Globalization;
 using PaceLaps.Agent.Core.Config;
 using PaceLaps.Agent.Core.Contracts;
@@ -22,6 +23,15 @@ public sealed record AgentStatus
     public bool SimRunning { get; init; }
 
     public bool SimInSession { get; init; }
+
+    /// <summary>The track of iRacing's session, if it names one.</summary>
+    public string? TrackName { get; init; }
+
+    /// <summary>Cars racing in iRacing's session (no spectators, no pace car).</summary>
+    public int CarCount { get; init; }
+
+    /// <summary>The setting: commands typed without bringing iRacing to the front.</summary>
+    public bool TypedWithoutFocus { get; init; } = true;
 
     public Uri? Server { get; init; }
 
@@ -51,6 +61,14 @@ public sealed record AgentStatus
 
     public SelfTestReport? LastSelfTest { get; init; }
 
+    public DateTimeOffset? LastSelfTestAt { get; init; }
+
+    /// <summary>The commands finished lately, newest first.</summary>
+    public IReadOnlyList<FinishedCommand> RecentCommands { get; init; } = [];
+
+    /// <summary>The steps of the running self-test so far (while State is SelfTest).</summary>
+    public IReadOnlyList<SelfTestStep> SelfTestProgress { get; init; } = [];
+
     public LocalFailsafeSettings LocalFailsafe { get; init; } = new();
 
     public string? LocalFailsafeHeld { get; init; }
@@ -71,6 +89,9 @@ public sealed record AgentStatus
             Busy = runtime.Busy,
             SimRunning = sim.IsConnected,
             SimInSession = sim.Session is not null,
+            TrackName = sim.Session?.Track?.Name,
+            CarCount = sim.Session is { } session ? session.Cars.Count(c => !c.IsSpectator && c.CarIdx != session.PaceCarIdx) : 0,
+            TypedWithoutFocus = (runtime.Settings ?? settings).TypedWithoutFocus,
             Server = server,
             AgentId = credentials is not null && server is not null && ServerAddress.Same(credentials.Server, server) ? credentials.AgentId : null,
             SettingsErrors = settingsErrors,
@@ -84,6 +105,9 @@ public sealed record AgentStatus
             ClockOffset = host?.ClockOffset,
             EventsBuffered = host?.Events.Count ?? 0,
             LastSelfTest = runtime.LastSelfTest,
+            LastSelfTestAt = runtime.LastSelfTestAt,
+            RecentCommands = runtime.RecentCommands.Items(),
+            SelfTestProgress = runtime.SelfTestProgress,
             LocalFailsafe = runtime.Settings?.LocalFailsafe ?? settings.LocalFailsafe,
             LocalFailsafeHeld = host?.LocalFailsafeCopies.Held is { } held ? $"{held.Procedure} v{held.Version}" : null,
             LocalFailsafeSince = host?.LocalFailsafe.Since,

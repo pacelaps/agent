@@ -13,17 +13,29 @@ It contains these libraries. Each is used under its own licence; the licence tex
 | Serilog | 4.4.0 | Apache-2.0 | Copyright (c) Serilog Contributors | https://github.com/serilog/serilog |
 | Serilog.Extensions.Logging | 10.0.0 | Apache-2.0 | Copyright (c) Microsoft, Serilog Contributors | https://github.com/serilog/serilog-extensions-logging |
 | Serilog.Sinks.File | 7.0.0 | Apache-2.0 | Copyright (c) Serilog Contributors | https://github.com/serilog/serilog-sinks-file |
-| Microsoft.Extensions.Logging.Abstractions | 10.0.13 | MIT | Copyright (c) .NET Foundation and Contributors | https://github.com/dotnet/runtime |
-| .NET runtime and Windows Forms (in the program) | 10.0.13 | MIT | Copyright (c) .NET Foundation and Contributors | https://github.com/dotnet/runtime, https://github.com/dotnet/winforms |
+| Microsoft.Extensions.Logging, .Logging.Abstractions, .DependencyInjection, .Options, .Primitives | 10.0 | MIT | Copyright (c) .NET Foundation and Contributors | https://github.com/dotnet/runtime |
+| CommunityToolkit.Mvvm | 8.4.2 | MIT | Copyright (c) .NET Foundation and Contributors | https://github.com/CommunityToolkit/dotnet |
+| H.NotifyIcon.Wpf, H.NotifyIcon, H.GeneratedIcons.System.Drawing | 2.4.1 | MIT | Copyright (c) HavenDV and contributors | https://github.com/HavenDV/H.NotifyIcon |
+| .NET runtime and WPF (in the program) | 10.0.13 | MIT | Copyright (c) .NET Foundation and Contributors | https://github.com/dotnet/runtime, https://github.com/dotnet/wpf |
+
+Fonts in the program, under the SIL Open Font License 1.1 (each font's licence text: `licenses/*-OFL.txt`, also in
+the release zip):
+
+| Font | Licence | Copyright | Source |
+| --- | --- | --- | --- |
+| Inter (weights 400 to 800, cut from the variable font) | OFL-1.1 | Copyright 2016 The Inter Project Authors | https://github.com/rsms/inter |
+| Barlow Condensed | OFL-1.1 | Copyright 2017 The Barlow Project Authors | https://github.com/jpt/barlow |
+| JetBrains Mono | OFL-1.1 | Copyright 2020 The JetBrains Mono Project Authors | https://github.com/JetBrains/JetBrainsMono |
 
 The .NET runtime's own third-party notices are in licenses/dotnet-runtime-notices.txt.
 
 
-MIT License (YamlDotNet; Microsoft.Extensions.Logging.Abstractions; .NET)
--------------------------------------------------------------------------
+MIT License (YamlDotNet; Microsoft.Extensions; CommunityToolkit.Mvvm; H.NotifyIcon; .NET)
+-----------------------------------------------------------------------------------------
 
 Copyright (c) Antoine Aubry and contributors (YamlDotNet)
-Copyright (c) .NET Foundation and Contributors (Microsoft.Extensions.Logging.Abstractions, .NET)
+Copyright (c) .NET Foundation and Contributors (Microsoft.Extensions, CommunityToolkit.Mvvm, .NET)
+Copyright (c) HavenDV and contributors (H.NotifyIcon)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

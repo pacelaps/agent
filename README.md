@@ -21,7 +21,7 @@ Needs Windows x64 and the .NET 10 SDK (`global.json`).
 ```
 dotnet build
 dotnet test
-dotnet run --project src/PaceLaps.Agent.Tray
+dotnet run --project src/PaceLaps.Agent.App
 ```
 
 More (the console, packaging, releases, the layout of the code): [docs/development.md](docs/development.md).

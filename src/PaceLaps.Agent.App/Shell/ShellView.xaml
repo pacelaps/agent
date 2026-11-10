@@ -1,0 +1,91 @@
+<UserControl x:Class="PaceLaps.Agent.App.Shell.ShellView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:shell="clr-namespace:PaceLaps.Agent.App.Shell"
+             Background="{StaticResource Canvas}" TextElement.FontFamily="{StaticResource Body}" TextElement.Foreground="{StaticResource Fg}"
+             UseLayoutRounding="True" TextOptions.TextFormattingMode="Display">
+    <UserControl.Resources>
+        <DataTemplate DataType="{x:Type shell:StatusPageModel}">
+            <shell:StatusPage />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type shell:SelfTestPageModel}">
+            <shell:SelfTestPage />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type shell:WelcomePageModel}">
+            <shell:WelcomePage />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type shell:PairingPageModel}">
+            <shell:PairingPage />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type shell:AboutPageModel}">
+            <shell:AboutPage />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type shell:SettingsPageModel}">
+            <shell:SettingsPage />
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <DockPanel>
+        <!-- Title bar: drag area of the window (WindowChrome), the buttons stay clickable -->
+        <Grid DockPanel.Dock="Top" Height="40">
+            <Border BorderBrush="{StaticResource LineSubtle}" BorderThickness="0,0,0,1" />
+            <StackPanel Orientation="Horizontal" Margin="14,0,0,0" VerticalAlignment="Center">
+                <Image Source="pack://application:,,,/Assets/pacelaps-agent.ico" Width="20" Height="20" RenderOptions.BitmapScalingMode="HighQuality" />
+                <TextBlock Text="PaceLaps Agent" Margin="10,0,0,0" FontSize="13" FontWeight="Bold" VerticalAlignment="Center" />
+                <Border Margin="10,0,0,0" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="6" Padding="6,1" VerticalAlignment="Center">
+                    <TextBlock Style="{StaticResource Eyebrow}" Text="{Binding Version}" />
+                </Border>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" WindowChrome.IsHitTestVisibleInChrome="True">
+                <Button Style="{StaticResource WinButton}" Click="OnMinimize" AutomationProperties.Name="Minimize" ToolTip="Minimize">
+                    <Path Data="M1,6 H11" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.2" Width="12" Height="12" />
+                </Button>
+                <Button Style="{StaticResource WinButton}" Click="OnClose" AutomationProperties.Name="Close to the tray" ToolTip="Close to the tray (the agent keeps running)">
+                    <Path Data="M1.5,1.5 L10.5,10.5 M10.5,1.5 L1.5,10.5" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.2" Width="12" Height="12" />
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- Navigation rail -->
+        <Border DockPanel.Dock="Left" Width="210" BorderBrush="{StaticResource LineSubtle}" BorderThickness="0,0,1,0" Visibility="{Binding ShowRail, Converter={StaticResource Shown}}">
+            <DockPanel Margin="12,16">
+                <StackPanel DockPanel.Dock="Bottom">
+                    <RadioButton Style="{StaticResource NavItem}" GroupName="Rail" Height="34" FontSize="13" Margin="0,0,0,8" Command="{Binding NavigateCommand}" CommandParameter="{x:Static shell:Screen.About}"
+                                 IsChecked="{Binding Screen, Mode=OneWay, Converter={StaticResource Is}, ConverterParameter=About}" Content="About and help" />
+                    <Border BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="10" Padding="12" Visibility="{Binding Paired, Converter={StaticResource Shown}}">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource Eyebrow}" Text="{Binding Source='Paired with', Converter={StaticResource Upper}, ConverterParameter=spaced}" />
+                            <TextBlock Text="{Binding PairedHost}" Margin="0,4,0,0" FontSize="12" FontWeight="Bold" TextTrimming="CharacterEllipsis" ToolTip="{Binding PairedHost}" />
+                            <TextBlock Style="{StaticResource Mono}" Text="{Binding AgentId}" Margin="0,2,0,0" FontSize="11" Foreground="{StaticResource FgSubtle}" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+                <StackPanel>
+                    <RadioButton Style="{StaticResource NavItem}" GroupName="Rail" Command="{Binding NavigateCommand}" CommandParameter="{x:Static shell:Screen.Status}"
+                                 IsChecked="{Binding Screen, Mode=OneWay, Converter={StaticResource Is}, ConverterParameter=Status}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="M22,12 H18 L15,21 L9,3 L6,12 H2" Style="{StaticResource NavIcon}" />
+                            <TextBlock Text="Status" Margin="10,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </RadioButton>
+                    <RadioButton Style="{StaticResource NavItem}" GroupName="Rail" Margin="0,4,0,0" Command="{Binding NavigateCommand}" CommandParameter="{x:Static shell:Screen.SelfTest}"
+                                 IsChecked="{Binding Screen, Mode=OneWay, Converter={StaticResource Is}, ConverterParameter=SelfTest}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="M9,11 L12,14 L22,4 M21,12 V19 A2,2 0 0 1 19,21 H5 A2,2 0 0 1 3,19 V5 A2,2 0 0 1 5,3 H16" Style="{StaticResource NavIcon}" />
+                            <TextBlock Text="Self-test" Margin="10,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </RadioButton>
+                    <RadioButton Style="{StaticResource NavItem}" GroupName="Rail" Margin="0,4,0,0" Command="{Binding NavigateCommand}" CommandParameter="{x:Static shell:Screen.Settings}"
+                                 IsChecked="{Binding Screen, Mode=OneWay, Converter={StaticResource Is}, ConverterParameter=Settings}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="M4,21 V14 M4,10 V3 M12,21 V12 M12,8 V3 M20,21 V16 M20,12 V3 M1,14 H7 M9,8 H15 M17,16 H23" Style="{StaticResource NavIcon}" />
+                            <TextBlock Text="Settings" Margin="10,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </RadioButton>
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <ContentControl Content="{Binding CurrentPage}" Focusable="False" />
+    </DockPanel>
+</UserControl>

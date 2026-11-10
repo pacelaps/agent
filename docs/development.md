@@ -12,13 +12,19 @@ dotnet test
 dotnet run --project src/PaceLaps.Agent.Console -- help
 ```
 
-The tray app (manual check: `docs/tray-check.md`):
+The app (manual check before a release: `docs/app-check.md`):
 
 ```
-dotnet run --project src/PaceLaps.Agent.Tray
+dotnet run --project src/PaceLaps.Agent.App
 ```
 
-It starts Sleeping: no connection to the server until Activate, which reads the settings and the credentials, connects and runs the self-test; Sleep or a failed self-test closes the connection. Its menu has Status, Activate, Sleep, Pair, Settings (edits `config.json`, start with Windows), the log folder and Exit. One instance per Windows session; a second start opens the first one's status window. The console's `run --server` runs on the same code (`Hosting/AgentRuntime`).
+To check the screens without clicking through the states, a local build draws them in example states to PNG files
+at 100 % and 150 % (also the tray menu, the notifications and the self-test question): `pacelaps-agent.exe --render <folder>`
+(from `src/PaceLaps.Agent.App/bin/...`; release builds refuse it). The app's look is WPF resource dictionaries in
+`src/PaceLaps.Agent.App/Themes` (colours = Race Control's dark tokens, checked by `ColoursTests`; Inter, Barlow Condensed and
+JetBrains Mono built in from `Assets/Fonts`).
+
+It starts Sleeping: no connection to the server until Activate, which reads the settings and the credentials, connects and runs the self-test; Sleep or a failed self-test closes the connection. The window (status, self-test, settings, about; first start and pairing until paired) exists only while open; closing it leaves the agent running by the clock. The icon's menu has Open, Activate or Sleep, the update, Settings, the log folder and Exit. One instance per Windows session; a second start brings the first one's window up. The console's `run --server` runs on the same code (`Hosting/AgentRuntime`).
 
 With a Race Control server from the console (steps: `docs/integration-test.md`), pair once, then run:
 
@@ -57,7 +63,7 @@ CI: `.github/workflows/ci.yml` builds and tests on a Windows runner, then builds
 
 ## Package and release
 
-The operator's package is one self-contained exe (no .NET needed on the PC; not trimmed, WinForms does not allow it) in a zip with `docs/operator-guide.md` as `README.txt`, plus a SHA-256 checksum file. Build it locally:
+The operator's package is one self-contained exe (no .NET needed on the PC; not trimmed, WPF does not allow it) in a zip with `docs/operator-guide.md` as `README.txt`, plus a SHA-256 checksum file. Build it locally:
 
 ```
 ./scripts/publish.ps1                  # artifacts/pacelaps-agent-<version>-win-x64.zip (development version)
@@ -73,14 +79,14 @@ src/PaceLaps.Agent.Core/       no iRacing dependency: contracts, states, self-te
                                       snapshots, events, clock offset, typed chat sender, agent host
 src/PaceLaps.Agent.IRacing/    IRSDKSharper adapter (SimConnection, SimDataAdapter, macro and replay channels), Win32 focus, scancode keyboard
 src/PaceLaps.Agent.Hosting/    shared by the console and the tray app: settings, credentials, logging, AgentRuntime,
-                                      AgentStatus, the tray app's presenters (unit-tested, no WinForms)
-src/PaceLaps.Agent.Tray/       the tray app (WinForms), pacelaps-agent.exe
+                                      AgentStatus, the app's views as plain data (StatusView, SelfTestView; unit-tested, no WPF)
+src/PaceLaps.Agent.App/        the app (WPF): window, tray icon and menu, notifications; pacelaps-agent.exe
 src/PaceLaps.Agent.Console/    console (run, pair, config; stub server) and spike runners, pacelaps-agent-cli.exe
 tests/PaceLaps.Agent.Tests/    xunit v3 on Microsoft.Testing.Platform, fakes and a fake clock
 docs/spike-results.md                 results per spike
 docs/spike-procedures.md              what the operator does in iRacing
 docs/poc-acceptance.md                the proof-of-concept acceptance run
-docs/tray-check.md                    manual check of the tray app
+docs/app-check.md                     manual check of the app
 docs/operator-guide.md                the operator's guide (README.txt in the package)
 scripts/publish.ps1                   builds the package (artifacts/, ignored by git)
 contracts/                            copy of webservice/contracts (scripts/sync-contracts.ps1), used by the tests

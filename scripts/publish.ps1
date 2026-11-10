@@ -1,4 +1,4 @@
-# Builds the operator's package: the tray app as one self-contained exe (no .NET needed on the PC), zipped with the
+# Builds the operator's package: the app as one self-contained exe (no .NET needed on the PC), zipped with the
 # operator guide as README.txt, plus a SHA-256 checksum file. Then it runs the exe with --version as a check.
 #
 #   ./scripts/publish.ps1                  # development build, version 0.1.0+<commit>
@@ -6,10 +6,15 @@
 #                                          # a release (the release workflow passes the tag's version and the
 #                                          # server; a build with -Server pairs only with that server)
 #
-# Output: artifacts/pacelaps-agent-<version>-win-x64.zip and .zip.sha256
+#   ./scripts/publish.ps1 -Installer      # also the installer (needs Inno Setup 6: ISCC.exe on the PATH or in its
+#                                          # usual folder; installer/pacelaps-agent.iss)
+#
+# Output: artifacts/pacelaps-agent-<version>-win-x64.zip and .zip.sha256 (with -Installer also
+# pacelaps-agent-<version>-setup.exe and .exe.sha256)
 param(
     [string] $Version = "",
-    [string] $Server = ""
+    [string] $Server = "",
+    [switch] $Installer
 )
 
 $ErrorActionPreference = 'Stop'
@@ -42,7 +47,7 @@ if ($Server -ne '') {
     $properties += "-p:ReleaseServer=$Server"
 }
 
-dotnet publish (Join-Path $root 'src/PaceLaps.Agent.Tray/PaceLaps.Agent.Tray.csproj') `
+dotnet publish (Join-Path $root 'src/PaceLaps.Agent.App/PaceLaps.Agent.App.csproj') `
     --configuration Release --runtime win-x64 --output $publish @properties
 if ($LASTEXITCODE -ne 0) {
     throw "dotnet publish failed ($LASTEXITCODE)"
@@ -83,12 +88,37 @@ Copy-Item (Join-Path $root 'docs/operator-guide.md') (Join-Path $stage 'README.t
 Copy-Item (Join-Path $root 'LICENSE') (Join-Path $stage 'LICENSE.txt')
 Copy-Item (Join-Path $root 'THIRD-PARTY-NOTICES.md') (Join-Path $stage 'THIRD-PARTY-NOTICES.txt')
 Copy-Item (Join-Path $root 'licenses/dotnet-runtime-notices.txt') (Join-Path $stage 'dotnet-runtime-notices.txt')
+# The fonts' licences (SIL Open Font License): Inter, Barlow Condensed, JetBrains Mono.
+Get-ChildItem (Join-Path $root 'licenses') -Filter '*-OFL.txt' | ForEach-Object { Copy-Item $_.FullName (Join-Path $stage $_.Name) }
 
 $zip = Join-Path $artifacts "$name.zip"
 if (Test-Path $zip) {
     Remove-Item $zip
 }
 Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $zip
+
+if ($Installer) {
+    # The installer from the same files as the zip (per user, no administrator rights).
+    $iscc = (Get-Command ISCC.exe -ErrorAction SilentlyContinue).Source
+    foreach ($candidate in @("${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe", "$env:ProgramFiles\Inno Setup 6\ISCC.exe", "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe")) {
+        if (-not $iscc -and (Test-Path $candidate)) {
+            $iscc = $candidate
+        }
+    }
+    if (-not $iscc) {
+        throw "-Installer needs Inno Setup 6 (ISCC.exe)"
+    }
+    $setupVersion = $reported.Split('+')[0]
+    & $iscc /Q "/DAppVersion=$setupVersion" "/DSourceDir=$stage" "/DOutputDir=$artifacts" (Join-Path $root 'installer/pacelaps-agent.iss')
+    if ($LASTEXITCODE -ne 0) {
+        throw "ISCC failed ($LASTEXITCODE)"
+    }
+    $setup = Join-Path $artifacts "pacelaps-agent-$setupVersion-setup.exe"
+    $setupHash = (Get-FileHash $setup -Algorithm SHA256).Hash.ToLowerInvariant()
+    Set-Content -Path "$setup.sha256" -Value "$setupHash  pacelaps-agent-$setupVersion-setup.exe" -Encoding ascii -NoNewline
+    Write-Host "Setup   $setup"
+}
+
 Remove-Item -Recurse -Force $stage
 
 $hash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant()

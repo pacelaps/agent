@@ -1,23 +1,24 @@
+using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using PaceLaps.Agent.Hosting.Tray;
+using Application = System.Windows.Application;
 
-namespace PaceLaps.Agent.Tray;
+namespace PaceLaps.Agent.App.Tray;
 
 /// <summary>
-/// The program's icon (`Assets/pacelaps-agent.ico`, the PaceLaps mark as on pacelaps.com) and the tray icons drawn
-/// from it at start: the mark with a badge in the state's colour (grey, blue, amber, green, red). Sleeping fades the
-/// mark; a problem's badge carries an exclamation mark, so it doesn't rely on colour alone. The icon handles live as
-/// long as the program.
+/// The tray icons, drawn at start from the PaceLaps mark (Assets/tray-*.png): a badge in the state's colour (grey,
+/// blue, amber, green, red). Sleeping fades the mark; a problem's badge carries an exclamation mark, so it doesn't rely
+/// on colour alone. The icon handles live as long as the program.
 /// </summary>
-internal sealed class TrayIcons : IDisposable
+internal sealed class TrayIconSet : IDisposable
 {
     private static readonly int[] MarkSizes = [16, 20, 24, 32, 40, 48];
     private readonly Dictionary<TrayIcon, Icon> _icons = [];
 
-    public TrayIcons()
+    /// <param name="size">The tray's icon size in pixels (16 at 100 % scaling).</param>
+    public TrayIconSet(int size)
     {
-        var size = SystemInformation.SmallIconSize.Width;
         using var mark = Mark(size);
         foreach (var (kind, color) in new[]
                  {
@@ -32,9 +33,6 @@ internal sealed class TrayIcons : IDisposable
         }
     }
 
-    /// <summary>The program's icon for every window's title bar and the taskbar.</summary>
-    public static Icon Program { get; } = LoadProgramIcon();
-
     public Icon this[TrayIcon kind] => _icons[kind];
 
     public void Dispose()
@@ -45,19 +43,10 @@ internal sealed class TrayIcons : IDisposable
         }
     }
 
-    private static Icon LoadProgramIcon()
-    {
-        using var stream = typeof(TrayIcons).Assembly.GetManifestResourceStream("PaceLaps.Agent.Tray.Assets.pacelaps-agent.ico")
-            ?? throw new InvalidOperationException("The program icon is missing from the build.");
-        return new Icon(stream);
-    }
-
-    /// <summary>The mark drawn for this size: the nearest rendered size at or above it, scaled down if needed.</summary>
     private static Bitmap Mark(int size)
     {
         var pick = MarkSizes.FirstOrDefault(s => s >= size, MarkSizes[^1]);
-        using var stream = typeof(TrayIcons).Assembly.GetManifestResourceStream($"PaceLaps.Agent.Tray.Assets.tray-{pick}.png")
-            ?? throw new InvalidOperationException("A tray image is missing from the build.");
+        using var stream = Application.GetResourceStream(new Uri($"pack://application:,,,/Assets/tray-{pick}.png"))!.Stream;
         using var source = new Bitmap(stream);
         var bitmap = new Bitmap(size, size, PixelFormat.Format32bppArgb);
         using var g = Graphics.FromImage(bitmap);
@@ -86,10 +75,9 @@ internal sealed class TrayIcons : IDisposable
 
             // The badge in the bottom right corner, with a dark ring so it reads on light and dark taskbars.
             var badge = MathF.Round(size * 0.5f);
-            var ring = Math.Max(1f, size / 16f);
             var box = new RectangleF(size - badge, size - badge, badge - 0.5f, badge - 0.5f);
             using var fill = new SolidBrush(color);
-            using var edge = new Pen(Color.FromArgb(0x09, 0x09, 0x0B), ring);
+            using var edge = new Pen(Color.FromArgb(0x09, 0x09, 0x0B), Math.Max(1f, size / 16f));
             g.FillEllipse(fill, box);
             g.DrawEllipse(edge, box);
             if (exclamation)

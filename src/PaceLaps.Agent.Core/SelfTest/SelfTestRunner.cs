@@ -99,6 +99,9 @@ public sealed class SelfTestRunner
         _options = options ?? new SelfTestOptions();
     }
 
+    /// <summary>A step finished (passed, failed or skipped), as it happens: the app shows the self-test live.</summary>
+    public event Action<SelfTestStep>? StepFinished;
+
     public async Task<SelfTestReport> RunAsync(CancellationToken ct)
     {
         var steps = new List<SelfTestStep>();
@@ -115,12 +118,12 @@ public sealed class SelfTestRunner
         var frame = _sim.Frame;
         if (!_sim.IsConnected || session is null || frame is null)
         {
-            steps.Add(new SelfTestStep(1, "sim and telemetry", false, "iRacing isn't running or telemetry is off (irsdkEnableMem=1 in app.ini)",
+            Add(steps, new SelfTestStep(1, "sim and telemetry", false, "iRacing isn't running or telemetry is off (irsdkEnableMem=1 in app.ini)",
                 Shared: "iRacing isn't running or telemetry is off"));
             return Done(false);
         }
 
-        steps.Add(new SelfTestStep(1, "sim and telemetry", true, $"build {session.BuildVersion}"));
+        Add(steps, new SelfTestStep(1, "sim and telemetry", true, $"build {session.BuildVersion}"));
         sdk = _options.ReplayEnabled ? ChannelReadiness.Ready : ChannelReadiness.Disabled;
 
         // 2. In a session, ids read, league registered, operator is a steward.
@@ -129,7 +132,7 @@ public sealed class SelfTestRunner
         // host's PC and has session id and sub-session id 0 (acceptance run, 2026-10-25).
         if (session.Cars.Count == 0 || session.SessionType == "Unknown")
         {
-            steps.Add(new SelfTestStep(2, "session identity", false, "not in a session", Shared: "not in a session"));
+            Add(steps, new SelfTestStep(2, "session identity", false, "not in a session", Shared: "not in a session"));
             return Done(false);
         }
 
@@ -137,7 +140,7 @@ public sealed class SelfTestRunner
 
         if (leagueId <= 0)
         {
-            steps.Add(new SelfTestStep(2, "session identity", false, "not a league session: select the league in the agent",
+            Add(steps, new SelfTestStep(2, "session identity", false, "not a league session: select the league in the agent",
                 Shared: "not a league session and no league selected"));
             return Done(false);
         }
@@ -150,7 +153,7 @@ public sealed class SelfTestRunner
         }
         catch (Exception e) when (e is not OperationCanceledException)
         {
-            steps.Add(new SelfTestStep(2, "session identity", false, "server check failed: " + e.Message));
+            Add(steps, new SelfTestStep(2, "session identity", false, "server check failed: " + e.Message));
             return Done(false);
         }
 
@@ -160,11 +163,11 @@ public sealed class SelfTestRunner
         if (!check.Ok)
         {
             var why = check.Reason ?? (!check.LeagueRegistered ? $"league {leagueId} is not registered" : "the operator is not a steward of the league");
-            steps.Add(new SelfTestStep(2, "session identity", false, why, Shared: why));
+            Add(steps, new SelfTestStep(2, "session identity", false, why, Shared: why));
             return Done(false);
         }
 
-        steps.Add(new SelfTestStep(2, "session identity", true,
+        Add(steps, new SelfTestStep(2, "session identity", true,
             $"league {leagueId}{(session.LeagueId <= 0 ? " (selected by the operator)" : "")}, " +
             (noIds ? "no iRacing session ids (hosted AI session)" : $"sub-session {session.SubSessionId}") +
             $", session {frame.SessionNum} {session.SessionType}"));
@@ -192,11 +195,11 @@ public sealed class SelfTestRunner
 
         if (answered == 0)
         {
-            steps.Add(new SelfTestStep(3, "server and clock", false, "the server did not answer the clock pings", Shared: "the server did not answer the clock pings"));
+            Add(steps, new SelfTestStep(3, "server and clock", false, "the server did not answer the clock pings", Shared: "the server did not answer the clock pings"));
             return Done(false);
         }
 
-        steps.Add(new SelfTestStep(3, "server and clock", true,
+        Add(steps, new SelfTestStep(3, "server and clock", true,
             $"{answered}/{_options.ClockPings} pings, offset {_clockOffset.Offset.TotalMilliseconds:F0} ms, round trip {_clockOffset.RoundTrip?.TotalMilliseconds:F0} ms"));
 
         // 4. All cars readable with the fields the sorting view needs.
@@ -205,11 +208,11 @@ public sealed class SelfTestRunner
         if (cars.Count == 0 || cars.Any(c => c.CarIdx < 0 || c.CarIdx >= frame.Cars.Count))
         {
             var why = cars.Count == 0 ? "no cars in the session" : "car data missing for some cars";
-            steps.Add(new SelfTestStep(4, "cars", false, why, Shared: why));
+            Add(steps, new SelfTestStep(4, "cars", false, why, Shared: why));
             return Done(false);
         }
 
-        steps.Add(new SelfTestStep(4, "cars", true, $"{cars.Count} cars, {inWorld} in the world"));
+        Add(steps, new SelfTestStep(4, "cars", true, $"{cars.Count} cars, {inWorld} in the world"));
 
         // 5. Typed channel: admin rights (spike 8), the key-binding rule (spike 2), then a harmless command (spike 12).
         if (!session.DriverIsAdmin && sdk == ChannelReadiness.Ready)
@@ -217,7 +220,7 @@ public sealed class SelfTestRunner
             // A steward's own agent beside their iRacing as a spectator: replays for the incident review only. Without
             // a typed or macro channel the server never makes it the executor.
             typed = ChannelReadiness.Disabled;
-            steps.Add(new SelfTestStep(5, "typed channel", true,
+            Add(steps, new SelfTestStep(5, "typed channel", true,
                 "view only: not an admin in this session (replays only)",
                 SelfTestStepResult.Skipped, "view only: not an admin in this session"));
             return Done(true);
@@ -226,7 +229,7 @@ public sealed class SelfTestRunner
         if (!session.DriverIsAdmin)
         {
             typed = ChannelReadiness.Failed;
-            steps.Add(new SelfTestStep(5, "typed channel", false, "not an admin in this session",
+            Add(steps, new SelfTestStep(5, "typed channel", false, "not an admin in this session",
                 Shared: "not an admin in this session"));
             return Done(false);
         }
@@ -235,7 +238,7 @@ public sealed class SelfTestRunner
                 "No chat macro or sim control is on a plain key (letter, digit, # + ! space)?", ct).ConfigureAwait(false))
         {
             typed = ChannelReadiness.Failed;
-            steps.Add(new SelfTestStep(5, "typed channel", false, "a macro or control may be on a plain key and would fire while typing",
+            Add(steps, new SelfTestStep(5, "typed channel", false, "a macro or control may be on a plain key and would fire while typing",
                 Shared: "a key binding would fire while typing"));
             return Done(false);
         }
@@ -245,7 +248,7 @@ public sealed class SelfTestRunner
         if (!sent.Success)
         {
             typed = ChannelReadiness.Failed;
-            steps.Add(new SelfTestStep(5, "typed channel", false, $"{_options.HarmlessCommand} failed: {sent.Failure} {sent.Detail}",
+            Add(steps, new SelfTestStep(5, "typed channel", false, $"{_options.HarmlessCommand} failed: {sent.Failure} {sent.Detail}",
                 Shared: $"typing {_options.HarmlessCommand} failed: {sent.Failure}"));
             return Done(false);
         }
@@ -253,13 +256,13 @@ public sealed class SelfTestRunner
         if (!await _operator.ConfirmAsync($"Did iRacing show the reply to {_options.HarmlessCommand} in chat?", ct).ConfigureAwait(false))
         {
             typed = ChannelReadiness.Failed;
-            steps.Add(new SelfTestStep(5, "typed channel", false, $"no reply to {_options.HarmlessCommand} (admin rights?)",
+            Add(steps, new SelfTestStep(5, "typed channel", false, $"no reply to {_options.HarmlessCommand} (admin rights?)",
                 Shared: $"no reply to {_options.HarmlessCommand} in chat"));
             return Done(false);
         }
 
         typed = ChannelReadiness.Ready;
-        steps.Add(new SelfTestStep(5, "typed channel", true, $"{_options.HarmlessCommand} in {sent.TotalTime.TotalMilliseconds:F0} ms, focus restored {sent.FocusRestored}"));
+        Add(steps, new SelfTestStep(5, "typed channel", true, $"{_options.HarmlessCommand} in {sent.TotalTime.TotalMilliseconds:F0} ms, focus restored {sent.FocusRestored}"));
 
         // 6. Macro channel, if enabled: read the slot texts from the sim's configuration (spike 10); if it cannot be
         // read, the operator confirms them. Not verified means not offered, but the self-test still passes.
@@ -273,11 +276,11 @@ public sealed class SelfTestRunner
             if (wrong.Count == 0)
             {
                 macro = ChannelReadiness.Ready;
-                steps.Add(new SelfTestStep(6, "macro channel", true, $"{_macros.Count} slot(s) match {_macroConfig!.Location}"));
+                Add(steps, new SelfTestStep(6, "macro channel", true, $"{_macros.Count} slot(s) match {_macroConfig!.Location}"));
             }
             else
             {
-                steps.Add(new SelfTestStep(6, "macro channel", true,
+                Add(steps, new SelfTestStep(6, "macro channel", true,
                     $"not verified: {string.Join("; ", wrong)} (the sim saves macros when it closes); macros off",
                     SelfTestStepResult.Unverified, $"{wrong.Count} slot(s) do not match the sim's saved macros"));
             }
@@ -288,19 +291,25 @@ public sealed class SelfTestRunner
             if (await _operator.ConfirmAsync($"Do these macro slots contain exactly this text? {list}", ct).ConfigureAwait(false))
             {
                 macro = ChannelReadiness.Ready;
-                steps.Add(new SelfTestStep(6, "macro channel", true, $"confirmed by the operator: {list}"));
+                Add(steps, new SelfTestStep(6, "macro channel", true, $"confirmed by the operator: {list}"));
             }
             else
             {
-                steps.Add(new SelfTestStep(6, "macro channel", true, "not confirmed: commands are typed",
+                Add(steps, new SelfTestStep(6, "macro channel", true, "not confirmed: commands are typed",
                     SelfTestStepResult.Unverified, "the operator did not confirm the macro slots"));
             }
         }
         else
         {
-            steps.Add(new SelfTestStep(6, "macro channel", true, "disabled", SelfTestStepResult.Skipped, "macro channel off"));
+            Add(steps, new SelfTestStep(6, "macro channel", true, "disabled", SelfTestStepResult.Skipped, "macro channel off"));
         }
 
         return Done(true);
+    }
+
+    private void Add(List<SelfTestStep> steps, SelfTestStep step)
+    {
+        steps.Add(step);
+        StepFinished?.Invoke(step);
     }
 }
