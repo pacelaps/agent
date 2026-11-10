@@ -31,7 +31,7 @@
             <Border BorderBrush="{StaticResource LineSubtle}" BorderThickness="0,0,0,1" />
             <StackPanel Orientation="Horizontal" Margin="14,0,0,0" VerticalAlignment="Center">
                 <Image Source="pack://application:,,,/Assets/pacelaps-agent.ico" Width="20" Height="20" RenderOptions.BitmapScalingMode="HighQuality" />
-                <TextBlock Text="PaceLaps Agent" Margin="10,0,0,0" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" />
+                <TextBlock Text="PaceLaps Agent" Margin="10,0,0,0" FontSize="13" FontWeight="Bold" VerticalAlignment="Center" />
                 <Border Margin="10,0,0,0" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="6" Padding="6,1" VerticalAlignment="Center">
                     <TextBlock Style="{StaticResource Eyebrow}" Text="{Binding Version}" />
                 </Border>
@@ -55,7 +55,7 @@
                     <Border BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="10" Padding="12" Visibility="{Binding Paired, Converter={StaticResource Shown}}">
                         <StackPanel>
                             <TextBlock Style="{StaticResource Eyebrow}" Text="{Binding Source='Paired with', Converter={StaticResource Upper}, ConverterParameter=spaced}" />
-                            <TextBlock Text="{Binding PairedHost}" Margin="0,4,0,0" FontSize="12" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" ToolTip="{Binding PairedHost}" />
+                            <TextBlock Text="{Binding PairedHost}" Margin="0,4,0,0" FontSize="12" FontWeight="Bold" TextTrimming="CharacterEllipsis" ToolTip="{Binding PairedHost}" />
                             <TextBlock Style="{StaticResource Mono}" Text="{Binding AgentId}" Margin="0,2,0,0" FontSize="11" Foreground="{StaticResource FgSubtle}" />
                         </StackPanel>
                     </Border>

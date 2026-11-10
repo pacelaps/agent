@@ -23,7 +23,7 @@ the release zip):
 
 | Font | Licence | Copyright | Source |
 | --- | --- | --- | --- |
-| Inter (weights 400 to 700, cut from the variable font) | OFL-1.1 | Copyright 2016 The Inter Project Authors | https://github.com/rsms/inter |
+| Inter (weights 400 to 800, cut from the variable font) | OFL-1.1 | Copyright 2016 The Inter Project Authors | https://github.com/rsms/inter |
 | Barlow Condensed | OFL-1.1 | Copyright 2017 The Barlow Project Authors | https://github.com/jpt/barlow |
 | JetBrains Mono | OFL-1.1 | Copyright 2020 The JetBrains Mono Project Authors | https://github.com/JetBrains/JetBrainsMono |
 

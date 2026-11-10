@@ -43,7 +43,7 @@
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                 <Path Data="M20,6 L9,17 L4,12" Stroke="{StaticResource GreenText}" StrokeThickness="2.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
                                       StrokeLineJoin="Round" Width="14" Height="14" Stretch="Uniform" />
-                                <TextBlock Margin="6,0,0,0" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource GreenText}" Text="{Binding View.Role}" />
+                                <TextBlock Margin="6,0,0,0" FontSize="13" FontWeight="Bold" Foreground="{StaticResource GreenText}" Text="{Binding View.Role}" />
                             </StackPanel>
                         </Border>
                         <Button Style="{StaticResource Btn}" Margin="0,12,0,0" HorizontalAlignment="Right" Content="{Binding ActionText}" Command="{Binding ActCommand}"

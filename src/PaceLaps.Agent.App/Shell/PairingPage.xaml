@@ -70,7 +70,7 @@
                 <StackPanel Orientation="Horizontal">
                     <Path Data="M21,12 A9,9 0 1 1 14.8,3.4" Width="16" Height="16" Stretch="Uniform" Stroke="{StaticResource BrandText}" StrokeThickness="2.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" VerticalAlignment="Center" />
                     <TextBlock Margin="12,0,0,0" FontSize="13" Foreground="{StaticResource FgMuted}" VerticalAlignment="Center" Text="Waiting for the approval on " />
-                    <TextBlock FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" Text="{Binding PageText}" />
+                    <TextBlock FontSize="13" FontWeight="Bold" VerticalAlignment="Center" Text="{Binding PageText}" />
                     <TextBlock Margin="12,0,0,0" Style="{StaticResource Mono}" Foreground="{StaticResource FgSubtle}" VerticalAlignment="Center" Text="{Binding Remaining}" />
                 </StackPanel>
             </Border>

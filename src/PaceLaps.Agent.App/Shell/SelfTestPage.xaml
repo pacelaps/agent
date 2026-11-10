@@ -30,7 +30,7 @@
         <Border DockPanel.Dock="Bottom" Style="{StaticResource Card}" Margin="0,16,0,0" Padding="22,18" Background="#0D1426" BorderBrush="{StaticResource BrandBorder}"
                 Visibility="{Binding Asking, Converter={StaticResource Shown}}">
             <StackPanel>
-                <TextBlock FontSize="18" FontWeight="Bold" TextWrapping="Wrap" Text="{Binding Asking}" />
+                <TextBlock FontSize="18" FontWeight="ExtraBold" TextWrapping="Wrap" Text="{Binding Asking}" />
                 <TextBlock Style="{StaticResource BodyText}" FontSize="13" Margin="0,6,0,0" Text="Answer it in the window in front of iRacing." />
             </StackPanel>
         </Border>
@@ -55,7 +55,7 @@
                                 <ContentControl x:Name="Mark" Grid.Column="0" Content="{Binding Check}" ContentTemplate="{StaticResource CheckMark}" Focusable="False" HorizontalAlignment="Left" />
                                 <Path x:Name="Spinner" Grid.Column="0" Visibility="Collapsed" Width="16" Height="16" Stretch="Uniform" HorizontalAlignment="Left"
                                       Data="M21,12 A9,9 0 1 1 14.8,3.4" Stroke="{StaticResource BrandText}" StrokeThickness="2.5" StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
-                                <TextBlock x:Name="Title" Grid.Column="1" FontSize="14" FontWeight="SemiBold" Text="{Binding Title}" />
+                                <TextBlock x:Name="Title" Grid.Column="1" FontSize="14" FontWeight="Bold" Text="{Binding Title}" />
                                 <TextBlock x:Name="Text" Grid.Column="2" FontSize="14" Foreground="{StaticResource FgMuted}" Text="{Binding Text}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Text}" />
                             </Grid>
                         </Border>

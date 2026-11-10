@@ -173,7 +173,7 @@ public sealed class ToastWindow : Window
         });
         words.Children.Add(new TextBlock
         {
-            Text = title, FontSize = 14, FontWeight = FontWeights.Bold, Foreground = Brush("Fg"), Margin = new Thickness(0, 4, 0, 0),
+            Text = title, FontSize = 14, FontWeight = FontWeights.ExtraBold, Foreground = Brush("Fg"), Margin = new Thickness(0, 4, 0, 0),
             FontFamily = (FontFamily)Application.Current.Resources["Body"], TextWrapping = TextWrapping.Wrap,
         });
         words.Children.Add(new TextBlock

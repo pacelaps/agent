@@ -24,6 +24,6 @@ own pairing, set `PACELAPS_AGENT_DATA` to another folder first (`docs/developmen
 | 12 | In a session with race control: send a yellow from race control. | Last commands lists `!yellow …` with Verified and the time it took. A notification "You send the commands" came when this agent became the executor; it didn't take the focus from iRacing. |
 | 13 | Exit from the menu while connected. | A question "The agent is connected to Race Control." with Sleep and exit; it sleeps, then the icon goes away. |
 | 14 | Windows display scaling 150 %: start it again. | Sharp text and icons, nothing cut off, the tray icon's badge readable. |
-| 15 | Update notice: `./scripts/publish.ps1 -Version 0.1.0 -Server https://racecontrol.pacelaps.com`, unzip, start that `pacelaps-agent.exe` (exit the other one first). | Within seconds a blue notification "Update available" and the menu line "Update available: <newest>", which opens pacelaps.com/download. |
+| 15 | Update notice: `./scripts/publish.ps1 -Version 0.1.0 -Server https://racecontrol.pacelaps.com`, unzip, start that `pacelaps-agent.exe` (exit the other one first). | Within seconds a blue notification "Update available" (at the bottom right of iRacing's screen, for 6 seconds; an exclusive fullscreen iRacing hides it) and the menu line "Update available: <newest>", which opens pacelaps.com/download (only once the website is live). The log says "Update check: <newest> is available". |
 
 Write down anything that looks wrong or reads badly, with the step number.

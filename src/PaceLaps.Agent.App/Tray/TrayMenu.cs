@@ -44,7 +44,7 @@ internal sealed class TrayMenu
         _updateSeparator.Visibility = Visibility.Collapsed;
         var state = new MenuItem { Header = head, IsEnabled = false };
         var open = Item("Open PaceLaps Agent", actions.Open);
-        open.FontWeight = FontWeights.SemiBold;
+        open.FontWeight = FontWeights.Bold;
         Menu = new ContextMenu { Style = (Style)Application.Current.Resources["TrayMenu"] };
         foreach (var element in new FrameworkElement[]
                  {

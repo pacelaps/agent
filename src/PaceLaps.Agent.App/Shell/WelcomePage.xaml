@@ -43,7 +43,7 @@
                 </StackPanel>
             </DockPanel>
             <StackPanel>
-                <TextBlock FontSize="20" FontWeight="Bold" Margin="0,0,0,20" Text="Three steps to your first race" />
+                <TextBlock FontSize="20" FontWeight="ExtraBold" Margin="0,0,0,20" Text="Three steps to your first race" />
 
                 <Border Style="{StaticResource Card}" Padding="18" BorderBrush="{StaticResource BrandBorder}">
                     <DockPanel>
@@ -52,7 +52,7 @@
                         </Border>
                         <Button DockPanel.Dock="Right" Style="{StaticResource BtnPrimary}" Content="Pair" Command="{Binding PairCommand}" VerticalAlignment="Center" Margin="12,0,0,0" />
                         <StackPanel Margin="16,0,0,0">
-                            <TextBlock FontSize="16" FontWeight="SemiBold" Text="Pair this PC with Race Control" />
+                            <TextBlock FontSize="16" FontWeight="Bold" Text="Pair this PC with Race Control" />
                             <TextBlock Style="{StaticResource BodyText}" FontSize="13" Margin="0,6,0,0" Text="Once per PC. You enter a short code on the Race Control page, signed in as a steward of your league." />
                         </StackPanel>
                     </DockPanel>
@@ -64,7 +64,7 @@
                             <TextBlock FontFamily="{StaticResource DisplayFont}" FontStyle="Italic" FontSize="22" Foreground="{StaticResource FgMuted}" Text="2" HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                         <StackPanel Margin="16,0,0,0">
-                            <TextBlock FontSize="16" FontWeight="SemiBold" Text="Join your session in iRacing as an admin" />
+                            <TextBlock FontSize="16" FontWeight="Bold" Text="Join your session in iRacing as an admin" />
                             <TextBlock Style="{StaticResource BodyText}" FontSize="13" Margin="0,6,0,0" Text="Borderless window works best. Without admin rights the agent can only play replays for the stewards." />
                         </StackPanel>
                     </DockPanel>
@@ -76,7 +76,7 @@
                             <TextBlock FontFamily="{StaticResource DisplayFont}" FontStyle="Italic" FontSize="22" Foreground="{StaticResource FgMuted}" Text="3" HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                         <StackPanel Margin="16,0,0,0">
-                            <TextBlock FontSize="16" FontWeight="SemiBold" Text="Activate" />
+                            <TextBlock FontSize="16" FontWeight="Bold" Text="Activate" />
                             <TextBlock Style="{StaticResource BodyText}" FontSize="13" Margin="0,6,0,0" Text="The self-test types !help and asks whether the reply appeared. Then the agent joins your session by itself." />
                         </StackPanel>
                     </DockPanel>

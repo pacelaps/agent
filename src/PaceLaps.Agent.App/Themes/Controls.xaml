@@ -38,7 +38,7 @@
         <Setter Property="BorderBrush" Value="{StaticResource LineControl}" />
         <Setter Property="FontFamily" Value="{StaticResource Body}" />
         <Setter Property="FontSize" Value="14" />
-        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="MinHeight" Value="44" />
         <Setter Property="Padding" Value="20,0" />
         <Setter Property="Cursor" Value="Hand" />
@@ -132,7 +132,7 @@
         <Setter Property="Foreground" Value="{StaticResource FgMuted}" />
         <Setter Property="FontFamily" Value="{StaticResource Body}" />
         <Setter Property="FontSize" Value="14" />
-        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Height" Value="40" />
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRing}" />
