@@ -2,7 +2,7 @@
 # operator guide as README.txt, plus a SHA-256 checksum file. Then it runs the exe with --version as a check.
 #
 #   ./scripts/publish.ps1                  # development build, version 0.1.0+<commit>
-#   ./scripts/publish.ps1 -Version 0.5.0 -Server https://racecontrol.pacelaps.com
+#   ./scripts/publish.ps1 -Version 0.5.0 -Server https://app.pacelaps.com
 #                                          # a release (the release workflow passes the tag's version and the
 #                                          # server; a build with -Server pairs only with that server)
 #
