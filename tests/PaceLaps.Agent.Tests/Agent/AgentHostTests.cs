@@ -126,6 +126,26 @@ public sealed class AgentHostTests
     }
 
     [Fact]
+    public async Task A_standby_agent_sends_a_snapshot_every_2_s_and_at_2_Hz_once_it_is_the_executor()
+    {
+        _server.View = _server.View with { IsExecutor = false };
+        await Activate();
+        _server.Sent.Clear();
+
+        Ticks(30);
+        Assert.Equal(2, _server.SentOf<SnapshotMessage>().Count());
+        Assert.Equal(3, _server.SentOf<HeartbeatMessage>().Count());
+
+        // Made the executor: its next snapshot goes out on the next tick, then every 500 ms.
+        _server.Sent.Clear();
+        _server.Push(_server.View with { Epoch = 2, IsExecutor = true });
+        Ticks(1);
+        Assert.Single(_server.SentOf<SnapshotMessage>());
+        Ticks(20);
+        Assert.Equal(5, _server.SentOf<SnapshotMessage>().Count());
+    }
+
+    [Fact]
     public async Task Active_sends_snapshots_at_2_Hz_and_heartbeats_at_1_Hz_all_valid()
     {
         await Activate();
