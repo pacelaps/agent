@@ -22,8 +22,14 @@ public sealed record AgentHostOptions
     public required string AgentId { get; init; }
     public required string AgentVersion { get; init; }
 
-    /// <summary>Snapshot rate: the spec asks for 1 to 2 Hz.</summary>
+    /// <summary>Snapshot rate of the executor: the spec asks for 1 to 2 Hz.</summary>
     public TimeSpan SnapshotInterval { get; init; } = TimeSpan.FromMilliseconds(500);
+
+    /// <summary>
+    /// Snapshot rate of a standby agent (active, not the executor). The server keeps its snapshots only while the
+    /// executor's are missing, so they only need to bridge a handover; sending them slower saves the server work.
+    /// </summary>
+    public TimeSpan StandbySnapshotInterval { get; init; } = TimeSpan.FromSeconds(2);
 
     public TimeSpan HeartbeatInterval { get; init; } = TimeSpan.FromSeconds(1);
 
@@ -273,6 +279,12 @@ public sealed class AgentHost : IStatusSink
     public void AssignExecutor(long epoch, bool isExecutor)
     {
         Executor.Epoch = epoch;
+        if (isExecutor && !IsExecutor)
+        {
+            // From standby rate to the executor's at once: the next snapshot goes out on the next tick.
+            _nextSnapshot = _clock.Elapsed;
+        }
+
         IsExecutor = isExecutor;
         _logger.LogInformation("Executor epoch {Epoch}, executor {IsExecutor}", epoch, isExecutor);
     }
@@ -413,7 +425,7 @@ public sealed class AgentHost : IStatusSink
 
         if (now >= _nextSnapshot)
         {
-            _nextSnapshot = now + _options.SnapshotInterval;
+            _nextSnapshot = now + (IsExecutor ? _options.SnapshotInterval : _options.StandbySnapshotInterval);
             var snapshot = SnapshotBuilder.Build(_options.AgentId, ++_snapshotSeq, _clock.UtcNow, session, frame);
             if (_identity is { LeagueId: > 0 } id && snapshot.Session.LeagueId == 0)
             {
