@@ -4,6 +4,10 @@ What changed in each release of the PaceLaps agent, for the people who run it. T
 heading is `## <version> – <yyyy-mm-dd>`; `scripts/upload-downloads.ps1` publishes this file as
 `agent/changelog.json` for the website's download page, so keep the format.
 
+## Unreleased
+
+- Less load on the server: while another agent runs race control, this one sends the sim's state every 2 seconds instead of twice a second. It switches back at once if it takes over.
+
 ## 0.13.0 – 2026-11-10
 
 - A new app window in the PaceLaps look: the status at a glance (iRacing, Race Control, typing, the local failsafe), the last commands with their result, the self-test step by step, and the settings.
