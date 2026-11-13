@@ -23,7 +23,7 @@ Spec section: "Agent specification". Tick items as they are done. Add new findin
 - [x] 8 Operator name and session admin detection: pass
 - [x] 9 Caution extension (!yellow at one lap to go, !pacelaps +n and absolute): pass; cap 20; !pacelaps only after the first caution lap
 - [x] 10 Macro configuration can be read: pass (app.ini [Autochat Messages]); key bindings binary
-- [ ] 11 Session identity fields (league, season, session, sub-session): open, needs a league session (ids read in an official session)
+- [x] 11 Session identity fields (league, season, session, sub-session): pass 2026-11-09 in a league session (`docs/spike-results.md`), confirmed 2026-11-13 with agent 0.13.0 on production
 - [x] 12 Harmless command to verify the typed channel: !help (sender's view; others untested)
 - [x] 13 Caution without the AI pace car: fail (no option); fallback applied
 - [x] 14 Spotter and Crew Chief reaction to iRacing flags: pass (Crew Chief and iRacing's built-in spotter)
